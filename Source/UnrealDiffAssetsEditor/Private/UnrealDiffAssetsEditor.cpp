@@ -87,10 +87,13 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 	{
 		if (DesktopPlatform->OpenFileDialog(nullptr, TEXT("Choose Another File"), TEXT(""), TEXT(""), Filter, EFileDialogFlags::None, OutFiles))
 		{
-			UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *OutFiles[0], LOAD_None);
-			if (AssetPkg)
+			if (OutFiles.Num() > 0)
 			{
-				AssetB = AssetPkg->FindAssetInPackage();
+				UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *OutFiles[0], LOAD_None);
+				if (AssetPkg)
+				{
+					AssetB = AssetPkg->FindAssetInPackage();
+				}
 			}
 		}
 		break;
@@ -175,7 +178,7 @@ void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* AssetA, UObject* 
 	FRevisionInfo NewRevision; 
 	NewRevision.Revision = TEXT("Remote Blueprint");
 	
-	AssetToolsModule.Get().DiffAssets(AssetA, AssetB, CurrentRevision, NewRevision);
+	AssetToolsModule.Get().DiffAssets(AssetA, AssetB, NewRevision, CurrentRevision);
 }
 
 #undef LOCTEXT_NAMESPACE
