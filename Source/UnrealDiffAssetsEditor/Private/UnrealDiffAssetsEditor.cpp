@@ -60,7 +60,20 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 		{
 			if (OutFiles.Num() > 0)
 			{
-				UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *OutFiles[0], LOAD_None);
+				FString DestFilePath = (FPaths::Combine(*FPaths::DiffDir(), TEXT("MergeTool-Left")));
+				const FString& AssetExt = FPackageName::GetAssetPackageExtension();
+				if (!DestFilePath.EndsWith(AssetExt))
+				{
+					DestFilePath += AssetExt;
+				}
+
+				if (IFileManager::Get().Copy(*DestFilePath, *OutFiles[0]) != COPY_OK)
+				{
+					UE_LOG(LogTemp, Error, TEXT("Copy failed: %s"), *DestFilePath)
+					return;
+				}
+				
+				UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *DestFilePath, LOAD_None);
 				if (AssetPkg)
 				{
 					AssetB = AssetPkg->FindAssetInPackage();
