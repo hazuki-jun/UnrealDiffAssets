@@ -13,12 +13,13 @@ public:
 	
     void OnDiffAssetMenuClicked();
 
+	bool IsSupported();
+	
     void DeleteLoadedUAssets();
 
 	void DeleteUAssets();
 	
     void ExecuteDiffAssets(UObject* AssetA, UObject* AssetB);
-
 
     FString AssetBPath;
 };

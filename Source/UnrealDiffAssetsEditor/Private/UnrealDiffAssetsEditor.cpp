@@ -7,6 +7,7 @@
 #include "IDesktopPlatform.h"
 #include "ObjectTools.h"
 #include "ToolMenus.h"
+#include "Dialogs/Dialogs.h"
 #include "Interfaces/IPluginManager.h"
 
 #define LOCTEXT_NAMESPACE "FUnrealDiffAssetsEditorModule"
@@ -26,7 +27,7 @@ void FUnrealDiffAssetsEditorModule::StartupModule()
 				DeleteLoadedUAssets();
 			});
 					
-			GEditor->GetTimerManager()->SetTimer(TimerHandle, TimerDelegate, 3.0f, false, 2.f);
+			GEditor->GetTimerManager()->SetTimer(TimerHandle, TimerDelegate, 3.0f, false, 1.f);
 		}
 	});
 	
@@ -62,6 +63,11 @@ void FUnrealDiffAssetsEditorModule::BuildDiffAssetsMenu()
 
 void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 {
+	if (!IsSupported())
+	{
+		return;
+	}
+	
 	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
 	if (!DesktopPlatform)
 	{
@@ -83,13 +89,13 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 				{
 					DestFilePath += AssetExt;
 				}
-
+				
 				if (IFileManager::Get().Copy(*DestFilePath, *OutFiles[0]) != COPY_OK)
 				{
 					UE_LOG(LogTemp, Error, TEXT("Copy failed: %s"), *DestFilePath)
 					return;
 				}
-
+				
 				AssetBPath = DestFilePath;
 				UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *DestFilePath, LOAD_None);
 				if (AssetPkg)
@@ -160,6 +166,35 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 	// }
 }
 
+bool FUnrealDiffAssetsEditorModule::IsSupported()
+{
+	TArray<UObject*> SelectedAssets =  UEditorUtilityLibrary::GetSelectedAssets();
+	if (SelectedAssets.Num() <= 0 || !SelectedAssets[0])
+	{
+		return false;
+	}
+	
+	FAssetToolsModule& AssetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
+	
+	TWeakPtr<IAssetTypeActions> Actions = AssetToolsModule.Get().GetAssetTypeActionsForClass( SelectedAssets[0]->GetClass() );
+
+	TSet<FName> NotSupportClasses = { TEXT("DataTable") };
+		
+	auto SupportClass = Actions.Pin()->GetSupportedClass();
+	if (SupportClass && NotSupportClasses.Contains(SupportClass->GetFName()))
+	{
+		FText NotSupportWarning = LOCTEXT("NotSupportWarningMessage", "This asset currently not supported");
+		FSuppressableWarningDialog::FSetupInfo Info( NotSupportWarning, LOCTEXT("NotSupport_Message", "Not Support"), "NotSupport_Warning" );
+		Info.ConfirmText = LOCTEXT( "NotSupport_Yes", "Ok");
+		Info.CancelText = LOCTEXT( "NotSupport_No", "Cancel");	
+		FSuppressableWarningDialog RemoveLevelWarning( Info );
+		auto Result = RemoveLevelWarning.ShowModal();
+		return false;
+	}
+
+	return true;
+}
+
 void FUnrealDiffAssetsEditorModule::DeleteLoadedUAssets()
 {
 	UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *AssetBPath, LOAD_None);
@@ -212,6 +247,19 @@ void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* AssetA, UObject* 
 
 	FRevisionInfo NewRevision; 
 	NewRevision.Revision = TEXT("Remote Blueprint");
+
+	if (AssetA->GetClass() == AssetB->GetClass())
+	{
+		if (!IsSupported())
+		{
+			return;
+		}
+	}
+	else
+	{
+		DeleteLoadedUAssets();
+		return;
+	}
 	
 	AssetToolsModule.Get().DiffAssets(AssetA, AssetB, NewRevision, CurrentRevision);
 }
