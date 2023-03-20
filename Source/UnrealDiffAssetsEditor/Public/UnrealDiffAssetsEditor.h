@@ -13,8 +13,10 @@ public:
 	
     void OnDiffAssetMenuClicked();
 
-    void DeleteUAssets();
-    
+    void DeleteLoadedUAssets();
+
+	void DeleteUAssets();
+	
     void ExecuteDiffAssets(UObject* AssetA, UObject* AssetB);
 
 

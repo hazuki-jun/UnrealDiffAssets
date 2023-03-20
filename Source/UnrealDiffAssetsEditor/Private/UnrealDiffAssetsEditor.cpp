@@ -13,6 +13,23 @@
 
 void FUnrealDiffAssetsEditorModule::StartupModule()
 {
+	DeleteUAssets();
+	
+	FSlateApplication::Get().OnWindowBeingDestroyed().AddLambda([this](const SWindow& Window)
+	{
+		if (Window.ToString().Find(TEXT("Blueprint Diff")) != INDEX_NONE)
+		{
+			FTimerHandle TimerHandle;
+			FTimerDelegate TimerDelegate;
+			TimerDelegate.BindLambda([this]()
+			{
+				DeleteLoadedUAssets();
+			});
+					
+			GEditor->GetTimerManager()->SetTimer(TimerHandle, TimerDelegate, 3.0f, false, 2.f);
+		}
+	});
+	
 	BuildDiffAssetsMenu();
 }
 
@@ -72,7 +89,8 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 					UE_LOG(LogTemp, Error, TEXT("Copy failed: %s"), *DestFilePath)
 					return;
 				}
-				
+
+				AssetBPath = DestFilePath;
 				UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *DestFilePath, LOAD_None);
 				if (AssetPkg)
 				{
@@ -142,14 +160,47 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 	// }
 }
 
-void FUnrealDiffAssetsEditorModule::DeleteUAssets()
+void FUnrealDiffAssetsEditorModule::DeleteLoadedUAssets()
 {
-	UObject* AssetB = StaticLoadObject(UObject::StaticClass(), nullptr, *AssetBPath);
-	if (AssetB)
+	UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *AssetBPath, LOAD_None);
+	if (AssetPkg)
 	{
-		ObjectTools::DeleteObjectsUnchecked({AssetB});
+		UObject* AssetB = AssetPkg->FindAssetInPackage();
+		if (AssetB)
+		{
+			ObjectTools::DeleteObjectsUnchecked({AssetB});
+		}
 	}
 	AssetBPath = "";
+}
+
+void FUnrealDiffAssetsEditorModule::DeleteUAssets()
+{
+	const auto Path = FPaths::Combine(*FPaths::DiffDir());
+	if (!FPaths::DirectoryExists(Path))
+	{
+		return;
+	}
+	
+	TArray<FString> Files;
+	
+	auto SearchSuffixFiles = [=,&Files](const FString& pSuffix)
+	{
+		IFileManager::Get().FindFilesRecursive(Files, *Path, *pSuffix, true, false, false);
+	};
+	
+	for (const FString& Suffix : {TEXT("*.uasset")})
+	{
+		SearchSuffixFiles(Suffix);
+	}
+	
+	for (const auto& File : Files)
+	{
+		if (FPaths::FileExists(File))
+		{
+			IFileManager::Get().Delete(*File, true);
+		}
+	}
 }
 
 void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* AssetA, UObject* AssetB)
