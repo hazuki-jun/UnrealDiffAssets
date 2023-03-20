@@ -6,6 +6,7 @@
 #include "EditorUtilityLibrary.h"
 #include "IDesktopPlatform.h"
 #include "ObjectTools.h"
+#include "SBlueprintVisualDiff.h"
 #include "ToolMenus.h"
 #include "Dialogs/Dialogs.h"
 #include "Interfaces/IPluginManager.h"
@@ -15,22 +16,6 @@
 void FUnrealDiffAssetsEditorModule::StartupModule()
 {
 	DeleteUAssets();
-	
-	FSlateApplication::Get().OnWindowBeingDestroyed().AddLambda([this](const SWindow& Window)
-	{
-		if (Window.ToString().Find(TEXT("Blueprint Diff")) != INDEX_NONE)
-		{
-			FTimerHandle TimerHandle;
-			FTimerDelegate TimerDelegate;
-			TimerDelegate.BindLambda([this]()
-			{
-				DeleteLoadedUAssets();
-			});
-					
-			GEditor->GetTimerManager()->SetTimer(TimerHandle, TimerDelegate, 3.0f, false, 1.f);
-		}
-	});
-	
 	BuildDiffAssetsMenu();
 }
 
@@ -260,8 +245,25 @@ void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* AssetA, UObject* 
 		DeleteLoadedUAssets();
 		return;
 	}
+
+	UBlueprint* OldBlueprint = CastChecked<UBlueprint>(AssetA);
+	UBlueprint* NewBlueprint = CastChecked<UBlueprint>(AssetB);
+
+	// sometimes we're comparing different revisions of one single asset (other 
+	// times we're comparing two completely separate assets altogether)
+	bool bIsSingleAsset = (NewBlueprint->GetName() == OldBlueprint->GetName());
+
+	FText WindowTitle = LOCTEXT("NamelessBlueprintDiff", "Blueprint Diff");
+	// if we're diffing one asset against itself 
+	if (bIsSingleAsset)
+	{
+		// identify the assumed single asset in the window's title
+		WindowTitle = FText::Format(LOCTEXT("Blueprint Diff", "{0} - Blueprint Diff"), FText::FromString(NewBlueprint->GetName()));
+	}
+
+	SBlueprintVisualDiff::CreateDiffWindow(WindowTitle, OldBlueprint, NewBlueprint, NewRevision, CurrentRevision);
 	
-	AssetToolsModule.Get().DiffAssets(AssetA, AssetB, NewRevision, CurrentRevision);
+	// AssetToo  lsModule.Get().DiffAssets(AssetA, AssetB, NewRevision, CurrentRevision);
 }
 
 #undef LOCTEXT_NAMESPACE
