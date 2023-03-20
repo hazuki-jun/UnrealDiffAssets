@@ -13,35 +13,19 @@
 
 void FUnrealDiffAssetsEditorModule::StartupModule()
 {
-	const auto Path = IPluginManager::Get().FindPlugin(TEXT("UnrealDiffAssets"))->GetBaseDir() / "Content/";
-	if (!FPaths::DirectoryExists(Path))
-	{
-		return;
-	}
-	
-	TArray<FString> AllProtoCodeFiles;
-	
-	auto SearchSuffixFiles = [=,&AllProtoCodeFiles](const FString& pSuffix)
-	{
-		IFileManager::Get().FindFilesRecursive(AllProtoCodeFiles, *Path, *pSuffix, true, false, false);
-	};
-	
-	for (const FString& Suffix : {TEXT("*.uasset")})
-	{
-		SearchSuffixFiles(Suffix);
-	}
-	
-	for (const auto& File : AllProtoCodeFiles)
-	{
-		if (FPaths::FileExists(File))
-		{
-			IFileManager::Get().Delete(*File, true);
-		}
-	}
-	
+	BuildDiffAssetsMenu();
+}
+
+void FUnrealDiffAssetsEditorModule::ShutdownModule()
+{
+}
+
+void FUnrealDiffAssetsEditorModule::BuildDiffAssetsMenu()
+{
 	UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu");
 	FToolMenuSection& Section = Menu->AddSection("UnrealDiffAssetsSection");
 	
+#if ENGINE_MAJOR_VERSION == 5
 	FToolMenuEntry Entry = FToolMenuEntry::InitMenuEntry(
 		TEXT("DiffAsset"),
 		LOCTEXT("DiffAssetLable","Diff Asset"),
@@ -50,26 +34,13 @@ void FUnrealDiffAssetsEditorModule::StartupModule()
 		FUIAction(FExecuteAction::CreateLambda([this](){ OnDiffAssetMenuClicked(); })));
 	
 	Section.AddEntry(Entry);
-
-	FSlateApplication::Get().OnWindowBeingDestroyed().AddLambda([this](const SWindow& Window)
-	{
-		if (Window.ToString().Find(TEXT("Blueprint Diff")) != INDEX_NONE)
-		{
-			// FTimerHandle TimerHandle;
-			// FTimerDelegate TimerDelegate;
-			// TimerDelegate.BindLambda([this]()
-			// {
-			// 	DeleteUAssets();
-			// });
-					
-			// GEditor->GetTimerManager()->SetTimer(TimerHandle, TimerDelegate, 3.0f, false, 3.f);
-		}
-	});
-}
-
-void FUnrealDiffAssetsEditorModule::ShutdownModule()
-{
-    
+#else
+	Section.AddMenuEntry(TEXT("DiffAsset"),
+		LOCTEXT("DiffAssetLable","Diff Asset"),
+		LOCTEXT("DiffAsset_ToolTip","Diff Asset"),
+		FSlateIcon(FEditorStyle::GetStyleSetName(), "SourceControl.Actions.Diff"),
+		FUIAction(FExecuteAction::CreateLambda([this](){ OnDiffAssetMenuClicked(); })));
+#endif
 }
 
 void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()

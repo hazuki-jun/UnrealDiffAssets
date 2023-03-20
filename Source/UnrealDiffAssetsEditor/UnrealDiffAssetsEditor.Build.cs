@@ -9,7 +9,7 @@ public class UnrealDiffAssetsEditor : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "Slate", "SlateCore", "UnrealEd", "Projects",
-			"ToolMenus", "MainFrame", "DesktopPlatform", "Blutility", "AssetTools", "ContentBrowser"
+			"ToolMenus", "MainFrame", "DesktopPlatform", "Blutility", "AssetTools", "ContentBrowser", "EditorStyle"
 		});
 	}
 }
