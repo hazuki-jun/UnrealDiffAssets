@@ -3,12 +3,22 @@
 
 #include "SBlueprintVisualDiff.h"
 
+#include "EdGraphUtilities.h"
 #include "GraphDiffControl.h"
+#include "K2Node_FunctionEntry.h"
 #include "SlateOptMacros.h"
 #include "SMyBlueprint.h"
 #include "UnrealDiffAssetDelegate.h"
+#include "UnrealDiffClipboardData.h"
 #include "Kismet/Private/DiffControl.h"
+#include "HAL/PlatformApplicationMisc.h"
 #include "Kismet2/BlueprintEditorUtils.h"
+
+namespace
+{
+	static const TCHAR* VAR_PREFIX = TEXT("BPVar");
+	static const TCHAR* GRAPH_PREFIX = TEXT("BPGraph");
+}
 
 #define STEAL_PROPERTY(Type, Class, Property) \
 namespace \
@@ -159,7 +169,52 @@ void SBlueprintVisualDiff::PerformMerge(TSharedPtr<TArray<FDiffSingleResult>> Di
 
 void SBlueprintVisualDiff::AddFunctionGraph(UBlueprint* Blueprint, UEdGraph* Graph)
 {
-	FBlueprintEditorUtils::AddFunctionGraph<UClass>(Blueprint, Graph, /*bIsUserCreated=*/ true, nullptr);
+	FString OutputString;
+	FUnrealDiffClipboardData ClipboardData(Graph);
+	ClipboardData.StaticStruct()->ExportText(OutputString, &ClipboardData, &ClipboardData, nullptr, 0, nullptr, false);
+
+	if (!OutputString.IsEmpty())
+	{
+		OutputString = ::GRAPH_PREFIX + OutputString;;
+		
+		FPlatformApplicationMisc::ClipboardCopy(OutputString.GetCharArray().GetData());
+	}
+
+	FUnrealDiffClipboardData FuncData;
+	FStringOutputDevice Errors;
+	FString ClipboardText;
+	FPlatformApplicationMisc::ClipboardPaste(ClipboardText);
+	const TCHAR* Import = ClipboardText.GetCharArray().GetData() + FCString::Strlen(::GRAPH_PREFIX);
+	FUnrealDiffClipboardData::StaticStruct()->ImportText(Import, &FuncData, nullptr, 0, &Errors, FUnrealDiffClipboardData::StaticStruct()->GetName());
+	
+	FString FunctionName = FGraphDiffControl::GetGraphPath(Graph);
+	UEdGraph* NewGraph = FBlueprintEditorUtils::CreateNewGraph(Blueprint, FName(*FunctionName), UEdGraph::StaticClass(), UEdGraphSchema_K2::StaticClass());
+	TSet<UEdGraphNode*> PastedNodes;
+	FEdGraphUtilities::ImportNodesFromText(NewGraph, FuncData.NodesString, PastedNodes);
+	
+	Blueprint->FunctionGraphs.Add(NewGraph);
+
+	TArray<UK2Node_FunctionEntry*> Entry;
+	NewGraph->GetNodesOfClass<UK2Node_FunctionEntry>(Entry);
+	if (ensure(Entry.Num() == 1))
+	{
+		// Discard category
+		Entry[0]->MetaData.Category = UEdGraphSchema_K2::VR_DefaultCategory;
+
+		// Add necessary function flags
+		int32 AdditionalFunctionFlags = (FUNC_BlueprintEvent | FUNC_BlueprintCallable);
+		if ((Entry[0]->GetExtraFlags() & FUNC_AccessSpecifiers) == FUNC_None)
+		{
+			AdditionalFunctionFlags |= FUNC_Public;
+		}
+		Entry[0]->AddExtraFlags(AdditionalFunctionFlags);
+
+		Entry[0]->FunctionReference.SetExternalMember(Graph->GetFName(), nullptr);
+	}
+	
+	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
+	
+	// FBlueprintEditorUtils::AddFunctionGraph<UClass>(Blueprint, Graph, /*bIsUserCreated=*/ true, nullptr);
 }
 
 void SBlueprintVisualDiff::RemoveFunctionGraph(UBlueprint* Blueprint, const FString& GraphPath)

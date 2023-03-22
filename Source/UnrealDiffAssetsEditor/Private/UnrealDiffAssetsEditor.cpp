@@ -52,6 +52,7 @@ void FUnrealDiffAssetsEditorModule::BuildDiffAssetsMenu()
 
 void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 {
+	static int32 DiffCount = 0;
 	if (!IsSupported())
 	{
 		return;
@@ -72,7 +73,7 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 		{
 			if (OutFiles.Num() > 0)
 			{
-				FString DestFilePath = (FPaths::Combine(*FPaths::DiffDir(), TEXT("MergeTool-Left")));
+				FString DestFilePath = (FPaths::Combine(*FPaths::DiffDir(), TEXT("AssetToDiff_Right_"))) + FString::FromInt(DiffCount++);
 				const FString& AssetExt = FPackageName::GetAssetPackageExtension();
 				if (!DestFilePath.EndsWith(AssetExt))
 				{

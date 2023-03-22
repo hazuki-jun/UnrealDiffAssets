@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "SBlueprintDiff.h"
-#include "UnrealDiffStructures.h"
 #include "Widgets/SCompoundWidget.h"
 
 
@@ -37,9 +36,6 @@ public:
 	void AddFunctionGraph(UBlueprint* Blueprint, class UEdGraph* Graph);
 
 	void RemoveFunctionGraph(UBlueprint* Blueprint, const FString& GraphPath);
-	
-protected:
-	TArray<TSharedPtr<FMyGraphToDiff>> MyGraphs;
 };
 
 
