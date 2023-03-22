@@ -14,6 +14,8 @@ public:
     void OnDiffAssetMenuClicked();
 
 	bool IsSupported();
+
+	void OnDiffWindowClosed();
 	
     void DeleteLoadedUAssets();
 
@@ -21,5 +23,7 @@ public:
 	
     void ExecuteDiffAssets(UObject* AssetA, UObject* AssetB);
 
-    FString AssetBPath;
+	void PerformDiffAction(UObject* AssetA, UObject* AssetB);
+
+    FString RemoteAssetPath;
 };

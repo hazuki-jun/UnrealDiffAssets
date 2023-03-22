@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "SBlueprintDiff.h"
+#include "UnrealDiffStructures.h"
 #include "Widgets/SCompoundWidget.h"
+
+
 
 /**
  * 
@@ -13,16 +16,32 @@ class UNREALDIFFASSETSEDITOR_API SBlueprintVisualDiff : public SBlueprintDiff
 {
 public:
 	SLATE_BEGIN_ARGS(SBlueprintVisualDiff){}
-		SLATE_ARGUMENT( const class UBlueprint*, BlueprintOld )
-		SLATE_ARGUMENT( const class UBlueprint*, BlueprintNew )
-		SLATE_ARGUMENT( struct FRevisionInfo, OldRevision )
-		SLATE_ARGUMENT( struct FRevisionInfo, NewRevision )
-		SLATE_ARGUMENT( bool, ShowAssetNames )
+		SLATE_ARGUMENT(UObject*, LocalAsset)
+		SLATE_ARGUMENT(UObject*, RemoteAsset)
 		SLATE_ARGUMENT(TSharedPtr<SWindow>, ParentWindow)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+	UObject* LocalAsset = nullptr;
+	
+	UObject* RemoteAsse = nullptr;
+	
 	virtual ~SBlueprintVisualDiff() override;
+	
+	void OnActionUseSelected();
+
+	void PerformMerge(TSharedPtr<TArray<FDiffSingleResult>> DiffResults, UEdGraph* LocalGraph, UEdGraph* RemoteGraph);
+
+	void AddFunctionGraph(UBlueprint* Blueprint, class UEdGraph* Graph);
+
+	void RemoveFunctionGraph(UBlueprint* Blueprint, const FString& GraphPath);
+	
+protected:
+	TArray<TSharedPtr<FMyGraphToDiff>> MyGraphs;
 };
+
+
+
+

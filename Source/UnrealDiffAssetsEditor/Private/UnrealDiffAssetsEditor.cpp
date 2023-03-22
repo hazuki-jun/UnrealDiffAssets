@@ -6,8 +6,10 @@
 #include "EditorUtilityLibrary.h"
 #include "IDesktopPlatform.h"
 #include "ObjectTools.h"
+#include "SBlueprintDiffWindow.h"
 #include "SBlueprintVisualDiff.h"
 #include "ToolMenus.h"
+#include "UnrealDiffAssetDelegate.h"
 #include "Dialogs/Dialogs.h"
 #include "Interfaces/IPluginManager.h"
 
@@ -17,6 +19,8 @@ void FUnrealDiffAssetsEditorModule::StartupModule()
 {
 	DeleteUAssets();
 	BuildDiffAssetsMenu();
+	
+	UUnrealDiffAssetDelegate::OnBlueprintDiffWidgetClosed.BindRaw(this, &FUnrealDiffAssetsEditorModule::OnDiffWindowClosed);
 }
 
 void FUnrealDiffAssetsEditorModule::ShutdownModule()
@@ -61,7 +65,7 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 	
 	FString Filter = TEXT("uasset file|*.uasset");
 	TArray<FString> OutFiles;
-	UObject* AssetB = nullptr;
+	UObject* RemoteAsset = nullptr;
 	for (;;)
 	{
 		if (DesktopPlatform->OpenFileDialog(nullptr, TEXT("Choose Another File"), TEXT(""), TEXT(""), Filter, EFileDialogFlags::None, OutFiles))
@@ -81,11 +85,15 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 					return;
 				}
 				
-				AssetBPath = DestFilePath;
+				RemoteAssetPath = DestFilePath;
 				UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *DestFilePath, LOAD_None);
 				if (AssetPkg)
 				{
-					AssetB = AssetPkg->FindAssetInPackage();
+					RemoteAsset = AssetPkg->FindAssetInPackage();
+				}
+				else
+				{
+					DeleteLoadedUAssets();
 				}
 			}
 		}
@@ -95,60 +103,15 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 	TArray<UObject*> SelectedAssets =  UEditorUtilityLibrary::GetSelectedAssets();
 	if (SelectedAssets.Num() > 0)
 	{
-		if (AssetB)
+		if (RemoteAsset)
 		{
-			ExecuteDiffAssets(AssetB, SelectedAssets[0]);
+			ExecuteDiffAssets(SelectedAssets[0], RemoteAsset);
+		}
+		else
+		{
+			DeleteLoadedUAssets();
 		}
 	}
-	
-	// DeleteUAssets();
-	// //
-	// IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
-	// if (!DesktopPlatform)
-	// {
-	// 	return;
-	// }
-	// FString Filter = TEXT("uasset file|*.uasset");
-	// FString Diff_AssetBName;
-	// FString AssetBName;
-	// TArray<FString> OutFiles;
-	// for (;;)
-	// {
-	// 	if (DesktopPlatform->OpenFileDialog(nullptr, TEXT("Choose Another File"), TEXT(""), TEXT(""), Filter, EFileDialogFlags::None, OutFiles))
-	// 	{
-	// 		if (OutFiles.Num() > 0)
-	// 		{
-	// 			Diff_AssetBName = AssetBName = OutFiles[0];
-	// 				
-	// 			int32 Pos;
-	// 			if (AssetBName.FindLastChar('/', Pos))
-	// 			{
-	// 				AssetBName.RemoveAt(0, Pos + 1);
-	// 			}
-	// 			Diff_AssetBName = "Diff_" + AssetBName;
-	//
-	// 			UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *OutFiles[0], LOAD_None);
-	// 			auto Asset = AssetPkg->FindAssetInPackage();
-	// 			const FString FileName = IPluginManager::Get().FindPlugin(TEXT("UnrealDiffAssets"))->GetBaseDir() / "Content"/ Diff_AssetBName;
-	// 			IFileManager::Get().Copy(*FileName, *OutFiles[0]);
-	// 		}
-	// 	}
-	// 	break;
-	// }
-	//
-	// TArray<UObject*> SelectedAssets =  UEditorUtilityLibrary::GetSelectedAssets();
-	// if (SelectedAssets.Num() > 0)
-	// {
-	// 	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
-	// 	FString Suffix;
-	// 	AssetBName.Split(".", &AssetBName, &Suffix);
-	// 	AssetBPath = "'/UnrealDiffAssets" / FString("Diff_") + AssetBName + "." + AssetBName + "'";
-	// 	UObject* AssetB = StaticLoadObject(UObject::StaticClass(), nullptr, *AssetBPath);
-	// 	if (AssetB)
-	// 	{
-	// 		ExecuteDiffAssets(AssetB, SelectedAssets[0]);
-	// 	}
-	// }
 }
 
 bool FUnrealDiffAssetsEditorModule::IsSupported()
@@ -180,18 +143,28 @@ bool FUnrealDiffAssetsEditorModule::IsSupported()
 	return true;
 }
 
+void FUnrealDiffAssetsEditorModule::OnDiffWindowClosed()
+{
+	DeleteLoadedUAssets();
+}
+
 void FUnrealDiffAssetsEditorModule::DeleteLoadedUAssets()
 {
-	UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *AssetBPath, LOAD_None);
+	if (RemoteAssetPath.IsEmpty())
+	{
+		return;
+	}
+	
+	UPackage* AssetPkg = LoadPackage(/*Outer =*/nullptr, *RemoteAssetPath, LOAD_None);
 	if (AssetPkg)
 	{
-		UObject* AssetB = AssetPkg->FindAssetInPackage();
-		if (AssetB)
+		UObject* RemoteAsset = AssetPkg->FindAssetInPackage();
+		if (RemoteAsset)
 		{
-			ObjectTools::DeleteObjectsUnchecked({AssetB});
+			ObjectTools::DeleteObjectsUnchecked({RemoteAsset});
+			RemoteAssetPath = "";
 		}
 	}
-	AssetBPath = "";
 }
 
 void FUnrealDiffAssetsEditorModule::DeleteUAssets()
@@ -223,17 +196,9 @@ void FUnrealDiffAssetsEditorModule::DeleteUAssets()
 	}
 }
 
-void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* AssetA, UObject* AssetB)
+void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* LocalAsset, UObject* RemoteAsset)
 {
-	FAssetToolsModule& AssetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
-
-	FRevisionInfo CurrentRevision; 
-	CurrentRevision.Revision = TEXT("Local Blueprint");
-
-	FRevisionInfo NewRevision; 
-	NewRevision.Revision = TEXT("Remote Blueprint");
-
-	if (AssetA->GetClass() == AssetB->GetClass())
+	if (LocalAsset->GetClass() == RemoteAsset->GetClass())
 	{
 		if (!IsSupported())
 		{
@@ -246,24 +211,24 @@ void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* AssetA, UObject* 
 		return;
 	}
 
-	UBlueprint* OldBlueprint = CastChecked<UBlueprint>(AssetA);
-	UBlueprint* NewBlueprint = CastChecked<UBlueprint>(AssetB);
+	PerformDiffAction(LocalAsset, RemoteAsset);
+}
 
-	// sometimes we're comparing different revisions of one single asset (other 
-	// times we're comparing two completely separate assets altogether)
-	bool bIsSingleAsset = (NewBlueprint->GetName() == OldBlueprint->GetName());
-
-	FText WindowTitle = LOCTEXT("NamelessBlueprintDiff", "Blueprint Diff");
-	// if we're diffing one asset against itself 
-	if (bIsSingleAsset)
+void FUnrealDiffAssetsEditorModule::PerformDiffAction(UObject* LocalAsset, UObject* RemoteAsset)
+{
+	if (!LocalAsset || !RemoteAsset)
 	{
-		// identify the assumed single asset in the window's title
-		WindowTitle = FText::Format(LOCTEXT("Blueprint Diff", "{0} - Blueprint Diff"), FText::FromString(NewBlueprint->GetName()));
+		return;
+	}
+	
+	EDiffAssetType DiffAssetType = EDiffAssetType::None;
+	
+	if (LocalAsset->IsA(UBlueprint::StaticClass()))
+	{
+		DiffAssetType = EDiffAssetType::Blueprint;
 	}
 
-	SBlueprintVisualDiff::CreateDiffWindow(WindowTitle, OldBlueprint, NewBlueprint, NewRevision, CurrentRevision);
-	
-	// AssetToo  lsModule.Get().DiffAssets(AssetA, AssetB, NewRevision, CurrentRevision);
+	auto BlueprintDiffWindow = SBlueprintDiffWindow::CreateWindow(DiffAssetType, LocalAsset, RemoteAsset);
 }
 
 #undef LOCTEXT_NAMESPACE
