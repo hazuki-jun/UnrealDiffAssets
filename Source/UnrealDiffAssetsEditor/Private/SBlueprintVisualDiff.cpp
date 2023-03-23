@@ -8,9 +8,9 @@
 #include "K2Node_FunctionEntry.h"
 #include "SlateOptMacros.h"
 #include "SMyBlueprint.h"
+
 #include "UnrealDiffAssetDelegate.h"
 #include "UnrealDiffClipboardData.h"
-#include "Kismet/Private/DiffControl.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 
@@ -27,14 +27,15 @@ namespace \
 	template <Stolen_##Property##_Ptr Property> \
 	struct Robber##Property \
 	{ \
-	friend Stolen_##Property##_Ptr Steal##Property() \
-	{ \
-	return Property; \
-	} \
+		friend Stolen_##Property##_Ptr Steal##Property() \
+		{ \
+			return Property; \
+		} \
 	}; \
 	template struct Robber##Property<&Class::Property>; \
 	Stolen_##Property##_Ptr Steal##Property(); \
 } \
+
 
 STEAL_PROPERTY(UEdGraph*, SMyBlueprint, EdGraph)
 STEAL_PROPERTY(UEdGraph*, SGraphEditor, EdGraphObj)
@@ -45,13 +46,20 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SBlueprintVisualDiff::Construct(const FArguments& InArgs)
 {
+	FSlateIcon MergeIcon;
+#if ENGINE_MAJOR_VERSION == 4
+	MergeIcon = FSlateIcon(FEditorStyle::GetStyleSetName(), "ContentReference.UseSelectionFromContentBrowser");
+#else
+	MergeIcon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentReference.UseSelectionFromContentBrowser");
+#endif
+	
 	FToolBarBuilder GraphToolbarBuilder(TSharedPtr< const FUICommandList >(), FMultiBoxCustomization::None);
 	GraphToolbarBuilder.AddToolBarButton(
-		FUIAction(FExecuteAction::CreateSP(this, &SBlueprintVisualDiff::OnActionUseSelected))
+		FUIAction(FExecuteAction::CreateSP(this, &SBlueprintVisualDiff::OnActionMerge))
 		, NAME_None
 		, LOCTEXT("UseSelectedLabel", "Merge")
 		, LOCTEXT("UseSelectedTooltip", "Use Selected Difference")
-		, FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentReference.UseSelectionFromContentBrowser")
+		, MergeIcon
 	);
 
 	LocalAsset = InArgs._LocalAsset;
@@ -68,6 +76,11 @@ void SBlueprintVisualDiff::Construct(const FArguments& InArgs)
  			.NewRevision(FRevisionInfo { TEXT("Remote") })
  			.ShowAssetNames(true));
 
+	FMargin MergeButtonMargin(100.f, 48.0f, 0.0f, 0.f);
+#if ENGINE_MAJOR_VERSION == 4
+	MergeButtonMargin = FMargin(100.f, 40.0f, 0.0f, 0.f);
+#endif
+	
 	InArgs._ParentWindow->AddOverlaySlot()
 	.HAlign(HAlign_Left)
 	.VAlign(VAlign_Top)
@@ -75,7 +88,7 @@ void SBlueprintVisualDiff::Construct(const FArguments& InArgs)
 		SNew(SHorizontalBox)
 		+SHorizontalBox::Slot()
 		.AutoWidth()
-		.Padding(FMargin(100.f, 48.0f, 0.0f, 0.f))
+		.Padding(MergeButtonMargin)
 		[
 			GraphToolbarBuilder.MakeWidget()
 		]
@@ -87,11 +100,15 @@ void SBlueprintVisualDiff::Construct(const FArguments& InArgs)
 	];
 }
 
-void SBlueprintVisualDiff::OnActionUseSelected()
+void SBlueprintVisualDiff::OnActionMerge()
 {
+	UEdGraph* LocalGraph = nullptr;
+	UEdGraph* RemoteGraph = nullptr;
+
 	auto StolenEdGraphPtr = ::StealEdGraph();
-	UEdGraph* LocalGraph = PanelOld.MyBlueprint.Get()->*StolenEdGraphPtr;
-	UEdGraph* RemoteGraph = PanelNew.MyBlueprint.Get()->*StolenEdGraphPtr;
+	LocalGraph = PanelOld.MyBlueprint.Get()->*StolenEdGraphPtr;
+	RemoteGraph = PanelNew.MyBlueprint.Get()->*StolenEdGraphPtr;
+
 	if (!LocalGraph && !RemoteGraph)
 	{
 		return;

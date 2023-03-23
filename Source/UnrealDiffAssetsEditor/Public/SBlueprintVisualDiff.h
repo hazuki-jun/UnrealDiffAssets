@@ -29,7 +29,7 @@ public:
 	
 	virtual ~SBlueprintVisualDiff() override;
 	
-	void OnActionUseSelected();
+	void OnActionMerge();
 
 	void PerformMerge(TSharedPtr<TArray<FDiffSingleResult>> DiffResults, UEdGraph* LocalGraph, UEdGraph* RemoteGraph);
 

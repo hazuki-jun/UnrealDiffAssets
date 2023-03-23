@@ -92,10 +92,6 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 				{
 					RemoteAsset = AssetPkg->FindAssetInPackage();
 				}
-				else
-				{
-					DeleteLoadedUAssets();
-				}
 			}
 		}
 		break;
@@ -107,10 +103,6 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 		if (RemoteAsset)
 		{
 			ExecuteDiffAssets(SelectedAssets[0], RemoteAsset);
-		}
-		else
-		{
-			DeleteLoadedUAssets();
 		}
 	}
 }
@@ -146,7 +138,7 @@ bool FUnrealDiffAssetsEditorModule::IsSupported()
 
 void FUnrealDiffAssetsEditorModule::OnDiffWindowClosed()
 {
-	DeleteLoadedUAssets();
+	// DeleteLoadedUAssets();
 }
 
 void FUnrealDiffAssetsEditorModule::DeleteLoadedUAssets()
@@ -208,7 +200,6 @@ void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* LocalAsset, UObje
 	}
 	else
 	{
-		DeleteLoadedUAssets();
 		return;
 	}
 

@@ -1,4 +1,5 @@
-﻿using UnrealBuildTool;
+﻿using System.IO;
+using UnrealBuildTool;
 
 public class UnrealDiffAssetsEditor : ModuleRules
 {
@@ -12,5 +13,14 @@ public class UnrealDiffAssetsEditor : ModuleRules
 			"ToolMenus", "MainFrame", "DesktopPlatform", "Blutility", "AssetTools", "ContentBrowser", "EditorStyle",
 			"GraphEditor", "UnrealEd", "BlueprintGraph"
 		});
+		
+		
+#if UE_5_0_OR_LATER
+        
+#else
+		string EngineDir = Path.GetFullPath(Target.RelativeEnginePath);
+		PrivateIncludePaths.AddRange(new string[] {Path.Combine(EngineDir, "Source/Editor/Kismet/Private")});
+#endif
+
 	}
 }
