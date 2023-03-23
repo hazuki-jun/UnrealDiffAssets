@@ -124,22 +124,6 @@ void SBlueprintVisualDiff::OnActionMerge()
 		}
 	}
 	
-	// if (LocalGraph && PanelOld.GraphEditor.IsValid())
-	// {
-	// 	auto GraphEditorEdGraphPtr = ::StealEdGraphObj();
-	// 	UEdGraph* EditorEdGraph = PanelOld.GraphEditor.Pin().Get()->*GraphEditorEdGraphPtr;
-	// 	const FString LocalEdGraphPath = FGraphDiffControl::GetGraphPath(LocalGraph);
-	// 	const FString EditorEdGraphPath = FGraphDiffControl::GetGraphPath(EditorEdGraph);
-	// 	if (!LocalEdGraphPath.Equals(EditorEdGraphPath))
-	// 	{
-	// 		LocalGraph = nullptr;
-	// 	}
-	// }
-	// else
-	// {
-	// 	LocalGraph = nullptr;
-	// }
-	
 	TSharedPtr<TArray<FDiffSingleResult>> DiffResults = MakeShared<TArray<FDiffSingleResult>>();
 	FGraphDiffControl::DiffGraphs(LocalGraph, RemoteGraph, *DiffResults);
 	struct SortDiff
@@ -155,11 +139,7 @@ void SBlueprintVisualDiff::OnActionMerge()
 
 void SBlueprintVisualDiff::PerformMerge(TSharedPtr<TArray<FDiffSingleResult>> DiffResults, UEdGraph* LocalGraph, UEdGraph* RemoteGraph)
 {
-	FString FocusGraphPath;
-	if (RemoteGraph)
-	{
-		FocusGraphPath = FGraphDiffControl::GetGraphPath(RemoteGraph);
-	}
+	UBlueprint* LocalAssetBlueprint = CastChecked<UBlueprint>(LocalAsset);
 	
 	if (DiffResults->Num() > 0)
 	{
@@ -169,18 +149,27 @@ void SBlueprintVisualDiff::PerformMerge(TSharedPtr<TArray<FDiffSingleResult>> Di
 	else
 	{
 		// 对比的是函数
-		
-		UBlueprint* LocalAssetBlueprint = CastChecked<UBlueprint>(LocalAsset);
-		if (!LocalGraph)
-		{
-			// 本地蓝图不存在函数 FocusGraphPath
-			AddFunctionGraph(LocalAssetBlueprint, RemoteGraph);
-		}
-		else if (!RemoteGraph)
-		{
-			// 对比的蓝图不存在 FocusGraphPath
-			RemoveFunctionGraph(LocalAssetBlueprint, FocusGraphPath);
-		}
+		MergeFunctionGraph(LocalAssetBlueprint, LocalGraph, RemoteGraph);
+	}
+}
+
+void SBlueprintVisualDiff::MergeFunctionGraph(UBlueprint* Blueprint, UEdGraph* LocalGraph, UEdGraph* RemoteGraph)
+{
+	FString FocusGraphPath;
+	if (RemoteGraph)
+	{
+		FocusGraphPath = FGraphDiffControl::GetGraphPath(RemoteGraph);
+	}
+	
+	if (!LocalGraph)
+	{
+		// 本地蓝图不存在函数 FocusGraphPath
+		AddFunctionGraph(Blueprint, RemoteGraph);
+	}
+	else if (!RemoteGraph)
+	{
+		// 对比的蓝图不存在 FocusGraphPath
+		RemoveFunctionGraph(Blueprint, FocusGraphPath);
 	}
 }
 
@@ -230,8 +219,6 @@ void SBlueprintVisualDiff::AddFunctionGraph(UBlueprint* Blueprint, UEdGraph* Gra
 	}
 	
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
-	
-	// FBlueprintEditorUtils::AddFunctionGraph<UClass>(Blueprint, Graph, /*bIsUserCreated=*/ true, nullptr);
 }
 
 void SBlueprintVisualDiff::RemoveFunctionGraph(UBlueprint* Blueprint, const FString& GraphPath)

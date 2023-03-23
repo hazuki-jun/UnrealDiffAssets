@@ -9,7 +9,7 @@
 
 
 /**
- * 
+ * 蓝图资源 对比 窗口
  */
 class UNREALDIFFASSETSEDITOR_API SBlueprintVisualDiff : public SBlueprintDiff
 {
@@ -23,16 +23,18 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+	virtual ~SBlueprintVisualDiff() override;
+	
 	UObject* LocalAsset = nullptr;
 	
 	UObject* RemoteAsse = nullptr;
-	
-	virtual ~SBlueprintVisualDiff() override;
 	
 	void OnActionMerge();
 
 	void PerformMerge(TSharedPtr<TArray<FDiffSingleResult>> DiffResults, UEdGraph* LocalGraph, UEdGraph* RemoteGraph);
 
+	void MergeFunctionGraph(UBlueprint* Blueprint, UEdGraph* LocalGraph, UEdGraph* RemoteGraph);
+	
 	void AddFunctionGraph(UBlueprint* Blueprint, class UEdGraph* Graph);
 
 	void RemoveFunctionGraph(UBlueprint* Blueprint, const FString& GraphPath);

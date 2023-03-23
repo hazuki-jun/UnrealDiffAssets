@@ -4,6 +4,7 @@
 #include "SBlueprintDiffWindow.h"
 
 #include "SBlueprintVisualDiff.h"
+#include "SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
 
 #define LOCTEXT_NAMESPACE "SBlueprintDiffWindow"
@@ -41,7 +42,11 @@ TSharedRef<SCompoundWidget> SBlueprintDiffWindow::GetBlueprintDiffWidget(UObject
 			.ParentWindow(SharedThis(this))
 			.LocalAsset(LocalAsset)
 			.RemoteAsset(RemoteAsset);
-			
+	case EDiffAssetType::DataTable:
+		return SNew(SDataTableVisualDiff)
+			.ParentWindow(SharedThis(this))
+			.LocalAsset(LocalAsset)
+			.RemoteAsset(RemoteAsset);
 	default:
 		return SNew(SBlueprintVisualDiff).ParentWindow(SharedThis(this));
 	}
@@ -60,7 +65,10 @@ TSharedPtr<SBlueprintDiffWindow> SBlueprintDiffWindow::CreateWindow(EDiffAssetTy
 	{
 	case EDiffAssetType::Blueprint:
 		WindowTitle = LOCTEXT("NamelessBlueprintDiff", "Blueprint Diff");
-		break;		
+		break;
+	case EDiffAssetType::DataTable:
+		WindowTitle = LOCTEXT("NamelessDataTableDiff", "DataTable Diff");
+		break;
 	default:
 		return SNew(SBlueprintDiffWindow);
 	}

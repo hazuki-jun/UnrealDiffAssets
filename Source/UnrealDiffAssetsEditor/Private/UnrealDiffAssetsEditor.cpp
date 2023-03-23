@@ -119,12 +119,12 @@ bool FUnrealDiffAssetsEditorModule::IsSupported()
 	
 	TWeakPtr<IAssetTypeActions> Actions = AssetToolsModule.Get().GetAssetTypeActionsForClass( SelectedAssets[0]->GetClass() );
 
-	TSet<FName> NotSupportClasses = { TEXT("DataTable") };
+	TSet<FName> SupportedClasses = { TEXT("Blueprint"), TEXT("DataTable") };
 		
 	auto SupportClass = Actions.Pin()->GetSupportedClass();
-	if (SupportClass && NotSupportClasses.Contains(SupportClass->GetFName()))
+	if (!SupportClass || !SupportedClasses.Contains(SupportClass->GetFName()))
 	{
-		FText NotSupportWarning = LOCTEXT("NotSupportWarningMessage", "This asset currently not supported");
+		FText NotSupportWarning = LOCTEXT("NotSupportWarningMessage", "This asset not supported now");
 		FSuppressableWarningDialog::FSetupInfo Info( NotSupportWarning, LOCTEXT("NotSupport_Message", "Not Support"), "NotSupport_Warning" );
 		Info.ConfirmText = LOCTEXT( "NotSupport_Yes", "Ok");
 		Info.CancelText = LOCTEXT( "NotSupport_No", "Cancel");	
@@ -219,7 +219,11 @@ void FUnrealDiffAssetsEditorModule::PerformDiffAction(UObject* LocalAsset, UObje
 	{
 		DiffAssetType = EDiffAssetType::Blueprint;
 	}
-
+	else if (LocalAsset->IsA(UDataTable::StaticClass()))
+	{
+		DiffAssetType = EDiffAssetType::DataTable;
+	}
+	
 	auto BlueprintDiffWindow = SBlueprintDiffWindow::CreateWindow(DiffAssetType, LocalAsset, RemoteAsset);
 }
 

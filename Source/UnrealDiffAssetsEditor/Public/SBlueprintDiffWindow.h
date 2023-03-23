@@ -31,8 +31,8 @@ public:
 	TSharedRef<SCompoundWidget> GetBlueprintDiffWidget(UObject* LocalAsset, UObject* RemoteAsset);
 	
 	static TSharedPtr<SBlueprintDiffWindow> CreateWindow(EDiffAssetType AssetType, UObject* LocalAsset, UObject* RemoteAsset);
-protected:
 	
+protected:
 	EDiffAssetType DiffAssetType = EDiffAssetType::None;
 };
 
