@@ -23,24 +23,33 @@ public:
 	void Construct(const FArguments& InArgs);
 
 	TSharedRef<SWidget> BuildWidgetContent();
+	void RefreshRowNumberColumnWidth();
 	
-	TSharedRef<SWidget> BuildLayoutWidget(bool bIsLocal);
+	TSharedRef<SWidget> BuildLayoutWidget(bool bIsLocal, TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> InListView);
 
-	TSharedRef<SWidget> GenerateHeaderWidgets();
+	TSharedPtr<SHeaderRow> GenerateHeaderWidgets();
 
+	float GetRowNumberColumnWidth() const;
+
+	void OnRowNumberColumnResized(const float NewWidth);
+	
 	TSharedRef<ITableRow> MakeRowWidget(FUnrealDiffDataTableRowListViewDataPtr InRowDataPtr, const TSharedRef<STableViewBase>& OwnerTable);
 	
 protected:
+	/** Width of the row name column */
+	float RowNameColumnWidth = 1.f;
+
+	/** Width of the row number column */
+	float RowNumberColumnWidth = 1.f;
+	
 	TSharedPtr<SWindow> ParentWindow;
 
 	UObject* LocalAsset = nullptr;
 	UObject* RemoteAsset = nullptr;
 
-	TSharedPtr<SHeaderRow> ColumnNamesHeaderRow;
-	
-	TSharedPtr<SSearchBox> SearchBoxWidget;
+	TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> CellsListView_Local;
 
-	TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> CellsListView;
+	TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> CellsListView_Remote;
 
 	/** Array of the rows that are available for editing */
 	TArray<FDataTableEditorRowListViewDataPtr> AvailableRows;
