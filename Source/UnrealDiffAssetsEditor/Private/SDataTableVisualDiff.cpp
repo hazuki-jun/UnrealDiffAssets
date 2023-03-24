@@ -41,7 +41,11 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 	+ SOverlay::Slot()
 	[
 		SNew(SSplitter)
+#if ENGINE_MAJOR_VERSION == 4
+		.Style(FEditorStyle::Get(), "DetailsView.Splitter")
+#else
 		.Style(FAppStyle::Get(), "DetailsView.Splitter")
+#endif
 		.PhysicalSplitterHandleSize(5.0f)
 		.HitDetectionSplitterHandleSize(5.0f)
 		+ SSplitter::Slot()

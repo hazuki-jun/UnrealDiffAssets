@@ -176,8 +176,13 @@ float SUnrealDiffDataTableLayout::GetRowNameColumnWidth() const
 
 void SUnrealDiffDataTableLayout::RefreshRowNameColumnWidth()
 {
-	TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+#if ENGINE_MAJOR_VERSION == 4
+	const FTextBlockStyle& CellTextStyle = FEditorStyle::GetWidgetStyle<FTextBlockStyle>("DataTableEditor.CellText");
+#else
 	const FTextBlockStyle& CellTextStyle = FAppStyle::GetWidgetStyle<FTextBlockStyle>("DataTableEditor.CellText");
+#endif
+	
+	TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
 	static const float CellPadding = 10.0f;
 
 	for (const FDataTableEditorRowListViewDataPtr& RowData : AvailableRows)
@@ -189,8 +194,13 @@ void SUnrealDiffDataTableLayout::RefreshRowNameColumnWidth()
 
 void SUnrealDiffDataTableLayout::RefreshRowNumberColumnWidth()
 {
-	TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
+#if ENGINE_MAJOR_VERSION == 4
+	const FTextBlockStyle& CellTextStyle = FEditorStyle::GetWidgetStyle<FTextBlockStyle>("DataTableEditor.CellText");
+#else
 	const FTextBlockStyle& CellTextStyle = FAppStyle::GetWidgetStyle<FTextBlockStyle>("DataTableEditor.CellText");
+#endif
+	
+	TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
 	const float CellPadding = 10.0f;
 
 	for (const FDataTableEditorRowListViewDataPtr& RowData : AvailableRows)

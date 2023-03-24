@@ -21,7 +21,11 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 	
 	SMultiColumnTableRow<FUnrealDiffDataTableRowListViewDataPtr>::Construct(
 		FSuperRowType::FArguments()
-		.Style(FAppStyle::Get(), "DataTableEditor.CellListViewRow"),
+#if ENGINE_MAJOR_VERSION == 4
+			.Style(FEditorStyle::Get(), "DataTableEditor.CellListViewRow"),
+#else
+			.Style(FAppStyle::Get(), "DataTableEditor.CellListViewRow"),
+#endif
 		InOwnerTableView
 	);
 
@@ -30,19 +34,12 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 
 const FSlateBrush* SUnrealDiffDataTableListViewRow::GetBorder() const
 {
-	if (bIsHoveredDragTarget)
-	{
-		return FAppStyle::GetBrush("DataTableEditor.DragDropHoveredTarget");
-	}
-	else
-	{
-		return STableRow::GetBorder();
-	}
+	return STableRow::GetBorder();
 }
 
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	SMultiColumnTableRow<TSharedPtr<FUnrealDiffDataTableRowListViewData, ESPMode::ThreadSafe>>::OnMouseButtonDown(MyGeometry, MouseEvent);
+	STableRow::OnMouseButtonDown(MyGeometry, MouseEvent);
 	UUnrealDiffAssetDelegate::OnDataTableRowSelected.Execute(bIsLocal, RowDataPtr->RowId);
 	
 	return FReply::Handled();
@@ -50,19 +47,19 @@ FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDown(const FGeometry& MyGeo
 
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	SMultiColumnTableRow<TSharedPtr<FUnrealDiffDataTableRowListViewData, ESPMode::ThreadSafe>>::OnMouseButtonUp(MyGeometry, MouseEvent);
+	STableRow::OnMouseButtonUp(MyGeometry, MouseEvent);
 	return FReply::Handled();
 }
 
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)
 {
-	SMultiColumnTableRow<TSharedPtr<FUnrealDiffDataTableRowListViewData, ESPMode::ThreadSafe>>::OnMouseButtonDoubleClick(InMyGeometry, InMouseEvent);
+	STableRow::OnMouseButtonDoubleClick(InMyGeometry, InMouseEvent);
 	return FReply::Handled();
 }
 
 FReply SUnrealDiffDataTableListViewRow::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
 {
-	SMultiColumnTableRow<TSharedPtr<FUnrealDiffDataTableRowListViewData, ESPMode::ThreadSafe>>::OnKeyDown(MyGeometry, InKeyEvent);
+	STableRow::OnKeyDown(MyGeometry, InKeyEvent);
 	return FReply::Handled();
 }
 
@@ -81,7 +78,11 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeCellWidget(const int32 
 			.Padding(FMargin(4, 2, 4, 2))
 			[
 				SNew(STextBlock)
+#if ENGINE_MAJOR_VERSION == 4
+				.TextStyle(FEditorStyle::Get(), "DataTableEditor.CellText")
+#else
 				.TextStyle(FAppStyle::Get(), "DataTableEditor.CellText")
+#endif
 				.Text(FText::FromString(FString::FromInt(RowDataPtr->RowNum)))
 				// .ColorAndOpacity(DataTableEdit, &FDataTableEditor::GetRowTextColor, RowDataPtr->RowId)
 				// .HighlightText(DataTableEdit, &FDataTableEditor::GetFilterText)
@@ -116,17 +117,17 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeCellWidget(const int32 
 	
 	if (AvailableColumns.IsValidIndex(ColumnIndex) && RowDataPtr->CellData.IsValidIndex(ColumnIndex))
 	{
-		TAttribute<FText> TextAttribute = TAttribute<FText>::CreateLambda([this, ColumnIndex]()
-		{
-			return GetCellText(ColumnIndex);
-		});
-		
+		TAttribute<FText> TextAttribute = GetCellText(ColumnIndex);
 		return SNew(SBox)
 			.Padding(FMargin(4, 2, 4, 2))
 			[
 				SNew(STextBlock)
 				.Margin(FMargin(5.f, 0.f, 0.f, 0.f))
+#if ENGINE_MAJOR_VERSION == 4
+				.TextStyle(FEditorStyle::Get(), "DataTableEditor.CellText")
+#else
 				.TextStyle(FAppStyle::Get(), "DataTableEditor.CellText")
+#endif
 				.Text(TextAttribute)
 				// .ColorAndOpacity(DataTableEdit, &FDataTableEditor::GetRowTextColor, RowDataPtr->RowId)
 			];
