@@ -8,7 +8,7 @@ class FUnrealDiffAssetsEditorModule : public IModuleInterface
 public:
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
-
+ 
     /**
      * @brief DiffAsset 菜单按钮
      */
@@ -49,4 +49,5 @@ public:
     void PerformDiffAction(UObject* AssetA, UObject* AssetB);
 
     FString RemoteAssetPath;
+ 
 };

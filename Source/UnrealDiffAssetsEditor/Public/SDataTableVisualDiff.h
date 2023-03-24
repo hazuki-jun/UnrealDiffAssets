@@ -23,42 +23,22 @@ public:
 	void Construct(const FArguments& InArgs);
 
 	TSharedRef<SWidget> BuildWidgetContent();
-	void RefreshRowNumberColumnWidth();
 	
-	TSharedRef<SWidget> BuildLayoutWidget(bool bIsLocal, TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> InListView);
+	TSharedRef<SWidget> BuildLayoutWidget(FText InTitle, UObject* AssetObject, bool bIsLocal);
 
-	TSharedPtr<SHeaderRow> GenerateHeaderWidgets();
-
-	float GetRowNumberColumnWidth() const;
-
-	void OnRowNumberColumnResized(const float NewWidth);
+	void OnRowSelectionChanged(bool bIsLocal, FName RowId);
 	
-	TSharedRef<ITableRow> MakeRowWidget(FUnrealDiffDataTableRowListViewDataPtr InRowDataPtr, const TSharedRef<STableViewBase>& OwnerTable);
+	void CopySelectedRow();
+
+	virtual FReply OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
+
+	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	
 protected:
-	/** Width of the row name column */
-	float RowNameColumnWidth = 1.f;
-
-	/** Width of the row number column */
-	float RowNumberColumnWidth = 1.f;
-	
 	TSharedPtr<SWindow> ParentWindow;
-
 	UObject* LocalAsset = nullptr;
 	UObject* RemoteAsset = nullptr;
-
-	TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> CellsListView_Local;
-
-	TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> CellsListView_Remote;
-
-	/** Array of the rows that are available for editing */
-	TArray<FDataTableEditorRowListViewDataPtr> AvailableRows;
-
-	/** Array of the columns that are available for editing */
-	TArray<FDataTableEditorColumnHeaderDataPtr> AvailableColumns;
-	
-	/** Array of the rows that match the active filter(s) */
-	TArray<FUnrealDiffDataTableRowListViewDataPtr> VisibleRows_Local;
-
-	TArray<FUnrealDiffDataTableRowListViewDataPtr> VisibleRows_Remote;
+	bool bPressedCtrl = false;
+	bool bIsLocalDataTableSelected = false;
+	FName SelectedRowId;
 };

@@ -14,4 +14,8 @@ class UNREALDIFFASSETSEDITOR_API UUnrealDiffAssetDelegate
 public:
 	DECLARE_DELEGATE(FOnBlueprintDiffWidgetClosed)
 	static FOnBlueprintDiffWidgetClosed OnBlueprintDiffWidgetClosed;
+
+
+	DECLARE_DELEGATE_TwoParams(FOnDataTableRowSelected, bool, FName)
+	static FOnDataTableRowSelected OnDataTableRowSelected;
 };

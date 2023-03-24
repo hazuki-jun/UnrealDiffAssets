@@ -35,6 +35,8 @@ public:
 	SLATE_BEGIN_ARGS(SUnrealDiffDataTableListViewRow){}
 		SLATE_ARGUMENT(FUnrealDiffDataTableRowListViewDataPtr, RowDataPtr)
 		SLATE_ARGUMENT(bool, IsEditable)
+		SLATE_ARGUMENT(bool, IsLocal)
+		SLATE_ARGUMENT(TArray<FDataTableEditorColumnHeaderDataPtr>, AvailableColumns)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -42,12 +44,18 @@ public:
 
 	//~ Begin SMultiColumnTableRow Interface
 	virtual const FSlateBrush* GetBorder() const override;
+	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override;
 	//~ End SMultiColumnTableRow Interface
-	
+
 	TSharedRef<SWidget> MakeCellWidget(const int32 InRowIndex, const FName& InColumnId);
+
+	FText GetCellText(int32 ColumnIndex) const;
+
+	void CopySelectedRow();
 	
 	TSharedPtr<SInlineEditableTextBlock> InlineEditableText;
 
@@ -58,4 +66,8 @@ public:
 	bool IsEditable;
 	bool bIsDragDropObject;
 	bool bIsHoveredDragTarget;
+	bool bIsLocal;
+	
+	/** Array of the columns that are available for editing */
+	TArray<FDataTableEditorColumnHeaderDataPtr> AvailableColumns;
 };

@@ -3,4 +3,5 @@
 
 #include "UnrealDiffAssetDelegate.h"
 
-UUnrealDiffAssetDelegate::FOnBlueprintDiffWidgetClosed UUnrealDiffAssetDelegate::OnBlueprintDiffWidgetClosed; 
+UUnrealDiffAssetDelegate::FOnBlueprintDiffWidgetClosed UUnrealDiffAssetDelegate::OnBlueprintDiffWidgetClosed;
+UUnrealDiffAssetDelegate::FOnDataTableRowSelected UUnrealDiffAssetDelegate::OnDataTableRowSelected;

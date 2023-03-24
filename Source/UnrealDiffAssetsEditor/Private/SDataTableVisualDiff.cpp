@@ -4,9 +4,11 @@
 #include "SDataTableVisualDiff.h"
 
 #include "IDocumentation.h"
+#include "HAL/PlatformApplicationMisc.h"
 #include "SlateOptMacros.h"
-#include "DataTableWidgets/SUnrealDiffDataTableListViewRow.h"
-#include "Fonts/FontMeasure.h"
+#include "UnrealDiffAssetDelegate.h"
+#include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
+#include "Framework/Commands/GenericCommands.h"
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 
@@ -29,6 +31,8 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 	[
 		BuildWidgetContent()
 	];
+
+	UUnrealDiffAssetDelegate::OnDataTableRowSelected.BindRaw(this, &SDataTableVisualDiff::OnRowSelectionChanged);
 }
 
 TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
@@ -42,159 +46,73 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 		.HitDetectionSplitterHandleSize(5.0f)
 		+ SSplitter::Slot()
 		[
-			BuildLayoutWidget(true, CellsListView_Local)
+			BuildLayoutWidget(FText::FromString(TEXT("DataTable Local")), LocalAsset, true)
 		]
 
 		+ SSplitter::Slot()
 		[
-			BuildLayoutWidget(false, CellsListView_Remote)
+			BuildLayoutWidget(FText::FromString(TEXT("DataTable Remote")), RemoteAsset, false)
 		]
 	];
 }
 
-void SDataTableVisualDiff::RefreshRowNumberColumnWidth()
+TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(FText InTitle, UObject* AssetObject, bool bIsLocal)
 {
-	TSharedRef<FSlateFontMeasure> FontMeasure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
-	const FTextBlockStyle& CellTextStyle = FAppStyle::GetWidgetStyle<FTextBlockStyle>("DataTableEditor.CellText");
-	const float CellPadding = 10.0f;
-
-	for (const FDataTableEditorRowListViewDataPtr& RowData : AvailableRows)
-	{
-		const float RowNumberWidth = (float)FontMeasure->Measure(FString::FromInt(RowData->RowNum), CellTextStyle.Font).X + CellPadding;
-		RowNumberColumnWidth = FMath::Max(RowNumberColumnWidth, RowNumberWidth);
-	}
+	return SNew(SUnrealDiffDataTableLayout).Title(InTitle).AssetObject(AssetObject).IsLocal(bIsLocal);
 }
 
-TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(bool bIsLocal, TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> InListView)
+void SDataTableVisualDiff::OnRowSelectionChanged(bool bIsLocal, FName RowId)
 {
-	UDataTable* DataTable = CastChecked<UDataTable>(LocalAsset);
-	FDataTableEditorUtils::CacheDataTableForEditing(DataTable, AvailableColumns, AvailableRows);
-	
-	for (auto RowData : AvailableRows)
-	{
-		FUnrealDiffDataTableRowListViewDataPtr Row = MakeShared<FUnrealDiffDataTableRowListViewData>();
-		Row->CellData = RowData->CellData;
-		Row->DisplayName = RowData->DisplayName;
-		Row->RowId = RowData->RowId;
-		Row->RowNum = RowData->RowNum;
-		Row->DesiredRowHeight = RowData->DesiredRowHeight;
+	bIsLocalDataTableSelected = bIsLocal;
+	SelectedRowId = RowId;
+}
 
-		if (bIsLocal)
-		{
-			VisibleRows_Local.Add(Row);
-		}
-		else
-		{
-			VisibleRows_Remote.Add(Row);
-		}
+void SDataTableVisualDiff::CopySelectedRow()
+{
+	if (SelectedRowId.IsNone())
+	{
+		return;
 	}
 	
-	FText LayoutTitle = bIsLocal ? FText::FromString(TEXT("Local DataTable")) : FText::FromString(TEXT("Remote DataTable"));
+	UDataTable* TablePtr = Cast<UDataTable>(bIsLocalDataTableSelected ? LocalAsset : RemoteAsset);
+	uint8* RowPtr = TablePtr ? TablePtr->GetRowMap().FindRef(SelectedRowId) : nullptr;
 	
-	TSharedRef<SScrollBar> HorizontalScrollBar = SNew(SScrollBar)
-		.Orientation(Orient_Horizontal)
-		.Thickness(FVector2D(12.0f, 12.0f));
-
-	TSharedRef<SScrollBar> VerticalScrollBar = SNew(SScrollBar)
-		.Orientation(Orient_Vertical)
-		.Thickness(FVector2D(12.0f, 12.0f));
-
-	RefreshRowNumberColumnWidth();
-	TSharedPtr<SHeaderRow> ColumnNamesHeaderRow = GenerateHeaderWidgets();
-	InListView = SNew(SListView<FUnrealDiffDataTableRowListViewDataPtr>)
-		.ListItemsSource(&VisibleRows_Local)
-		.HeaderRow(ColumnNamesHeaderRow)
-		.OnGenerateRow(this, &SDataTableVisualDiff::MakeRowWidget)
-		// .OnSelectionChanged(this, &FDataTableEditor::OnRowSelectionChanged)
-		.ExternalScrollbar(VerticalScrollBar)
-		.ConsumeMouseWheel(EConsumeMouseWheel::Always)
-		.SelectionMode(ESelectionMode::Single)
-		.AllowOverscroll(EAllowOverscroll::No);
-
-	TSharedPtr<SSearchBox> SearchBoxWidget;
-	return SNew(SVerticalBox)
-		   + SVerticalBox::Slot()
-		   .AutoHeight()
-		   [
-			   SNew(SHorizontalBox)
-			   + SHorizontalBox::Slot()
-			   [
-				   SAssignNew(SearchBoxWidget, SSearchBox)
-				   // .InitialText(this, &FDataTableEditor::GetFilterText)
-				   // .OnTextChanged(this, &FDataTableEditor::OnFilterTextChanged)
-				   // .OnTextCommitted(this, &FDataTableEditor::OnFilterTextCommitted)
-			   ]
-		   ]
-		   +SVerticalBox::Slot()
-			. HAlign(HAlign_Fill)
-		   [
-			   SNew(SHorizontalBox)
-			   + SHorizontalBox::Slot()
-			   . HAlign(HAlign_Fill)
-			   [
-				   SNew(SScrollBox)
-				   .Orientation(Orient_Horizontal)
-				   .ExternalScrollbar(HorizontalScrollBar)
-				   +SScrollBox::Slot()
-				   [
-					   InListView.ToSharedRef()
-				   ]
-			   ]
-			   // + SHorizontalBox::Slot()
-			   // .AutoWidth()
-			   // [
-				  //  VerticalScrollBar
-			   // ]
-		   ];
-		   // +SVerticalBox::Slot()
-		   // .AutoHeight()
-		   // [
-			  //  SNew(SHorizontalBox)
-			  //  +SHorizontalBox::Slot()
-			  //  [
-				 //   HorizontalScrollBar
-			  //  ]
-		   // ];
-}
-
-TSharedPtr<SHeaderRow> SDataTableVisualDiff::GenerateHeaderWidgets()
-{
-	TSharedPtr<SHeaderRow> ColumnNamesHeaderRow = SNew(SHeaderRow);
+	if (!RowPtr || !TablePtr->RowStruct)
+	{
+		SelectedRowId = NAME_None;
+		return;
+	}
 	
-	ColumnNamesHeaderRow->AddColumn(
-		SHeaderRow::Column(TEXT("RowNumber"))
-		.DefaultLabel(LOCTEXT("DataTableRowNumber", "Row Number"))
-		.ManualWidth(this, &SDataTableVisualDiff::GetRowNumberColumnWidth)
-		.OnWidthChanged(this, &SDataTableVisualDiff::OnRowNumberColumnResized)
-	);
+	FString ClipboardValue;
+	TablePtr->RowStruct->ExportText(ClipboardValue, RowPtr, RowPtr, TablePtr, PPF_Copy, nullptr);
+	FPlatformApplicationMisc::ClipboardCopy(*ClipboardValue);
+}
 
-	ColumnNamesHeaderRow->AddColumn(
-		SHeaderRow::Column(TEXT("RowName"))
-		.DefaultLabel(LOCTEXT("DataTableRowName", "Row Name"))
-		.ManualWidth(this, &SDataTableVisualDiff::GetRowNumberColumnWidth)
-		.OnWidthChanged(this, &SDataTableVisualDiff::OnRowNumberColumnResized)
-	);
+FReply SDataTableVisualDiff::OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
+{
+	if (InKeyEvent.GetKey() == EKeys::LeftControl)
+	{
+		bPressedCtrl = true;
+	}
 	
+	if (InKeyEvent.GetKey() == EKeys::C)
+	{
+		if (bPressedCtrl)
+		{
+			CopySelectedRow();
+			bPressedCtrl = false;
+		}
+	}
 	
-	return ColumnNamesHeaderRow;
+	return SCompoundWidget::OnPreviewKeyDown(MyGeometry, InKeyEvent);
 }
 
-float SDataTableVisualDiff::GetRowNumberColumnWidth() const
+FReply SDataTableVisualDiff::OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
 {
-	return RowNumberColumnWidth;
+	bPressedCtrl = false;
+	return SCompoundWidget::OnKeyUp(MyGeometry, InKeyEvent);
 }
 
-void SDataTableVisualDiff::OnRowNumberColumnResized(const float NewWidth)
-{
-	RowNumberColumnWidth = NewWidth;
-}
-
-TSharedRef<ITableRow> SDataTableVisualDiff::MakeRowWidget(FUnrealDiffDataTableRowListViewDataPtr InRowDataPtr, const TSharedRef<STableViewBase>& OwnerTable)
-{
-	return SNew(SUnrealDiffDataTableListViewRow, OwnerTable)
-		.RowDataPtr(InRowDataPtr)
-		.IsEditable(false);
-}
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 

@@ -11,6 +11,7 @@
 #include "ToolMenus.h"
 #include "UnrealDiffAssetDelegate.h"
 #include "Dialogs/Dialogs.h"
+#include "Framework/Commands/GenericCommands.h"
 #include "Interfaces/IPluginManager.h"
 
 #define LOCTEXT_NAMESPACE "FUnrealDiffAssetsEditorModule"
