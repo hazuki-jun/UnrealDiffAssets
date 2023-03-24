@@ -10,6 +10,7 @@
 #include "SBlueprintVisualDiff.h"
 #include "ToolMenus.h"
 #include "UnrealDiffAssetDelegate.h"
+#include "UnrealDiffWindowStyle.h"
 #include "Dialogs/Dialogs.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Interfaces/IPluginManager.h"
@@ -18,6 +19,9 @@
 
 void FUnrealDiffAssetsEditorModule::StartupModule()
 {
+	FUnrealDiffWindowStyle::Initialize();
+	FSlateApplication::Get().GetRenderer()->ReloadTextureResources();
+	
 	DeleteUAssets();
 	BuildDiffAssetsMenu();
 	
@@ -32,7 +36,7 @@ void FUnrealDiffAssetsEditorModule::BuildDiffAssetsMenu()
 {
 	UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu");
 	FToolMenuSection& Section = Menu->AddSection("UnrealDiffAssetsSection");
-	
+	// .FSlateIcon(FUnrealDiffWindowStyle::GetStyleSetName(), "UnrealDiffAssets.WindowBackground"),
 #if ENGINE_MAJOR_VERSION == 5
 	FToolMenuEntry Entry = FToolMenuEntry::InitMenuEntry(
 		TEXT("DiffAsset"),
@@ -120,7 +124,7 @@ bool FUnrealDiffAssetsEditorModule::IsSupported()
 	
 	TWeakPtr<IAssetTypeActions> Actions = AssetToolsModule.Get().GetAssetTypeActionsForClass( SelectedAssets[0]->GetClass() );
 
-	TSet<FName> SupportedClasses = { TEXT("Blueprint"), TEXT("DataTable") };
+	TSet<FName> SupportedClasses = { TEXT("Blueprint"), TEXT("DataTable"), TEXT("WidgetBlueprint") };
 		
 	auto SupportClass = Actions.Pin()->GetSupportedClass();
 	if (!SupportClass || !SupportedClasses.Contains(SupportClass->GetFName()))

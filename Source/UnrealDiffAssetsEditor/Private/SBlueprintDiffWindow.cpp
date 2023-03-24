@@ -2,10 +2,13 @@
 
 
 #include "SBlueprintDiffWindow.h"
-
+#include "Styling/SlateStyle.h"
 #include "SBlueprintVisualDiff.h"
 #include "SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
+#include "UnrealDiffWindowStyle.h"
+#include "Interfaces/IPluginManager.h"
+#include "Styling/SlateStyleRegistry.h"
 
 #define LOCTEXT_NAMESPACE "SBlueprintDiffWindow"
 
@@ -18,6 +21,7 @@ void SBlueprintDiffWindow::Construct(const FArguments& InArgs)
 		.Title(InArgs._WindowTitel)
 		.ClientSize(FVector2D(1000, 800)));
 
+	// auto Brush = FUnrealDiffWindowStyle::Get().GetBrush(TEXT("UnrealDiffAssets.WindowBackground"));
 	if (DiffAssetType == EDiffAssetType::None)
 	{
 		return;
@@ -25,6 +29,14 @@ void SBlueprintDiffWindow::Construct(const FArguments& InArgs)
 	
 	auto DiffWidget = GetBlueprintDiffWidget(InArgs._LocalAsset, InArgs._RemoteAsset);
 	SetContent(SNew(SOverlay)
+		// + SOverlay::Slot()
+		// .HAlign(EHorizontalAlignment::HAlign_Fill)
+		// .VAlign(EVerticalAlignment::VAlign_Fill)
+		// [
+		// 	SNew(SImage)
+		// 	.Image(Brush)	
+		// ]
+	
 		+ SOverlay::Slot()
 		.HAlign(EHorizontalAlignment::HAlign_Fill)
 		.VAlign(EVerticalAlignment::VAlign_Fill)

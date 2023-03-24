@@ -45,6 +45,8 @@ public:
 	TSharedRef<ITableRow> MakeRowWidget(FUnrealDiffDataTableRowListViewDataPtr InRowDataPtr, const TSharedRef<STableViewBase>& OwnerTable);
 
 	void OnRowSelectionChanged(FUnrealDiffDataTableRowListViewDataPtr InNewSelection, ESelectInfo::Type InSelectInfo);
+
+	void OnListViewScrolled(double InScrollOffset);
 	
 protected:
 	/** Struct holding information about the current column widths */
@@ -84,5 +86,7 @@ protected:
 
 	TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> ListView;
 
-	bool bIsLocal;
+	bool bIsLocal = true;
 };
+
+

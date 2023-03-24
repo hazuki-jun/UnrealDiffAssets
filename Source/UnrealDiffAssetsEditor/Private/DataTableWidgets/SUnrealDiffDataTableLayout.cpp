@@ -5,6 +5,7 @@
 
 #include "IDocumentation.h"
 #include "SlateOptMacros.h"
+#include "UnrealDiffWindowStyle.h"
 #include "DataTableWidgets/SUnrealDiffDataTableListViewRow.h"
 #include "Fonts/FontMeasure.h"
 #include "Widgets/Input/SSearchBox.h"
@@ -34,18 +35,34 @@ void SUnrealDiffDataTableLayout::Construct(const FArguments& InArgs)
 		VisibleRows.Add(Row);
 	}
 
-	VisibleRows.StableSort([](const FUnrealDiffDataTableRowListViewDataPtr& first, const FUnrealDiffDataTableRowListViewDataPtr& second)
-	{
-		return (first->DisplayName).ToString() < (second->DisplayName).ToString();
-	});
+	// VisibleRows.StableSort([](const FUnrealDiffDataTableRowListViewDataPtr& first, const FUnrealDiffDataTableRowListViewDataPtr& second)
+	// {
+	// 	return (first->DisplayName).ToString() < (second->DisplayName).ToString();
+	// });
 	
 	SetupColumnWidth();
 	RefreshRowNumberColumnWidth();
 	RefreshRowNameColumnWidth();
 
+	// auto Brush = FUnrealDiffWindowStyle::Get().GetBrush(TEXT("UnrealDiffAssets.WindowBackground"));
 	this->ChildSlot
 	[
-		BuildContent()
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		[
+			SNew(SImage)
+			.ColorAndOpacity(FSlateColor(FLinearColor(0.f, 0.f, 0.f, 1.f)))
+			.Visibility(EVisibility::SelfHitTestInvisible)
+		]
+
+		+ SOverlay::Slot()
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		[
+			BuildContent()
+		]
 	];
 }
 
@@ -66,39 +83,61 @@ TSharedRef<SWidget> SUnrealDiffDataTableLayout::BuildContent()
 		.HeaderRow(ColumnNamesHeaderRow)
 		.OnGenerateRow(this, &SUnrealDiffDataTableLayout::MakeRowWidget)
 		// .OnSelectionChanged(this, &SUnrealDiffDataTableLayout::OnRowSelectionChanged)
+		.OnListViewScrolled(this, &SUnrealDiffDataTableLayout::OnListViewScrolled)
 		.ExternalScrollbar(VerticalScrollBar)
 		.ConsumeMouseWheel(EConsumeMouseWheel::Always)
 		.SelectionMode(ESelectionMode::Single)
-		.AllowOverscroll(EAllowOverscroll::No);
+		.AllowOverscroll(EAllowOverscroll::Yes);
 
 	// TSharedPtr<SSearchBox> SearchBoxWidget;
 	
 	return SNew(SVerticalBox)
-	   // + SVerticalBox::Slot()
-	   // .AutoHeight()
-	   // [
-		  //  SNew(SHorizontalBox)
-		  //  + SHorizontalBox::Slot()
-		  //  [
-			 //   SAssignNew(SearchBoxWidget, SSearchBox)
-		  //  ]
-	   // ]
-	   +SVerticalBox::Slot()
-		. HAlign(HAlign_Fill)
-	   [
-		   SNew(SHorizontalBox)
-		   + SHorizontalBox::Slot()
-		   . HAlign(HAlign_Fill)
-		   [
-			   SNew(SScrollBox)
-			   .Orientation(Orient_Horizontal)
-			   .ExternalScrollbar(HorizontalScrollBar)
-			   +SScrollBox::Slot()
-			   [
-				   ListView.ToSharedRef()
-			   ]
-		   ]
-	   ];
+		// + SVerticalBox::Slot()
+		// .AutoHeight()
+		// [
+		// 	SNew(SHorizontalBox)
+		// 	+ SHorizontalBox::Slot()
+		// 	[
+		// 		SAssignNew(SearchBoxWidget, SSearchBox)
+		// 		.InitialText(this, &FDataTableEditor::GetFilterText)
+		// 		.OnTextChanged(this, &FDataTableEditor::OnFilterTextChanged)
+		// 		.OnTextCommitted(this, &FDataTableEditor::OnFilterTextCommitted)
+		// 	]
+		// ]
+		+ SVerticalBox::Slot()
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			
+			[
+				SNew(SScrollBox)
+				.Orientation(Orient_Horizontal)
+				.ExternalScrollbar(HorizontalScrollBar)
+				+SScrollBox::Slot()
+				[
+					ListView.ToSharedRef()
+				]
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			[
+				VerticalScrollBar
+			]
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SHorizontalBox)
+			+SHorizontalBox::Slot()
+			[
+				HorizontalScrollBar
+			]
+		];
+}
+
+void SUnrealDiffDataTableLayout::OnListViewScrolled(double InScrollOffset)
+{
+	ListView->SetScrollbarVisibility(EVisibility::Visible);
 }
 
 void SUnrealDiffDataTableLayout::OnRowSelectionChanged(FUnrealDiffDataTableRowListViewDataPtr InNewSelection, ESelectInfo::Type InSelectInfo)
