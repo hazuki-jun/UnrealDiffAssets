@@ -62,13 +62,28 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 
 TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(FText InTitle, UObject* AssetObject, bool bIsLocal)
 {
-	return SNew(SUnrealDiffDataTableLayout).Title(InTitle).AssetObject(AssetObject).IsLocal(bIsLocal);
+	return SNew(SUnrealDiffDataTableLayout).Title(InTitle).IsLocal(bIsLocal).DataTableVisual(SharedThis(this));
 }
 
 void SDataTableVisualDiff::OnRowSelectionChanged(bool bIsLocal, FName RowId)
 {
 	bIsLocalDataTableSelected = bIsLocal;
 	SelectedRowId = RowId;
+
+	if (bIsLocal)
+	{
+		if (DataTableLayoutRemote)
+		{
+			DataTableLayoutRemote->SelectRow(RowId);
+		}
+	}
+	else
+	{
+		if (DataTableLayoutLocal)
+		{
+			DataTableLayoutLocal->SelectRow(RowId);
+		}
+	}
 }
 
 void SDataTableVisualDiff::CopySelectedRow()
@@ -115,6 +130,72 @@ FReply SDataTableVisualDiff::OnKeyUp(const FGeometry& MyGeometry, const FKeyEven
 {
 	bPressedCtrl = false;
 	return SCompoundWidget::OnKeyUp(MyGeometry, InKeyEvent);
+}
+
+
+void SDataTableVisualDiff::GetDataTableData(bool bIsLocal, TArray<FDataTableEditorColumnHeaderDataPtr>& OutAvailableColumns, TArray<FDataTableEditorRowListViewDataPtr>& OutAvailableRows)
+{
+	UDataTable* DataTableLocal = CastChecked<UDataTable>(LocalAsset);
+	UDataTable* DataTableRemote = CastChecked<UDataTable>(RemoteAsset);
+
+	const TMap<FName, uint8*>& RowMapLocal = DataTableLocal->GetRowMap();
+	TArray<FName> RowNamesLocal = DataTableLocal->GetRowNames();
+	TArray<FDataTableEditorRowListViewDataPtr> EmptyRowDataRemote;
+	
+	const TMap<FName, uint8*>& RowMapRemote = DataTableRemote->GetRowMap(); 
+	TArray<FName> RowNamesRemote = DataTableRemote->GetRowNames();
+	TArray<FDataTableEditorRowListViewDataPtr> EmptyRowDataLocal;
+	
+	if (bIsLocal)
+	{
+		FDataTableEditorUtils::CacheDataTableForEditing(DataTableLocal, OutAvailableColumns, OutAvailableRows);
+		
+		int32 Index = 0;
+		for (auto RowIt = RowMapRemote.CreateConstIterator(); RowIt; ++RowIt, ++Index)
+		{
+			if (!RowMapLocal.Find(RowIt.Key()))
+			{
+				FDataTableEditorRowListViewDataPtr DataPtr = MakeShareable(new FDataTableEditorRowListViewData());
+				DataPtr->RowId = RowIt->Key;
+				DataPtr->RowNum = -1;
+				OutAvailableRows.Add(DataPtr);
+			}
+		}
+	}
+	else
+	{
+		FDataTableEditorUtils::CacheDataTableForEditing(DataTableRemote, OutAvailableColumns, OutAvailableRows);
+		
+		int32 Index = 0;
+		for (auto RowIt = RowMapLocal.CreateConstIterator(); RowIt; ++RowIt, ++Index)
+		{
+			if (!RowMapRemote.Find(RowIt.Key()))
+			{
+				FDataTableEditorRowListViewDataPtr DataPtr = MakeShareable(new FDataTableEditorRowListViewData());
+				DataPtr->RowId = RowIt->Key;
+				DataPtr->RowNum = -1;
+				OutAvailableRows.Add(DataPtr);
+			}
+		}
+	}
+}
+
+void SDataTableVisualDiff::SyncVerticalScrollOffset(bool bIsLocal, float NewOffset)
+{
+	if (bIsLocal)
+	{
+		if (DataTableLayoutRemote)
+		{
+			DataTableLayoutRemote->SetListViewScrollOffset(NewOffset);
+		}
+	}
+	else
+	{
+		if (DataTableLayoutLocal)
+		{
+			DataTableLayoutLocal->SetListViewScrollOffset(NewOffset);
+		}
+	}
 }
 
 

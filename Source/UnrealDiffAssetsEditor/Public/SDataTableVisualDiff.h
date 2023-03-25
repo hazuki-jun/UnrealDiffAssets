@@ -33,6 +33,16 @@ public:
 	virtual FReply OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 
 	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
+
+public:
+	//~ Cell
+	void GetDataTableData(bool bIsLocal, TArray<FDataTableEditorColumnHeaderDataPtr> &OutAvailableColumns, TArray<FDataTableEditorRowListViewDataPtr> &OutAvailableRows);
+	//~ Cell
+
+	void SyncVerticalScrollOffset(bool bIsLocal, float NewOffset);
+
+	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutLocal;
+	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutRemote;
 	
 protected:
 	TSharedPtr<SWindow> ParentWindow;

@@ -15,8 +15,8 @@ class UNREALDIFFASSETSEDITOR_API SUnrealDiffDataTableLayout : public SCompoundWi
 public:
 	SLATE_BEGIN_ARGS(SUnrealDiffDataTableLayout){}
 		SLATE_ARGUMENT(FText, Title)
-		SLATE_ARGUMENT(UObject*, AssetObject)
 		SLATE_ARGUMENT(bool, IsLocal)
+		SLATE_ARGUMENT(TSharedPtr<class SDataTableVisualDiff>, DataTableVisual)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -44,9 +44,19 @@ public:
 	
 	TSharedRef<ITableRow> MakeRowWidget(FUnrealDiffDataTableRowListViewDataPtr InRowDataPtr, const TSharedRef<STableViewBase>& OwnerTable);
 
-	void OnRowSelectionChanged(FUnrealDiffDataTableRowListViewDataPtr InNewSelection, ESelectInfo::Type InSelectInfo);
-
 	void OnListViewScrolled(double InScrollOffset);
+
+	void SetListViewScrollOffset(float InOffset);
+public:
+	//~ Cell
+	void SelectRow(FName RowId);
+	
+	FText GetCellText(const FName& InColumnId, const FName& RowName) const;
+	
+	FSlateColor GetCellTextColor(const FName& InColumnId, const FName& RowName) const;
+
+	bool IsCellEnable(const FName& InColumnId, const FName& RowName) const;
+	//~ Cell
 	
 protected:
 	/** Struct holding information about the current column widths */
@@ -73,20 +83,21 @@ protected:
 	/** Widths of data table cell columns */
 	TArray<FColumnWidth> ColumnWidths;
 	
-	/** Array of the rows that match the active filter(s) */
-	TArray<FUnrealDiffDataTableRowListViewDataPtr> VisibleRows;
-	
 	/** Array of the rows that are available for editing */
 	TArray<FDataTableEditorRowListViewDataPtr> AvailableRows;
 
 	/** Array of the columns that are available for editing */
 	TArray<FDataTableEditorColumnHeaderDataPtr> AvailableColumns;
 	
-	UObject* AssetObject = nullptr;
+	TArray<FUnrealDiffDataTableRowListViewDataPtr> VisibleRows;
 
 	TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> ListView;
 
 	bool bIsLocal = true;
+	
+	TSharedPtr<class SDataTableVisualDiff> DataTableVisual= nullptr;
 };
+
+
 
 

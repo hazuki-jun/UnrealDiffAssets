@@ -22,6 +22,10 @@ struct FUnrealDiffDataTableRowListViewData
 
 	/** Array corresponding to each cell in this row */
 	TArray<FText> CellData;
+
+	bool bIsRemoved = false;
+
+	bool bIsAdded = false;
 };
 
 typedef TSharedPtr<FUnrealDiffDataTableRowListViewData> FUnrealDiffDataTableRowListViewDataPtr;
@@ -33,10 +37,10 @@ class UNREALDIFFASSETSEDITOR_API SUnrealDiffDataTableListViewRow : public SMulti
 {
 public:
 	SLATE_BEGIN_ARGS(SUnrealDiffDataTableListViewRow){}
-		SLATE_ARGUMENT(FUnrealDiffDataTableRowListViewDataPtr, RowDataPtr)
-		SLATE_ARGUMENT(bool, IsEditable)
 		SLATE_ARGUMENT(bool, IsLocal)
-		SLATE_ARGUMENT(TArray<FDataTableEditorColumnHeaderDataPtr>, AvailableColumns)
+		SLATE_ARGUMENT(TSharedPtr<class SDataTableVisualDiff>, DataTableVisual)
+		SLATE_ARGUMENT(TSharedPtr<class SUnrealDiffDataTableLayout>, DataTableLayout)
+		SLATE_ARGUMENT(FUnrealDiffDataTableRowListViewDataPtr, InRowDataPtr)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -48,26 +52,13 @@ public:
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
-	virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override;
+	virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& InColumnId) override;
 	//~ End SMultiColumnTableRow Interface
 
-	TSharedRef<SWidget> MakeCellWidget(const int32 InRowIndex, const FName& InColumnId);
-
-	FText GetCellText(int32 ColumnIndex) const;
-
-	void CopySelectedRow();
+	TSharedRef<SWidget> MakeCellWidget(const FName& InColumnId);
 	
-	TSharedPtr<SInlineEditableTextBlock> InlineEditableText;
-
-	TSharedPtr<FName> CurrentName;
-
+	bool bIsLocal = true;
 	FUnrealDiffDataTableRowListViewDataPtr RowDataPtr;
-
-	bool IsEditable;
-	bool bIsDragDropObject;
-	bool bIsHoveredDragTarget;
-	bool bIsLocal;
-	
-	/** Array of the columns that are available for editing */
-	TArray<FDataTableEditorColumnHeaderDataPtr> AvailableColumns;
+	TSharedPtr<class SDataTableVisualDiff> DataTableVisual = nullptr;
+	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayout;
 };

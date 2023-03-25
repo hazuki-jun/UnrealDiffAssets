@@ -4,6 +4,7 @@
 #include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
 
 #include "IDocumentation.h"
+#include "SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
 #include "DataTableWidgets/SUnrealDiffDataTableListViewRow.h"
@@ -17,12 +18,20 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SUnrealDiffDataTableLayout::Construct(const FArguments& InArgs)
 {
-	AssetObject = InArgs._AssetObject;
 	bIsLocal = InArgs._IsLocal;
+	DataTableVisual = InArgs._DataTableVisual;
 	FText Title = InArgs._Title;
+
+	if (bIsLocal)
+	{
+		DataTableVisual->DataTableLayoutLocal = SharedThis(this);
+	}
+	else
+	{
+		DataTableVisual->DataTableLayoutRemote = SharedThis(this);
+	}
 	
-	UDataTable* DataTable = CastChecked<UDataTable>(AssetObject);
-	FDataTableEditorUtils::CacheDataTableForEditing(DataTable, AvailableColumns, AvailableRows);
+	DataTableVisual->GetDataTableData(bIsLocal, AvailableColumns, AvailableRows);
 	
 	for (auto RowData : AvailableRows)
 	{
@@ -35,16 +44,25 @@ void SUnrealDiffDataTableLayout::Construct(const FArguments& InArgs)
 		VisibleRows.Add(Row);
 	}
 
-	// VisibleRows.StableSort([](const FUnrealDiffDataTableRowListViewDataPtr& first, const FUnrealDiffDataTableRowListViewDataPtr& second)
-	// {
-	// 	return (first->DisplayName).ToString() < (second->DisplayName).ToString();
-	// });
+	VisibleRows.StableSort([](const FUnrealDiffDataTableRowListViewDataPtr& A, const FUnrealDiffDataTableRowListViewDataPtr& B)
+	{
+		return (A->RowId).ToString() < (B->RowId).ToString();
+	});
+
+	for (int32 i = 0; i < VisibleRows.Num(); ++i)
+	{
+		if (VisibleRows[i]->RowNum == -1)
+		{
+			VisibleRows[i]->bIsRemoved = true;
+		}
+		
+		VisibleRows[i]->RowNum = i + 1;
+	}
 	
 	SetupColumnWidth();
 	RefreshRowNumberColumnWidth();
 	RefreshRowNameColumnWidth();
 
-	// auto Brush = FUnrealDiffWindowStyle::Get().GetBrush(TEXT("UnrealDiffAssets.WindowBackground"));
 	this->ChildSlot
 	[
 		SNew(SOverlay)
@@ -82,28 +100,13 @@ TSharedRef<SWidget> SUnrealDiffDataTableLayout::BuildContent()
 		.ListItemsSource(&VisibleRows)
 		.HeaderRow(ColumnNamesHeaderRow)
 		.OnGenerateRow(this, &SUnrealDiffDataTableLayout::MakeRowWidget)
-		// .OnSelectionChanged(this, &SUnrealDiffDataTableLayout::OnRowSelectionChanged)
 		.OnListViewScrolled(this, &SUnrealDiffDataTableLayout::OnListViewScrolled)
 		.ExternalScrollbar(VerticalScrollBar)
 		.ConsumeMouseWheel(EConsumeMouseWheel::Always)
 		.SelectionMode(ESelectionMode::Single)
 		.AllowOverscroll(EAllowOverscroll::Yes);
-
-	// TSharedPtr<SSearchBox> SearchBoxWidget;
 	
 	return SNew(SVerticalBox)
-		// + SVerticalBox::Slot()
-		// .AutoHeight()
-		// [
-		// 	SNew(SHorizontalBox)
-		// 	+ SHorizontalBox::Slot()
-		// 	[
-		// 		SAssignNew(SearchBoxWidget, SSearchBox)
-		// 		.InitialText(this, &FDataTableEditor::GetFilterText)
-		// 		.OnTextChanged(this, &FDataTableEditor::OnFilterTextChanged)
-		// 		.OnTextCommitted(this, &FDataTableEditor::OnFilterTextCommitted)
-		// 	]
-		// ]
 		+ SVerticalBox::Slot()
 		[
 			SNew(SHorizontalBox)
@@ -113,7 +116,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableLayout::BuildContent()
 				SNew(SScrollBox)
 				.Orientation(Orient_Horizontal)
 				.ExternalScrollbar(HorizontalScrollBar)
-				+SScrollBox::Slot()
+				+ SScrollBox::Slot()
 				[
 					ListView.ToSharedRef()
 				]
@@ -137,17 +140,9 @@ TSharedRef<SWidget> SUnrealDiffDataTableLayout::BuildContent()
 
 void SUnrealDiffDataTableLayout::OnListViewScrolled(double InScrollOffset)
 {
-	ListView->SetScrollbarVisibility(EVisibility::Visible);
-}
-
-void SUnrealDiffDataTableLayout::OnRowSelectionChanged(FUnrealDiffDataTableRowListViewDataPtr InNewSelection, ESelectInfo::Type InSelectInfo)
-{
-	if (InSelectInfo == ESelectInfo::OnMouseClick)
+	if (DataTableVisual.IsValid())
 	{
-		if (InNewSelection.IsValid())
-		{
-			
-		}
+		DataTableVisual->SyncVerticalScrollOffset(bIsLocal, InScrollOffset);
 	}
 }
 
@@ -285,7 +280,92 @@ void SUnrealDiffDataTableLayout::OnRowNumberColumnResized(const float NewWidth)
 
 TSharedRef<ITableRow> SUnrealDiffDataTableLayout::MakeRowWidget(FUnrealDiffDataTableRowListViewDataPtr InRowDataPtr,const TSharedRef<STableViewBase>& OwnerTable)
 {
-	return SNew(SUnrealDiffDataTableListViewRow, OwnerTable).RowDataPtr(InRowDataPtr).AvailableColumns(AvailableColumns).IsLocal(bIsLocal);
+	return SNew(SUnrealDiffDataTableListViewRow, OwnerTable).IsLocal(bIsLocal).DataTableVisual(DataTableVisual).InRowDataPtr(InRowDataPtr).DataTableLayout(SharedThis(this));
+}
+
+void SUnrealDiffDataTableLayout::SetListViewScrollOffset(float InOffset)
+{
+	if (ListView.IsValid())
+	{
+		ListView->SetScrollOffset(InOffset);
+	}
+}
+
+void SUnrealDiffDataTableLayout::SelectRow(FName RowId)
+{
+	if (!ListView.IsValid())
+	{
+		return;
+	}
+	
+	for (const auto& RowData : VisibleRows)
+	{
+		ListView->SetItemSelection(RowData, false);
+	}
+	
+	for (const auto& RowData : VisibleRows)
+	{
+		if (RowData->RowId != RowId)
+		{
+			continue;
+		}
+
+		if (!ListView->IsItemSelected(RowData))
+		{
+			ListView->SetItemSelection(RowData, true);
+			break;
+		}
+	}
+}
+
+FText SUnrealDiffDataTableLayout::GetCellText(const FName& InColumnId, const FName& RowName) const
+{
+	int32 ColumnIndex = -1;
+	for (int32 i = 0; i < AvailableColumns.Num(); ++i)
+	{
+		if (AvailableColumns[i]->ColumnId == InColumnId)
+		{
+			ColumnIndex = i;
+			break;
+		}
+	}
+	
+	if (ColumnIndex >= 0)
+	{
+		for (const auto& RowData : AvailableRows)
+		{
+			if (RowData->RowId == RowName)
+			{
+				if (RowData->CellData.IsValidIndex(ColumnIndex))
+				{
+					return RowData->CellData[ColumnIndex];
+				}
+			}
+		}
+	}
+	
+	return FText();
+}
+
+FSlateColor SUnrealDiffDataTableLayout::GetCellTextColor(const FName& InColumnId, const FName& RowName) const
+{
+	for (const auto& RowData : VisibleRows)
+	{
+		if (RowName == RowData->RowId)
+		{
+			if (RowData->bIsRemoved)
+			{
+				return FSlateColor(FLinearColor(0.8, 0.0, 0.1, 1.0));
+			}
+		}
+	}
+	
+	return FSlateColor(FLinearColor(0.5, 0.5, 0.5, 1.0));
+}
+
+bool SUnrealDiffDataTableLayout::IsCellEnable(const FName& InColumnId, const FName& RowName) const
+{
+	return true;
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

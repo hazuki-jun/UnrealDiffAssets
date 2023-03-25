@@ -3,8 +3,10 @@
 
 #include "DataTableWidgets/SUnrealDiffDataTableListViewRow.h"
 
+#include "SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
 #include "UnrealDiffAssetDelegate.h"
+#include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
 
@@ -13,11 +15,10 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView)
 {
-	RowDataPtr = InArgs._RowDataPtr;
-	CurrentName = MakeShareable(new FName(RowDataPtr->RowId));
-	IsEditable = false;
-	AvailableColumns = InArgs._AvailableColumns;
 	bIsLocal = InArgs._IsLocal;
+	DataTableVisual = InArgs._DataTableVisual;
+	DataTableLayout = InArgs._DataTableLayout;
+	RowDataPtr = InArgs._InRowDataPtr;
 	
 	SMultiColumnTableRow<FUnrealDiffDataTableRowListViewDataPtr>::Construct(
 		FSuperRowType::FArguments()
@@ -63,19 +64,13 @@ FReply SUnrealDiffDataTableListViewRow::OnKeyDown(const FGeometry& MyGeometry, c
 	return FReply::Handled();
 }
 
-TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::GenerateWidgetForColumn(const FName& ColumnName)
+TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::GenerateWidgetForColumn(const FName& InColumnId)
 {
-	return MakeCellWidget(0, ColumnName);
-}
-
-TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeCellWidget(const int32 InRowIndex, const FName& InColumnId)
-{
-	const FName RowNumberColumnId("RowNumber");
-
-	if (InColumnId.IsEqual(RowNumberColumnId))
+	if (InColumnId.IsEqual(TEXT("RowNumber")))
 	{
 		return SNew(SBox)
 			.Padding(FMargin(4, 2, 4, 2))
+			.IsEnabled(DataTableLayout->IsCellEnable(InColumnId, RowDataPtr->RowId))
 			[
 				SNew(STextBlock)
 #if ENGINE_MAJOR_VERSION == 4
@@ -84,80 +79,42 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeCellWidget(const int32 
 				.TextStyle(FAppStyle::Get(), "DataTableEditor.CellText")
 #endif
 				.Text(FText::FromString(FString::FromInt(RowDataPtr->RowNum)))
-				// .ColorAndOpacity(DataTableEdit, &FDataTableEditor::GetRowTextColor, RowDataPtr->RowId)
-				// .HighlightText(DataTableEdit, &FDataTableEditor::GetFilterText)
+				.ColorAndOpacity(DataTableLayout->GetCellTextColor(InColumnId, RowDataPtr->RowId))
 			];
 	}
-
-	const FName RowNameColumnId("RowName");
-
-	if (InColumnId.IsEqual(RowNameColumnId))
+	
+	if (InColumnId.IsEqual(TEXT("RowName")))
 	{
 		return SNew(SBox)
+			.IsEnabled(DataTableLayout->IsCellEnable(InColumnId, RowDataPtr->RowId))
 			.Padding(FMargin(4, 2, 4, 2))
 			[
-				SAssignNew(InlineEditableText, SInlineEditableTextBlock)
-				.Text(RowDataPtr->DisplayName)
+				SNew(SInlineEditableTextBlock)
 				.IsReadOnly(true)
-				// .OnTextCommitted(this, &SDataTableListViewRow::OnRowRenamed)
-				// .HighlightText(DataTableEdit, &FDataTableEditor::GetFilterText)
-				// .ColorAndOpacity(DataTableEdit, &FDataTableEditor::GetRowTextColor, RowDataPtr->RowId)
+				.Text(FText::FromName(RowDataPtr->RowId))
+				.ColorAndOpacity(DataTableLayout->GetCellTextColor(InColumnId, RowDataPtr->RowId))
 			];
 	}
-
-	int32 ColumnIndex = 0;
-	for (; ColumnIndex < AvailableColumns.Num(); ++ColumnIndex)
-	{
-		const FDataTableEditorColumnHeaderDataPtr& ColumnData = AvailableColumns[ColumnIndex];
-		if (ColumnData->ColumnId == InColumnId)
-		{
-			break;
-		}
-	}
 	
-	if (AvailableColumns.IsValidIndex(ColumnIndex) && RowDataPtr->CellData.IsValidIndex(ColumnIndex))
-	{
-		TAttribute<FText> TextAttribute = GetCellText(ColumnIndex);
-		return SNew(SBox)
-			.Padding(FMargin(4, 2, 4, 2))
-			[
-				SNew(STextBlock)
-				.Margin(FMargin(5.f, 0.f, 0.f, 0.f))
+	return MakeCellWidget(InColumnId);
+}
+
+TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeCellWidget(const FName& InColumnId)
+{
+	return SNew(SBox)
+		.Padding(FMargin(4, 2, 4, 2))
+		[
+			SNew(STextBlock)
+			.IsEnabled(DataTableLayout->IsCellEnable(InColumnId, RowDataPtr->RowId))
+			.Margin(FMargin(5.f, 0.f, 0.f, 0.f))
 #if ENGINE_MAJOR_VERSION == 4
-				.TextStyle(FEditorStyle::Get(), "DataTableEditor.CellText")
+			.TextStyle(FEditorStyle::Get(), "DataTableEditor.CellText")
 #else
-				.TextStyle(FAppStyle::Get(), "DataTableEditor.CellText")
+			.TextStyle(FAppStyle::Get(), "DataTableEditor.CellText")
 #endif
-				.Text(TextAttribute)
-				// .ColorAndOpacity(DataTableEdit, &FDataTableEditor::GetRowTextColor, RowDataPtr->RowId)
-			];
-	}
-	
-	return SNullWidget::NullWidget;
-}
-
-FText SUnrealDiffDataTableListViewRow::GetCellText(int32 ColumnIndex) const
-{
-	if (RowDataPtr.IsValid() && ColumnIndex < RowDataPtr->CellData.Num())
-	{
-		return RowDataPtr->CellData[ColumnIndex];
-	}
-
-	return FText();
-}
-
-void SUnrealDiffDataTableListViewRow::CopySelectedRow()
-{
-	// UDataTable* TablePtr = Cast<UDataTable>(Data);
-	// uint8* RowPtr = TablePtr ? TablePtr->GetRowMap().FindRef(HighlightedRowName) : nullptr;
-	//
-	// if (!RowPtr || !TablePtr->RowStruct)
-	// 	return;
-	//
-	// FString ClipboardValue;
-	// TablePtr->RowStruct->ExportText(ClipboardValue, RowPtr, RowPtr, TablePtr, PPF_Copy, nullptr);
-	//
-	// FPlatformApplicationMisc::ClipboardCopy(*ClipboardValue);
+			.Text(DataTableLayout->GetCellText(InColumnId, RowDataPtr->RowId))
+			.ColorAndOpacity(DataTableLayout->GetCellTextColor(InColumnId, RowDataPtr->RowId))
+		];
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
