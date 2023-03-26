@@ -61,8 +61,13 @@ public:
 
 	TSharedRef<SWidget> MakeRowActionsMenu();
 
+	// 右键菜单 CopyName
 	void OnMenuActionCopyName();
+
+	// 右键菜单 CopyName
 	void OnMenuActionCopyValue();
+
+	// 右键菜单 ShowDifference
 	void OnMenuActionShowDifference();
 	
 	bool bIsLocal = true;

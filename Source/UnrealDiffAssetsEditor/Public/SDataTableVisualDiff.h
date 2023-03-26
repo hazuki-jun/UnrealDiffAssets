@@ -26,20 +26,44 @@ public:
 	
 	TSharedRef<SWidget> BuildLayoutWidget(FText InTitle, UObject* AssetObject, bool bIsLocal);
 
+	/**
+	 * @brief 选中行/鼠标点击了行
+	 * @param bIsLocal 
+	 * @param RowId 
+	 */
 	void OnRowSelectionChanged(bool bIsLocal, FName RowId);
-	
+
+	/**
+	 * @brief 拷贝指定行到粘贴板
+	 * @param bIsLocal 
+	 * @param RowName 
+	 */
 	void CopyRow(bool bIsLocal, const FName& RowName);
-	
+
+	/**
+	 * @brief 拷贝选中的行到粘贴板
+	 */
 	void CopySelectedRow();
 
+	/**
+	 * @brief 导出DataTable指定行
+	 * @param ValueStr [Out]
+	 * @param DataTable 
+	 * @param RowName 
+	 */
 	void ExportText(FString& ValueStr, UDataTable* DataTable, FName& RowName) const;
-	
+
+	/**
+	 * @brief 拷贝行名到粘贴板
+	 * @param RowName 
+	 */
 	void CopyRowName(const FName& RowName);
-	
+
+	//~ Begin Ctrl + C 
 	virtual FReply OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
-
 	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
-
+	//~ End Ctrl + C
+	
 	TSharedPtr<SWindow> GetParentWindow() const { return ParentWindow; }
 
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -49,6 +73,7 @@ public:
 	void GetDataTableData(bool bIsLocal, TArray<FDataTableEditorColumnHeaderDataPtr> &OutAvailableColumns, TArray<FDataTableEditorRowListViewDataPtr> &OutAvailableRows);
 	//~ Cell
 
+	// 同步左右侧滚动
 	void SyncVerticalScrollOffset(bool bIsLocal, float NewOffset);
 
 	UObject* GetLocalAsset() const { return LocalAsset; }
@@ -61,10 +86,19 @@ public:
 	
 protected:
 	TSharedPtr<SWindow> ParentWindow;
+	
 	UObject* LocalAsset = nullptr;
 	UObject* RemoteAsset = nullptr;
+
+	// Ctrl +C
 	bool bPressedCtrl = false;
+
+	// 标记选中的是本地还是对比的资源
 	bool bIsLocalDataTableSelected = false;
+	
+	// 当前选中的行
 	FName SelectedRowId;
+
+	// Parent Window Window Size
 	mutable FVector2D WindowSize;
 };

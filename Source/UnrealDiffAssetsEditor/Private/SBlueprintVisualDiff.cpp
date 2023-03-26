@@ -237,6 +237,7 @@ void SBlueprintVisualDiff::RemoveFunctionGraph(UBlueprint* Blueprint, const FStr
 SBlueprintVisualDiff::~SBlueprintVisualDiff()
 {
 	UUnrealDiffAssetDelegate::OnBlueprintDiffWidgetClosed.ExecuteIfBound();
+	UUnrealDiffAssetDelegate::OnBlueprintDiffWidgetClosed.Unbind();
 }
 
 #undef LOCTEXT_NAMESPACE

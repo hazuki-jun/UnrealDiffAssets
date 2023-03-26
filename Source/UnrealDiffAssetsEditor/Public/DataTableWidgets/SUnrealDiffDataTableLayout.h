@@ -25,12 +25,15 @@ public:
 	TSharedRef<SWidget> BuildContent();
 	
 	TSharedPtr<SHeaderRow> GenerateHeaderWidgets();
-	
+
+	// 初始列宽
 	void SetupColumnWidth();
-	
+
+	// RowName 列宽
 	float GetRowNameColumnWidth() const;
 	void RefreshRowNameColumnWidth();
 
+	// RowNumber 列宽
 	float GetRowNumberColumnWidth() const;
 	void RefreshRowNumberColumnWidth();
 
@@ -48,9 +51,10 @@ public:
 
 	void SetListViewScrollOffset(float InOffset);
 
-	TSharedRef<SWidget> CreateRowDetailView();
-
+	// 窗口尺寸发生变化时 Layout跟随变化
 	void OnWindowResized(FVector2D WindowSize);
+
+	TSharedRef<SWidget> CreateRowDetailView();
 	
 public:
 	//~ Cell
