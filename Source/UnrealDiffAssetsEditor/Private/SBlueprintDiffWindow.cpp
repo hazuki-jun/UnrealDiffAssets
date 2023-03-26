@@ -6,6 +6,7 @@
 #include "SBlueprintVisualDiff.h"
 #include "SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
+#include "UnrealDiffAssetDelegate.h"
 #include "UnrealDiffWindowStyle.h"
 #include "Interfaces/IPluginManager.h"
 #include "Styling/SlateStyleRegistry.h"
@@ -43,6 +44,12 @@ void SBlueprintDiffWindow::Construct(const FArguments& InArgs)
 		[
 			DiffWidget
 		]);
+
+	WindowClosedEvent.AddLambda([](const TSharedRef<SWindow>& InWindow)
+	{
+		UUnrealDiffAssetDelegate::OnWindowResized.Clear();
+		UUnrealDiffAssetDelegate::OnDataTableRowSelected.Unbind();
+	});
 }
 
 TSharedRef<SCompoundWidget> SBlueprintDiffWindow::GetBlueprintDiffWidget(UObject* LocalAsset, UObject* RemoteAsset)

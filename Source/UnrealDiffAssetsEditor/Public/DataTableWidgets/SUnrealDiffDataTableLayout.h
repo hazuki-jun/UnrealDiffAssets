@@ -47,6 +47,11 @@ public:
 	void OnListViewScrolled(double InScrollOffset);
 
 	void SetListViewScrollOffset(float InOffset);
+
+	TSharedRef<SWidget> CreateRowDetailView();
+
+	void OnWindowResized(FVector2D WindowSize);
+	
 public:
 	//~ Cell
 	void SelectRow(FName RowId);
@@ -94,6 +99,8 @@ protected:
 	TSharedPtr<SListView<FUnrealDiffDataTableRowListViewDataPtr>> ListView;
 
 	bool bIsLocal = true;
+
+	float InitialDesiredWidth = 500.f;
 	
 	TSharedPtr<class SDataTableVisualDiff> DataTableVisual= nullptr;
 };

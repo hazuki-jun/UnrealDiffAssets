@@ -41,7 +41,11 @@ const FSlateBrush* SUnrealDiffDataTableListViewRow::GetBorder() const
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	STableRow::OnMouseButtonDown(MyGeometry, MouseEvent);
-	UUnrealDiffAssetDelegate::OnDataTableRowSelected.Execute(bIsLocal, RowDataPtr->RowId);
+	
+	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		UUnrealDiffAssetDelegate::OnDataTableRowSelected.Execute(bIsLocal, RowDataPtr->RowId);	
+	}
 	
 	return FReply::Handled();
 }
@@ -49,7 +53,78 @@ FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDown(const FGeometry& MyGeo
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	STableRow::OnMouseButtonUp(MyGeometry, MouseEvent);
+
+	if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	{
+		UUnrealDiffAssetDelegate::OnDataTableRowSelected.Execute(bIsLocal, RowDataPtr->RowId);	
+
+		TSharedRef<SWidget> MenuWidget = MakeRowActionsMenu();
+
+		FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
+		FSlateApplication::Get().PushMenu(AsShared(), WidgetPath, MenuWidget, MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
+	}
+	
 	return FReply::Handled();
+}
+
+TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
+{
+	FMenuBuilder MenuBuilder(true, NULL);
+
+	MenuBuilder.AddMenuEntry(
+		LOCTEXT("DataTableRowMenuActions_CopyName", "Copy Name"),
+		LOCTEXT("DataTableRowMenuActions_CopyNamTooltip", "Copy row name"),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "GenericCommands.Copy"),
+		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionCopyName))
+	);
+	
+	MenuBuilder.AddMenuEntry(
+		LOCTEXT("DataTableRowMenuActions_Copy", "Copy Value"),
+		LOCTEXT("DataTableRowMenuActions_CopyTooltip", "Copy this row"),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "GenericCommands.Copy"),
+		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionCopyValue))
+	);
+	
+	// MenuBuilder.AddMenuEntry(
+	// LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
+	// LOCTEXT("DataTableRowMenuActions_ShowDifferencTooltip", "Show Difference"),
+	// 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Diff"),
+	// 	FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference))
+	// );
+	
+	return MenuBuilder.MakeWidget();
+}
+
+void SUnrealDiffDataTableListViewRow::OnMenuActionCopyName()
+{
+	if (DataTableVisual)
+	{
+		DataTableVisual->CopyRowName(RowDataPtr->RowId);
+	}
+}
+
+void SUnrealDiffDataTableListViewRow::OnMenuActionCopyValue()
+{
+	if (!RowDataPtr.IsValid())
+	{
+		return;
+	}
+
+	if (DataTableVisual)
+	{
+		if (!RowDataPtr->bIsRemoved)
+		{
+			DataTableVisual->CopyRow(bIsLocal, RowDataPtr->RowId);
+		}
+		else
+		{
+			DataTableVisual->CopyRow(bIsLocal, NAME_None);
+		}
+	}
+}
+
+void SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference()
+{
 }
 
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)

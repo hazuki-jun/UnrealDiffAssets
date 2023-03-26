@@ -26,6 +26,8 @@ struct FUnrealDiffDataTableRowListViewData
 	bool bIsRemoved = false;
 
 	bool bIsAdded = false;
+
+	bool bHasAnyDifference = false;
 };
 
 typedef TSharedPtr<FUnrealDiffDataTableRowListViewData> FUnrealDiffDataTableRowListViewDataPtr;
@@ -56,9 +58,17 @@ public:
 	//~ End SMultiColumnTableRow Interface
 
 	TSharedRef<SWidget> MakeCellWidget(const FName& InColumnId);
+
+	TSharedRef<SWidget> MakeRowActionsMenu();
+
+	void OnMenuActionCopyName();
+	void OnMenuActionCopyValue();
+	void OnMenuActionShowDifference();
 	
 	bool bIsLocal = true;
 	FUnrealDiffDataTableRowListViewDataPtr RowDataPtr;
 	TSharedPtr<class SDataTableVisualDiff> DataTableVisual = nullptr;
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayout;
 };
+
+

@@ -5,3 +5,4 @@
 
 UUnrealDiffAssetDelegate::FOnBlueprintDiffWidgetClosed UUnrealDiffAssetDelegate::OnBlueprintDiffWidgetClosed;
 UUnrealDiffAssetDelegate::FOnDataTableRowSelected UUnrealDiffAssetDelegate::OnDataTableRowSelected;
+UUnrealDiffAssetDelegate::FOnWindowResized UUnrealDiffAssetDelegate::OnWindowResized;

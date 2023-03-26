@@ -28,12 +28,22 @@ public:
 
 	void OnRowSelectionChanged(bool bIsLocal, FName RowId);
 	
+	void CopyRow(bool bIsLocal, const FName& RowName);
+	
 	void CopySelectedRow();
 
+	void ExportText(FString& ValueStr, UDataTable* DataTable, FName& RowName) const;
+	
+	void CopyRowName(const FName& RowName);
+	
 	virtual FReply OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 
 	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 
+	TSharedPtr<SWindow> GetParentWindow() const { return ParentWindow; }
+
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+	
 public:
 	//~ Cell
 	void GetDataTableData(bool bIsLocal, TArray<FDataTableEditorColumnHeaderDataPtr> &OutAvailableColumns, TArray<FDataTableEditorRowListViewDataPtr> &OutAvailableRows);
@@ -41,6 +51,11 @@ public:
 
 	void SyncVerticalScrollOffset(bool bIsLocal, float NewOffset);
 
+	UObject* GetLocalAsset() const { return LocalAsset; }
+	UObject* GetRemoteAsset() const { return RemoteAsset; }
+
+	UObject* GetAssetObject(bool bIsLocal) const { return bIsLocal ? LocalAsset : RemoteAsset; }
+	
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutLocal;
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutRemote;
 	
@@ -51,4 +66,5 @@ protected:
 	bool bPressedCtrl = false;
 	bool bIsLocalDataTableSelected = false;
 	FName SelectedRowId;
+	mutable FVector2D WindowSize;
 };

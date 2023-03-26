@@ -21,7 +21,7 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 	ParentWindow = InArgs._ParentWindow;
 	LocalAsset = InArgs._LocalAsset;
 	RemoteAsset = InArgs._RemoteAsset;
-	
+	WindowSize = ParentWindow->GetClientSizeInScreen();
 	if (!LocalAsset || !RemoteAsset)
 	{
 		return;
@@ -86,10 +86,19 @@ void SDataTableVisualDiff::OnRowSelectionChanged(bool bIsLocal, FName RowId)
 	}
 }
 
+void SDataTableVisualDiff::CopyRow(bool bIsLocal, const FName& RowName)
+{
+	bIsLocalDataTableSelected = bIsLocal;
+	SelectedRowId = RowName;
+
+	CopySelectedRow();
+}
+
 void SDataTableVisualDiff::CopySelectedRow()
 {
 	if (SelectedRowId.IsNone())
 	{
+		FPlatformApplicationMisc::ClipboardCopy(TEXT("Unable to copy, maybe this row has been removed"));
 		return;
 	}
 	
@@ -103,8 +112,30 @@ void SDataTableVisualDiff::CopySelectedRow()
 	}
 	
 	FString ClipboardValue;
-	TablePtr->RowStruct->ExportText(ClipboardValue, RowPtr, RowPtr, TablePtr, PPF_Copy, nullptr);
+	ExportText(ClipboardValue, TablePtr, SelectedRowId);
+	// TablePtr->RowStruct->ExportText(ClipboardValue, RowPtr, RowPtr, TablePtr, PPF_Copy, nullptr);
 	FPlatformApplicationMisc::ClipboardCopy(*ClipboardValue);
+}
+
+void SDataTableVisualDiff::ExportText(FString& ValueStr, UDataTable* DataTable, FName& RowName) const
+{
+	uint8* RowPtr = DataTable ? DataTable->GetRowMap().FindRef(RowName) : nullptr;
+
+	if (RowPtr)
+	{
+		DataTable->RowStruct->ExportText(ValueStr, RowPtr, RowPtr, DataTable, PPF_Copy, nullptr);
+	}
+}
+
+void SDataTableVisualDiff::CopyRowName(const FName& RowName)
+{
+	if (SelectedRowId.IsNone())
+	{
+		FPlatformApplicationMisc::ClipboardCopy(TEXT("Unable to copy, maybe this row has been removed"));
+		return;
+	}
+
+	FPlatformApplicationMisc::ClipboardCopy(*RowName.ToString());
 }
 
 FReply SDataTableVisualDiff::OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
@@ -133,6 +164,25 @@ FReply SDataTableVisualDiff::OnKeyUp(const FGeometry& MyGeometry, const FKeyEven
 }
 
 
+int32 SDataTableVisualDiff::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
+	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
+	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	int32 Ret = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+
+	if (ParentWindow.IsValid())
+	{
+		FVector2D ClientSize = ParentWindow->GetClientSizeInScreen();
+		if (ClientSize != WindowSize)
+		{
+			WindowSize = ClientSize;
+			UUnrealDiffAssetDelegate::OnWindowResized.Broadcast(WindowSize);
+		}
+	}
+	
+	return Ret;
+}
+
 void SDataTableVisualDiff::GetDataTableData(bool bIsLocal, TArray<FDataTableEditorColumnHeaderDataPtr>& OutAvailableColumns, TArray<FDataTableEditorRowListViewDataPtr>& OutAvailableRows)
 {
 	UDataTable* DataTableLocal = CastChecked<UDataTable>(LocalAsset);
@@ -157,8 +207,41 @@ void SDataTableVisualDiff::GetDataTableData(bool bIsLocal, TArray<FDataTableEdit
 			{
 				FDataTableEditorRowListViewDataPtr DataPtr = MakeShareable(new FDataTableEditorRowListViewData());
 				DataPtr->RowId = RowIt->Key;
-				DataPtr->RowNum = -1;
+				DataPtr->RowNum = -2;
 				OutAvailableRows.Add(DataPtr);
+			}
+		}
+
+		for (auto& RowData : OutAvailableRows)
+		{
+			if (!RowMapRemote.Find(RowData->RowId))
+			{
+				RowData->RowNum = 0;
+			}
+			else if (RowData->RowNum > 0)
+			{
+				FString LocalStructDataText;
+				ExportText(LocalStructDataText, DataTableLocal, RowData->RowId);
+
+				FString RemoteStructDataText;
+				ExportText(RemoteStructDataText, DataTableRemote, RowData->RowId);
+
+				if (LocalStructDataText.IsEmpty() || RemoteStructDataText.IsEmpty())
+				{
+					continue;
+				}
+				
+				if (RemoteStructDataText.Len() != LocalStructDataText.Len())
+				{
+					RowData->RowNum = -1;
+					continue;
+				}
+				
+				if (!RemoteStructDataText.Equals(LocalStructDataText))
+				{
+					RowData->RowNum = -1;
+					continue;
+				}
 			}
 		}
 	}
@@ -173,8 +256,41 @@ void SDataTableVisualDiff::GetDataTableData(bool bIsLocal, TArray<FDataTableEdit
 			{
 				FDataTableEditorRowListViewDataPtr DataPtr = MakeShareable(new FDataTableEditorRowListViewData());
 				DataPtr->RowId = RowIt->Key;
-				DataPtr->RowNum = -1;
+				DataPtr->RowNum = -2;
 				OutAvailableRows.Add(DataPtr);
+			}
+		}
+
+		for (auto& RowData : OutAvailableRows)
+		{
+			if (!RowMapLocal.Find(RowData->RowId))
+			{
+				RowData->RowNum = 0;
+			}
+			else if (RowData->RowNum > 0)
+			{
+				FString LocalStructDataText;
+				ExportText(LocalStructDataText, DataTableLocal, RowData->RowId);
+
+				FString RemoteStructDataText;
+				ExportText(RemoteStructDataText, DataTableRemote, RowData->RowId);
+
+				if (LocalStructDataText.IsEmpty() || RemoteStructDataText.IsEmpty())
+				{
+					continue;
+				}
+				
+				if (RemoteStructDataText.Len() != LocalStructDataText.Len())
+				{
+					RowData->RowNum = -1;
+					continue;
+				}
+				
+				if (!RemoteStructDataText.Equals(LocalStructDataText))
+				{
+					RowData->RowNum = -1;
+					continue;
+				}
 			}
 		}
 	}
