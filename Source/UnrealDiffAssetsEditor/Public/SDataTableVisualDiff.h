@@ -83,6 +83,15 @@ public:
 	
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutLocal;
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutRemote;
+
+	/**
+	 * @brief 指定Row是否存在差异
+	 * @param InLocalDataTable 
+	 * @param InRemoteDataTable 
+	 * @param RowName 
+	 * @return 
+	 */
+	bool IsAnyDifferenceRowToTow(UDataTable* InLocalDataTable, UDataTable* InRemoteDataTable, FName& RowName);
 	
 protected:
 	TSharedPtr<SWindow> ParentWindow;

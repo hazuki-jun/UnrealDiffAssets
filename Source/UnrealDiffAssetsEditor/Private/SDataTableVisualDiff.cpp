@@ -220,27 +220,9 @@ void SDataTableVisualDiff::GetDataTableData(bool bIsLocal, TArray<FDataTableEdit
 			}
 			else if (RowData->RowNum > 0)
 			{
-				FString LocalStructDataText;
-				ExportText(LocalStructDataText, DataTableLocal, RowData->RowId);
-
-				FString RemoteStructDataText;
-				ExportText(RemoteStructDataText, DataTableRemote, RowData->RowId);
-
-				if (LocalStructDataText.IsEmpty() || RemoteStructDataText.IsEmpty())
-				{
-					continue;
-				}
-				
-				if (RemoteStructDataText.Len() != LocalStructDataText.Len())
+				if (IsAnyDifferenceRowToTow(DataTableLocal, DataTableRemote, RowData->RowId))
 				{
 					RowData->RowNum = -1;
-					continue;
-				}
-				
-				if (!RemoteStructDataText.Equals(LocalStructDataText))
-				{
-					RowData->RowNum = -1;
-					continue;
 				}
 			}
 		}
@@ -269,27 +251,9 @@ void SDataTableVisualDiff::GetDataTableData(bool bIsLocal, TArray<FDataTableEdit
 			}
 			else if (RowData->RowNum > 0)
 			{
-				FString LocalStructDataText;
-				ExportText(LocalStructDataText, DataTableLocal, RowData->RowId);
-
-				FString RemoteStructDataText;
-				ExportText(RemoteStructDataText, DataTableRemote, RowData->RowId);
-
-				if (LocalStructDataText.IsEmpty() || RemoteStructDataText.IsEmpty())
-				{
-					continue;
-				}
-				
-				if (RemoteStructDataText.Len() != LocalStructDataText.Len())
+				if (IsAnyDifferenceRowToTow(DataTableLocal, DataTableRemote, RowData->RowId))
 				{
 					RowData->RowNum = -1;
-					continue;
-				}
-				
-				if (!RemoteStructDataText.Equals(LocalStructDataText))
-				{
-					RowData->RowNum = -1;
-					continue;
 				}
 			}
 		}
@@ -312,6 +276,32 @@ void SDataTableVisualDiff::SyncVerticalScrollOffset(bool bIsLocal, float NewOffs
 			DataTableLayoutLocal->SetListViewScrollOffset(NewOffset);
 		}
 	}
+}
+
+bool SDataTableVisualDiff::IsAnyDifferenceRowToTow(UDataTable* InLocalDataTable, UDataTable* InRemoteDataTable, FName& RowName)
+{
+	FString LocalStructDataText;
+	ExportText(LocalStructDataText, InLocalDataTable, RowName);
+
+	FString RemoteStructDataText;
+	ExportText(RemoteStructDataText, InRemoteDataTable, RowName);
+
+	if (LocalStructDataText.IsEmpty() || RemoteStructDataText.IsEmpty())
+	{
+		return false;
+	}
+				
+	if (RemoteStructDataText.Len() != LocalStructDataText.Len())
+	{
+		return true;
+	}
+				
+	if (!RemoteStructDataText.Equals(LocalStructDataText))
+	{
+		return true;
+	}
+
+	return false;
 }
 
 

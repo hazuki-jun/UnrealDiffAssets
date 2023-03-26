@@ -3,6 +3,7 @@
 
 #include "DataTableWidgets/SUnrealDiffDataTableListViewRow.h"
 
+#include "IDocumentation.h"
 #include "SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
 #include "UnrealDiffAssetDelegate.h"
@@ -19,6 +20,8 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 	DataTableVisual = InArgs._DataTableVisual;
 	DataTableLayout = InArgs._DataTableLayout;
 	RowDataPtr = InArgs._InRowDataPtr;
+
+	check(RowDataPtr)
 	
 	SMultiColumnTableRow<FUnrealDiffDataTableRowListViewDataPtr>::Construct(
 		FSuperRowType::FArguments()
@@ -30,6 +33,17 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 		InOwnerTableView
 	);
 
+	FText Tooltip;
+	
+	if (RowDataPtr->bIsRemoved)
+	{
+		FString::Format(TEXT("Row {0}"), { "has been removed" });
+	}
+
+	SetToolTipText(Tooltip);
+	
+	// IDocumentation::Get()->CreateToolTip(Tooltip, nullptr, ExcerptLink, ExcerptName)
+	
 	SetBorderImage(TAttribute<const FSlateBrush*>(this, &SUnrealDiffDataTableListViewRow::GetBorder));
 }
 
