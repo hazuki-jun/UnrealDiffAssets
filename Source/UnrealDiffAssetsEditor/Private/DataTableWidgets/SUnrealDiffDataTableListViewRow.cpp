@@ -70,18 +70,25 @@ FReply SUnrealDiffDataTableListViewRow::OnMouseButtonUp(const FGeometry& MyGeome
 TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 {
 	FMenuBuilder MenuBuilder(true, NULL);
-
 	MenuBuilder.AddMenuEntry(
 		LOCTEXT("DataTableRowMenuActions_CopyName", "Copy Name"),
 		LOCTEXT("DataTableRowMenuActions_CopyNamTooltip", "Copy row name"),
+#if ENGINE_MAJOR_VERSION == 4
+		FSlateIcon(FEditorStyle::GetStyleSetName(), "GenericCommands.Copy"),
+#else
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "GenericCommands.Copy"),
+#endif
 		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionCopyName))
 	);
 	
 	MenuBuilder.AddMenuEntry(
 		LOCTEXT("DataTableRowMenuActions_Copy", "Copy Value"),
 		LOCTEXT("DataTableRowMenuActions_CopyTooltip", "Copy this row"),
+#if ENGINE_MAJOR_VERSION == 4
+		FSlateIcon(FEditorStyle::GetStyleSetName(), "GenericCommands.Copy"),
+#else
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "GenericCommands.Copy"),
+#endif
 		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionCopyValue))
 	);
 	
