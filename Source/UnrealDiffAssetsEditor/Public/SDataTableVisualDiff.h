@@ -24,7 +24,7 @@ public:
 
 	TSharedRef<SWidget> BuildWidgetContent();
 	
-	TSharedRef<SWidget> BuildLayoutWidget(FText InTitle, UObject* AssetObject, bool bIsLocal);
+	TSharedRef<SWidget> BuildLayoutWidget(FText InTitle, bool bIsLocal);
 
 	/**
 	 * @brief 选中行/鼠标点击了行
@@ -44,21 +44,27 @@ public:
 	 * @brief 拷贝选中的行到粘贴板
 	 */
 	void CopySelectedRow();
-
-	/**
-	 * @brief 导出DataTable指定行
-	 * @param ValueStr [Out]
-	 * @param DataTable 
-	 * @param RowName 
-	 */
-	void ExportText(FString& ValueStr, UDataTable* DataTable, FName& RowName) const;
-
+	
 	/**
 	 * @brief 拷贝行名到粘贴板
 	 * @param RowName 
 	 */
 	void CopyRowName(const FName& RowName);
 
+	/**
+	 * @brief 复制右侧行到左侧, 左侧行不存在是会添加一行
+	 * @param RowName 
+	 */
+	void MergeAction_MergeRow(const FName& RowName);
+	
+	/**
+	 * @brief 删除指定行
+	 * @param RowName 
+	 */
+	void MergeAction_DeleteRow(FName RowName);
+
+	void RefreshLayout();
+	
 	//~ Begin Ctrl + C 
 	virtual FReply OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
@@ -111,3 +117,4 @@ protected:
 	// Parent Window Window Size
 	mutable FVector2D WindowSize;
 };
+

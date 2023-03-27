@@ -9,6 +9,7 @@
 #include "UnrealDiffAssetDelegate.h"
 #include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
 #include "Framework/Commands/GenericCommands.h"
+#include "Utils/FUnrealDiffDataTableUtil.h"
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 
@@ -29,7 +30,25 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 	
 	this->ChildSlot
 	[
-		BuildWidgetContent()
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		[
+			SNew(SVerticalBox)
+			// + SVerticalBox::Slot()
+			// [
+			// 	// Todo
+			// 	// Toolbar
+			// ]
+			
+			+ SVerticalBox::Slot()
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
+			[
+				BuildWidgetContent()
+			]
+		]
 	];
 
 	UUnrealDiffAssetDelegate::OnDataTableRowSelected.BindRaw(this, &SDataTableVisualDiff::OnRowSelectionChanged);
@@ -50,17 +69,17 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 		.HitDetectionSplitterHandleSize(5.0f)
 		+ SSplitter::Slot()
 		[
-			BuildLayoutWidget(FText::FromString(TEXT("DataTable Local")), LocalAsset, true)
+			BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [local]"), { *LocalAsset->GetName() })), true)
 		]
 
 		+ SSplitter::Slot()
 		[
-			BuildLayoutWidget(FText::FromString(TEXT("DataTable Remote")), RemoteAsset, false)
+			BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [Remote]"), { *RemoteAsset->GetName() })), false)
 		]
 	];
 }
 
-TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(FText InTitle, UObject* AssetObject, bool bIsLocal)
+TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(FText InTitle, bool bIsLocal)
 {
 	return SNew(SUnrealDiffDataTableLayout).Title(InTitle).IsLocal(bIsLocal).DataTableVisual(SharedThis(this));
 }
@@ -112,19 +131,8 @@ void SDataTableVisualDiff::CopySelectedRow()
 	}
 	
 	FString ClipboardValue;
-	ExportText(ClipboardValue, TablePtr, SelectedRowId);
-	// TablePtr->RowStruct->ExportText(ClipboardValue, RowPtr, RowPtr, TablePtr, PPF_Copy, nullptr);
+	FUnrealDiffDataTableUtil::ExportRowText(ClipboardValue, TablePtr, SelectedRowId);
 	FPlatformApplicationMisc::ClipboardCopy(*ClipboardValue);
-}
-
-void SDataTableVisualDiff::ExportText(FString& ValueStr, UDataTable* DataTable, FName& RowName) const
-{
-	uint8* RowPtr = DataTable ? DataTable->GetRowMap().FindRef(RowName) : nullptr;
-
-	if (RowPtr)
-	{
-		DataTable->RowStruct->ExportText(ValueStr, RowPtr, RowPtr, DataTable, PPF_Copy, nullptr);
-	}
 }
 
 void SDataTableVisualDiff::CopyRowName(const FName& RowName)
@@ -137,6 +145,35 @@ void SDataTableVisualDiff::CopyRowName(const FName& RowName)
 
 	FPlatformApplicationMisc::ClipboardCopy(*RowName.ToString());
 }
+
+void SDataTableVisualDiff::MergeAction_MergeRow(const FName& RowName)
+{
+	UDataTable* DataTableLocal = CastChecked<UDataTable>(LocalAsset);
+	UDataTable* DataTableRemote = CastChecked<UDataTable>(RemoteAsset);
+	FUnrealDiffDataTableUtil::MergeRow(DataTableLocal, DataTableRemote, RowName);
+
+	RefreshLayout();
+}
+
+void SDataTableVisualDiff::MergeAction_DeleteRow(FName RowName)
+{
+	UDataTable* DataTableLocal = CastChecked<UDataTable>(LocalAsset);
+	FUnrealDiffDataTableUtil::DeleteRow(DataTableLocal, RowName);
+
+	RefreshLayout();
+}
+
+void SDataTableVisualDiff::RefreshLayout()
+{
+	if (!DataTableLayoutLocal || !DataTableLayoutRemote)
+	{
+		return;
+	}
+
+	DataTableLayoutLocal->Refresh();
+	DataTableLayoutRemote->Refresh();
+}
+
 
 FReply SDataTableVisualDiff::OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
 {
@@ -281,10 +318,10 @@ void SDataTableVisualDiff::SyncVerticalScrollOffset(bool bIsLocal, float NewOffs
 bool SDataTableVisualDiff::HasAnyDifferenceRowToRow(UDataTable* InLocalDataTable, UDataTable* InRemoteDataTable, FName& RowName)
 {
 	FString LocalStructDataText;
-	ExportText(LocalStructDataText, InLocalDataTable, RowName);
+	FUnrealDiffDataTableUtil::ExportRowText(LocalStructDataText, InLocalDataTable, RowName);
 
 	FString RemoteStructDataText;
-	ExportText(RemoteStructDataText, InRemoteDataTable, RowName);
+	FUnrealDiffDataTableUtil::ExportRowText(RemoteStructDataText, InRemoteDataTable, RowName);
 
 	if (LocalStructDataText.IsEmpty() || RemoteStructDataText.IsEmpty())
 	{

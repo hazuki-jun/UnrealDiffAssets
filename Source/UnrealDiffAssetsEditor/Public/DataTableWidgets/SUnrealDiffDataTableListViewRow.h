@@ -69,6 +69,9 @@ public:
 
 	// 右键菜单 ShowDifference
 	void OnMenuActionShowDifference();
+
+	// 右键菜单 Merge
+	void OnMenuActionMerge();
 	
 	bool bIsLocal = true;
 	FUnrealDiffDataTableRowListViewDataPtr RowDataPtr;

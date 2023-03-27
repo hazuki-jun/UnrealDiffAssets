@@ -129,12 +129,12 @@ bool FUnrealDiffAssetsEditorModule::IsSupported()
 	auto SupportClass = Actions.Pin()->GetSupportedClass();
 	if (!SupportClass || !SupportedClasses.Contains(SupportClass->GetFName()))
 	{
-		FText NotSupportWarning = LOCTEXT("NotSupportWarningMessage", "This asset not supported now");
-		FSuppressableWarningDialog::FSetupInfo Info( NotSupportWarning, LOCTEXT("NotSupport_Message", "Not Support"), "NotSupport_Warning" );
-		Info.ConfirmText = LOCTEXT( "NotSupport_Yes", "Ok");
-		Info.CancelText = LOCTEXT( "NotSupport_No", "Cancel");	
-		FSuppressableWarningDialog RemoveLevelWarning( Info );
-		auto Result = RemoveLevelWarning.ShowModal();
+		// FText NotSupportWarning = LOCTEXT("NotSupportWarningMessage", "This asset not supported now");
+		// FSuppressableWarningDialog::FSetupInfo Info( NotSupportWarning, LOCTEXT("NotSupport_Message", "Not Support"), "NotSupport_Warning" );
+		// Info.ConfirmText = LOCTEXT( "NotSupport_Yes", "Ok");
+		// Info.CancelText = LOCTEXT( "NotSupport_No", "Cancel");	
+		// FSuppressableWarningDialog RemoveLevelWarning( Info );
+		// auto Result = RemoveLevelWarning.ShowModal();
 		return false;
 	}
 
@@ -200,6 +200,10 @@ void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* LocalAsset, UObje
 	{
 		if (!IsSupported())
 		{
+			FRevisionInfo RevisionInfo;
+			RevisionInfo.Revision = TEXT("");
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			AssetToolsModule.Get().DiffAssets(LocalAsset, RemoteAsset, RevisionInfo, RevisionInfo);
 			return;
 		}
 	}

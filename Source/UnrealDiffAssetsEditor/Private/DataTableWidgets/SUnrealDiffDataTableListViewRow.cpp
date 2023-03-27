@@ -182,6 +182,20 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionCopyValue))
 	);
 	
+	if (!bIsLocal)
+	{
+		MenuBuilder.AddMenuEntry(
+			LOCTEXT("DataTableRowMenuActions_MergeRow", "Merge Row"),
+			LOCTEXT("DataTableRowMenuActions_MergeRowTooltip", "Merge this row to left"),
+#if ENGINE_MAJOR_VERSION == 4
+			FSlateIcon(FEditorStyle::GetStyleSetName(), "ContentReference.UseSelectionFromContentBrowser"),
+#else
+			FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentReference.UseSelectionFromContentBrowser"),
+#endif
+			FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionMerge))
+		);
+	}
+	
 	// MenuBuilder.AddMenuEntry(
 	// LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
 	// LOCTEXT("DataTableRowMenuActions_ShowDifferencTooltip", "Show Difference"),
@@ -222,6 +236,21 @@ void SUnrealDiffDataTableListViewRow::OnMenuActionCopyValue()
 
 void SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference()
 {
+}
+
+void SUnrealDiffDataTableListViewRow::OnMenuActionMerge()
+{
+	if (DataTableVisual)
+	{
+		if (RowDataPtr->bIsRemoved)
+		{
+			DataTableVisual->MergeAction_DeleteRow(RowDataPtr->RowId);	
+		}
+		else
+		{
+			DataTableVisual->MergeAction_MergeRow(RowDataPtr->RowId);
+		}
+	}
 }
 
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)

@@ -21,6 +21,10 @@ public:
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+	
+	void SetupRowsData();
+
+	void Refresh();
 
 	TSharedRef<SWidget> BuildContent();
 	
@@ -55,7 +59,7 @@ public:
 	void OnWindowResized(FVector2D WindowSize);
 
 	TSharedRef<SWidget> CreateRowDetailView();
-	
+
 public:
 	//~ Cell
 	void SelectRow(FName RowId);

@@ -35,6 +35,54 @@ void SUnrealDiffDataTableLayout::Construct(const FArguments& InArgs)
 	{
 		DataTableVisual->DataTableLayoutRemote = SharedThis(this);
 	}
+
+	SetupRowsData();
+	
+	SetupColumnWidth();
+	RefreshRowNumberColumnWidth();
+	RefreshRowNameColumnWidth();
+
+	this->ChildSlot
+	[
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		[
+			SNew(SImage)
+			.ColorAndOpacity(FSlateColor(FLinearColor(0.f, 0.f, 0.f, 1.f)))
+			.Visibility(EVisibility::SelfHitTestInvisible)
+		]
+
+		+ SOverlay::Slot()
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(FMargin(10.f, 0.f, 0.f, 0.f))
+			.AutoHeight()
+			[
+				// Title
+				SNew(STextBlock)
+				.Text(Title)
+			]
+			
+			+ SVerticalBox::Slot()
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
+			[
+				BuildContent()
+			]
+		]
+	];
+}
+
+void SUnrealDiffDataTableLayout::SetupRowsData()
+{
+	AvailableColumns.Empty();
+	AvailableRows.Empty();
+	VisibleRows.Empty();
 	
 	DataTableVisual->GetDataTableData(bIsLocal, AvailableColumns, AvailableRows);
 	
@@ -71,30 +119,15 @@ void SUnrealDiffDataTableLayout::Construct(const FArguments& InArgs)
 		
 		VisibleRows[i]->RowNum = i + 1;
 	}
-	
-	SetupColumnWidth();
-	RefreshRowNumberColumnWidth();
-	RefreshRowNameColumnWidth();
+}
 
-	this->ChildSlot
-	[
-		SNew(SOverlay)
-		+ SOverlay::Slot()
-		.HAlign(HAlign_Fill)
-		.VAlign(VAlign_Fill)
-		[
-			SNew(SImage)
-			.ColorAndOpacity(FSlateColor(FLinearColor(0.f, 0.f, 0.f, 1.f)))
-			.Visibility(EVisibility::SelfHitTestInvisible)
-		]
-
-		+ SOverlay::Slot()
-		.HAlign(HAlign_Fill)
-		.VAlign(VAlign_Fill)
-		[
-			BuildContent()
-		]
-	];
+void SUnrealDiffDataTableLayout::Refresh()
+{
+	if (ListView)
+	{
+		SetupRowsData();
+		ListView->RequestListRefresh();
+	}
 }
 
 TSharedRef<SWidget> SUnrealDiffDataTableLayout::BuildContent()
