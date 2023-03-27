@@ -37,9 +37,13 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 	
 	if (RowDataPtr->bIsRemoved)
 	{
-		FString::Format(TEXT("Row {0}"), { "has been removed" });
+		Tooltip =  FText::FromString(FString::Format(TEXT("Removed row {0}"), { *RowDataPtr->RowId.ToString() }));
 	}
-
+	else if (RowDataPtr->bIsAdded)
+	{
+		Tooltip =  FText::FromString(FString::Format(TEXT("Added row {0}"), { *RowDataPtr->RowId.ToString() }));
+	}
+	
 	SetToolTipText(Tooltip);
 	
 	// IDocumentation::Get()->CreateToolTip(Tooltip, nullptr, ExcerptLink, ExcerptName)
@@ -49,7 +53,83 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 
 const FSlateBrush* SUnrealDiffDataTableListViewRow::GetBorder() const
 {
-	return STableRow::GetBorder();
+		TSharedRef< ITypedTableView<FUnrealDiffDataTableRowListViewDataPtr> > OwnerTable = OwnerTablePtr.Pin().ToSharedRef();
+
+		const bool bIsActive = OwnerTable->AsWidget()->HasKeyboardFocus();
+
+		const bool bItemHasChildren = OwnerTable->Private_DoesItemHaveChildren( IndexInList );
+
+		if (const FUnrealDiffDataTableRowListViewDataPtr* MyItemPtr = OwnerTable->Private_ItemFromWidget(this))
+		{
+			const bool bIsSelected = OwnerTable->Private_IsItemSelected(*MyItemPtr);
+			const bool bIsHighlighted = OwnerTable->Private_IsItemHighlighted(*MyItemPtr);
+
+			const bool bAllowSelection = GetSelectionMode() != ESelectionMode::None;
+			const bool bEvenEntryIndex = (IndexInList % 2 == 0);
+
+			if (bIsSelected && bShowSelection)
+			{
+				if (bIsActive)
+				{
+					return IsHovered()
+						? &Style->ActiveHoveredBrush
+						: &Style->ActiveBrush;
+				}
+				else
+				{
+					return IsHovered()
+						? &Style->InactiveHoveredBrush
+						: &Style->InactiveBrush;
+				}
+			}
+			else if (!bIsSelected && bIsHighlighted)
+			{
+				if (bIsActive)
+				{
+					return IsHovered()
+						? (bEvenEntryIndex ? &Style->EvenRowBackgroundHoveredBrush : &Style->OddRowBackgroundHoveredBrush)
+						: &Style->ActiveHighlightedBrush;
+				}
+				else
+				{
+					return IsHovered()
+						? (bEvenEntryIndex ? &Style->EvenRowBackgroundHoveredBrush : &Style->OddRowBackgroundHoveredBrush)
+						: &Style->InactiveHighlightedBrush;
+				}
+			}
+			else if (bItemHasChildren && Style->bUseParentRowBrush && GetIndentLevel() == 0)
+			{
+				return IsHovered() 
+				? &Style->ParentRowBackgroundHoveredBrush	
+				: &Style->ParentRowBackgroundBrush;	
+			}
+			else
+			{
+				// Add a slightly lighter background for even rows
+				if (bEvenEntryIndex)
+				{
+					return (IsHovered() && bAllowSelection)
+						? &Style->EvenRowBackgroundHoveredBrush
+						: &Style->EvenRowBackgroundBrush;
+
+				}
+				else
+				{
+					return (IsHovered() && bAllowSelection)
+						? &Style->OddRowBackgroundHoveredBrush
+						: &Style->OddRowBackgroundBrush;
+
+				}
+			}
+		}
+	
+	return &Style->InactiveHoveredBrush;
+	
+// #if ENGINE_MAJOR_VERSION == 5
+// 	return STableRow::GetBorder();
+// #else
+// 	return STableRow::GetBorder();
+// #endif
 }
 
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)

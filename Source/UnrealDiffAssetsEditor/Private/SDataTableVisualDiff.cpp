@@ -220,7 +220,7 @@ void SDataTableVisualDiff::GetDataTableData(bool bIsLocal, TArray<FDataTableEdit
 			}
 			else if (RowData->RowNum > 0)
 			{
-				if (IsAnyDifferenceRowToTow(DataTableLocal, DataTableRemote, RowData->RowId))
+				if (HasAnyDifferenceRowToRow(DataTableLocal, DataTableRemote, RowData->RowId))
 				{
 					RowData->RowNum = -1;
 				}
@@ -251,7 +251,7 @@ void SDataTableVisualDiff::GetDataTableData(bool bIsLocal, TArray<FDataTableEdit
 			}
 			else if (RowData->RowNum > 0)
 			{
-				if (IsAnyDifferenceRowToTow(DataTableLocal, DataTableRemote, RowData->RowId))
+				if (HasAnyDifferenceRowToRow(DataTableLocal, DataTableRemote, RowData->RowId))
 				{
 					RowData->RowNum = -1;
 				}
@@ -278,7 +278,7 @@ void SDataTableVisualDiff::SyncVerticalScrollOffset(bool bIsLocal, float NewOffs
 	}
 }
 
-bool SDataTableVisualDiff::IsAnyDifferenceRowToTow(UDataTable* InLocalDataTable, UDataTable* InRemoteDataTable, FName& RowName)
+bool SDataTableVisualDiff::HasAnyDifferenceRowToRow(UDataTable* InLocalDataTable, UDataTable* InRemoteDataTable, FName& RowName)
 {
 	FString LocalStructDataText;
 	ExportText(LocalStructDataText, InLocalDataTable, RowName);
@@ -296,7 +296,7 @@ bool SDataTableVisualDiff::IsAnyDifferenceRowToTow(UDataTable* InLocalDataTable,
 		return true;
 	}
 				
-	if (!RemoteStructDataText.Equals(LocalStructDataText))
+	if (!RemoteStructDataText.Equals(LocalStructDataText, ESearchCase::IgnoreCase))
 	{
 		return true;
 	}

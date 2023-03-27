@@ -91,7 +91,7 @@ public:
 	 * @param RowName 
 	 * @return 
 	 */
-	bool IsAnyDifferenceRowToTow(UDataTable* InLocalDataTable, UDataTable* InRemoteDataTable, FName& RowName);
+	bool HasAnyDifferenceRowToRow(UDataTable* InLocalDataTable, UDataTable* InRemoteDataTable, FName& RowName);
 	
 protected:
 	TSharedPtr<SWindow> ParentWindow;
