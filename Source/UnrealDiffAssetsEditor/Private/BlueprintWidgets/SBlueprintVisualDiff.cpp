@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SBlueprintVisualDiff.h"
+#include "BlueprintWidgets/SBlueprintVisualDiff.h"
 
 #include "EdGraphUtilities.h"
 #include "GraphDiffControl.h"
@@ -81,6 +81,7 @@ void SBlueprintVisualDiff::Construct(const FArguments& InArgs)
 	MergeButtonMargin = FMargin(100.f, 40.0f, 0.0f, 0.f);
 #endif
 	
+	InArgs._ParentWindow->SetTitle(FText::FromString(TEXT("Difference Blueprint")));
 	InArgs._ParentWindow->AddOverlaySlot()
 	.HAlign(HAlign_Left)
 	.VAlign(VAlign_Top)

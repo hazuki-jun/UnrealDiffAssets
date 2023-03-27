@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SDataTableVisualDiff.h"
+#include "DataTableWidgets/SDataTableVisualDiff.h"
 
 #include "IDocumentation.h"
 #include "HAL/PlatformApplicationMisc.h"
@@ -23,6 +23,7 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 	LocalAsset = InArgs._LocalAsset;
 	RemoteAsset = InArgs._RemoteAsset;
 	WindowSize = ParentWindow->GetClientSizeInScreen();
+	ParentWindow->SetTitle(FText::FromString(TEXT("Difference DataTable")));
 	if (!LocalAsset || !RemoteAsset)
 	{
 		return;

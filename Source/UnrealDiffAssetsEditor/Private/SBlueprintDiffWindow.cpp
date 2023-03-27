@@ -2,9 +2,11 @@
 
 
 #include "SBlueprintDiffWindow.h"
+
+#include "DiffClassCollectionSubsystem.h"
 #include "Styling/SlateStyle.h"
-#include "SBlueprintVisualDiff.h"
-#include "SDataTableVisualDiff.h"
+#include "BlueprintWidgets/SBlueprintVisualDiff.h"
+#include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
 #include "UnrealDiffAssetDelegate.h"
 #include "UnrealDiffWindowStyle.h"
@@ -17,27 +19,12 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SBlueprintDiffWindow::Construct(const FArguments& InArgs)
 {
-	DiffAssetType = InArgs._DiffAssetType;
 	SWindow::Construct(SWindow::FArguments()
 		.Title(InArgs._WindowTitel)
 		.ClientSize(FVector2D(1000, 800)));
-
-	// auto Brush = FUnrealDiffWindowStyle::Get().GetBrush(TEXT("UnrealDiffAssets.WindowBackground"));
-	if (DiffAssetType == EDiffAssetType::None)
-	{
-		return;
-	}
 	
 	auto DiffWidget = GetBlueprintDiffWidget(InArgs._LocalAsset, InArgs._RemoteAsset);
 	SetContent(SNew(SOverlay)
-		// + SOverlay::Slot()
-		// .HAlign(EHorizontalAlignment::HAlign_Fill)
-		// .VAlign(EVerticalAlignment::VAlign_Fill)
-		// [
-		// 	SNew(SImage)
-		// 	.Image(Brush)	
-		// ]
-	
 		+ SOverlay::Slot()
 		.HAlign(EHorizontalAlignment::HAlign_Fill)
 		.VAlign(EVerticalAlignment::VAlign_Fill)
@@ -54,24 +41,10 @@ void SBlueprintDiffWindow::Construct(const FArguments& InArgs)
 
 TSharedRef<SCompoundWidget> SBlueprintDiffWindow::GetBlueprintDiffWidget(UObject* LocalAsset, UObject* RemoteAsset)
 {
-	switch (DiffAssetType)
-	{
-	case EDiffAssetType::Blueprint:
-		return SNew(SBlueprintVisualDiff)
-			.ParentWindow(SharedThis(this))
-			.LocalAsset(LocalAsset)
-			.RemoteAsset(RemoteAsset);
-	case EDiffAssetType::DataTable:
-		return SNew(SDataTableVisualDiff)
-			.ParentWindow(SharedThis(this))
-			.LocalAsset(LocalAsset)
-			.RemoteAsset(RemoteAsset);
-	default:
-		return SNew(SBlueprintVisualDiff).ParentWindow(SharedThis(this));
-	}
+	return GDiffClassCollectionSubsystem.CreateVisualDiffWidget(SharedThis(this), LocalAsset, RemoteAsset);
 }
 
-TSharedPtr<SBlueprintDiffWindow> SBlueprintDiffWindow::CreateWindow(EDiffAssetType AssetType, UObject* LocalAsset, UObject* RemoteAsset)
+TSharedPtr<SBlueprintDiffWindow> SBlueprintDiffWindow::CreateWindow(UObject* LocalAsset, UObject* RemoteAsset)
 {
 	if (!LocalAsset || !RemoteAsset)
 	{
@@ -80,22 +53,9 @@ TSharedPtr<SBlueprintDiffWindow> SBlueprintDiffWindow::CreateWindow(EDiffAssetTy
 
 	FText WindowTitle;
 	
-	switch (AssetType)
-	{
-	case EDiffAssetType::Blueprint:
-		WindowTitle = LOCTEXT("NamelessBlueprintDiff", "Blueprint Diff");
-		break;
-	case EDiffAssetType::DataTable:
-		WindowTitle = LOCTEXT("NamelessDataTableDiff", "DataTable Diff");
-		break;
-	default:
-		return SNew(SBlueprintDiffWindow);
-	}
-	
 	TSharedPtr<SBlueprintDiffWindow> Window =
 		SNew(SBlueprintDiffWindow)
 			.WindowTitel(WindowTitle)
-			.DiffAssetType(AssetType)
 			.LocalAsset(LocalAsset)
 			.RemoteAsset(RemoteAsset);
 					

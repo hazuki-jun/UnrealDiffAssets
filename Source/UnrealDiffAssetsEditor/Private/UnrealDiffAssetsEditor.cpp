@@ -3,11 +3,12 @@
 #include "AssetToolsModule.h"
 #include "ContentBrowserModule.h"
 #include "DesktopPlatformModule.h"
+#include "DiffClassCollectionSubsystem.h"
 #include "EditorUtilityLibrary.h"
 #include "IDesktopPlatform.h"
 #include "ObjectTools.h"
 #include "SBlueprintDiffWindow.h"
-#include "SBlueprintVisualDiff.h"
+#include "BlueprintWidgets/SBlueprintVisualDiff.h"
 #include "ToolMenus.h"
 #include "UnrealDiffAssetDelegate.h"
 #include "UnrealDiffWindowStyle.h"
@@ -58,11 +59,6 @@ void FUnrealDiffAssetsEditorModule::BuildDiffAssetsMenu()
 void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 {
 	static int32 DiffCount = 0;
-	if (!IsSupported())
-	{
-		return;
-	}
-	
 	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
 	if (!DesktopPlatform)
 	{
@@ -119,15 +115,8 @@ bool FUnrealDiffAssetsEditorModule::IsSupported()
 	{
 		return false;
 	}
-	
-	FAssetToolsModule& AssetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
-	
-	TWeakPtr<IAssetTypeActions> Actions = AssetToolsModule.Get().GetAssetTypeActionsForClass( SelectedAssets[0]->GetClass() );
 
-	TSet<FName> SupportedClasses = { TEXT("Blueprint"), TEXT("DataTable"), TEXT("WidgetBlueprint") };
-		
-	auto SupportClass = Actions.Pin()->GetSupportedClass();
-	if (!SupportClass || !SupportedClasses.Contains(SupportClass->GetFName()))
+	if (!GDiffClassCollectionSubsystem.IsSupported(SelectedAssets[0]))
 	{
 		// FText NotSupportWarning = LOCTEXT("NotSupportWarningMessage", "This asset not supported now");
 		// FSuppressableWarningDialog::FSetupInfo Info( NotSupportWarning, LOCTEXT("NotSupport_Message", "Not Support"), "NotSupport_Warning" );
@@ -222,18 +211,7 @@ void FUnrealDiffAssetsEditorModule::PerformDiffAction(UObject* LocalAsset, UObje
 		return;
 	}
 	
-	EDiffAssetType DiffAssetType = EDiffAssetType::None;
-	
-	if (LocalAsset->IsA(UBlueprint::StaticClass()))
-	{
-		DiffAssetType = EDiffAssetType::Blueprint;
-	}
-	else if (LocalAsset->IsA(UDataTable::StaticClass()))
-	{
-		DiffAssetType = EDiffAssetType::DataTable;
-	}
-	
-	auto BlueprintDiffWindow = SBlueprintDiffWindow::CreateWindow(DiffAssetType, LocalAsset, RemoteAsset);
+	auto BlueprintDiffWindow = SBlueprintDiffWindow::CreateWindow(LocalAsset, RemoteAsset);
 }
 
 #undef LOCTEXT_NAMESPACE

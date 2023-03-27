@@ -5,13 +5,6 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
-enum class EDiffAssetType
-{
-	None,
-	Blueprint,
-	DataTable,
-};
-
 /**
  * 
  */
@@ -20,7 +13,6 @@ class UNREALDIFFASSETSEDITOR_API SBlueprintDiffWindow : public SWindow
 public:
 	SLATE_BEGIN_ARGS(SBlueprintDiffWindow) {}
 		SLATE_ARGUMENT(FText, WindowTitel)
-		SLATE_ARGUMENT(EDiffAssetType, DiffAssetType)
 		SLATE_ARGUMENT(UObject*, LocalAsset)
 		SLATE_ARGUMENT(UObject*, RemoteAsset)
 	SLATE_END_ARGS()
@@ -30,9 +22,6 @@ public:
 	
 	TSharedRef<SCompoundWidget> GetBlueprintDiffWidget(UObject* LocalAsset, UObject* RemoteAsset);
 	
-	static TSharedPtr<SBlueprintDiffWindow> CreateWindow(EDiffAssetType AssetType, UObject* LocalAsset, UObject* RemoteAsset);
-	
-protected:
-	EDiffAssetType DiffAssetType = EDiffAssetType::None;
+	static TSharedPtr<SBlueprintDiffWindow> CreateWindow(UObject* LocalAsset, UObject* RemoteAsset);
 };
 

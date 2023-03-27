@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "DataTableEditorUtils.h"
-#include "DataTableWidgets/SUnrealDiffDataTableListViewRow.h"
 #include "Widgets/SCompoundWidget.h"
+#include "DataTableWidgets/SUnrealDiffDataTableListViewRow.h"
 
 /**
  * 
