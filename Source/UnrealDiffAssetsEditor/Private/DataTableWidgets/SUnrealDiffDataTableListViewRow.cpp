@@ -53,83 +53,79 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 
 const FSlateBrush* SUnrealDiffDataTableListViewRow::GetBorder() const
 {
-		TSharedRef< ITypedTableView<FUnrealDiffDataTableRowListViewDataPtr> > OwnerTable = OwnerTablePtr.Pin().ToSharedRef();
+	TSharedRef< ITypedTableView<FUnrealDiffDataTableRowListViewDataPtr> > OwnerTable = OwnerTablePtr.Pin().ToSharedRef();
 
-		const bool bIsActive = OwnerTable->AsWidget()->HasKeyboardFocus();
+	const bool bIsActive = OwnerTable->AsWidget()->HasKeyboardFocus();
 
-		const bool bItemHasChildren = OwnerTable->Private_DoesItemHaveChildren( IndexInList );
+	const bool bItemHasChildren = OwnerTable->Private_DoesItemHaveChildren( IndexInList );
 
-		if (const FUnrealDiffDataTableRowListViewDataPtr* MyItemPtr = OwnerTable->Private_ItemFromWidget(this))
+	if (const FUnrealDiffDataTableRowListViewDataPtr* MyItemPtr = OwnerTable->Private_ItemFromWidget(this))
+	{
+		const bool bIsSelected = OwnerTable->Private_IsItemSelected(*MyItemPtr);
+		const bool bIsHighlighted = OwnerTable->Private_IsItemHighlighted(*MyItemPtr);
+
+		const bool bAllowSelection = GetSelectionMode() != ESelectionMode::None;
+		const bool bEvenEntryIndex = (IndexInList % 2 == 0);
+
+		if (bIsSelected && bShowSelection)
 		{
-			const bool bIsSelected = OwnerTable->Private_IsItemSelected(*MyItemPtr);
-			const bool bIsHighlighted = OwnerTable->Private_IsItemHighlighted(*MyItemPtr);
-
-			const bool bAllowSelection = GetSelectionMode() != ESelectionMode::None;
-			const bool bEvenEntryIndex = (IndexInList % 2 == 0);
-
-			if (bIsSelected && bShowSelection)
+			if (bIsActive)
 			{
-				if (bIsActive)
-				{
-					return IsHovered()
-						? &Style->ActiveHoveredBrush
-						: &Style->ActiveBrush;
-				}
-				else
-				{
-					return IsHovered()
-						? &Style->InactiveHoveredBrush
-						: &Style->InactiveBrush;
-				}
-			}
-			else if (!bIsSelected && bIsHighlighted)
-			{
-				if (bIsActive)
-				{
-					return IsHovered()
-						? (bEvenEntryIndex ? &Style->EvenRowBackgroundHoveredBrush : &Style->OddRowBackgroundHoveredBrush)
-						: &Style->ActiveHighlightedBrush;
-				}
-				else
-				{
-					return IsHovered()
-						? (bEvenEntryIndex ? &Style->EvenRowBackgroundHoveredBrush : &Style->OddRowBackgroundHoveredBrush)
-						: &Style->InactiveHighlightedBrush;
-				}
-			}
-			else if (bItemHasChildren && Style->bUseParentRowBrush && GetIndentLevel() == 0)
-			{
-				return IsHovered() 
-				? &Style->ParentRowBackgroundHoveredBrush	
-				: &Style->ParentRowBackgroundBrush;	
+				return IsHovered()
+					? &Style->ActiveHoveredBrush
+					: &Style->ActiveBrush;
 			}
 			else
 			{
-				// Add a slightly lighter background for even rows
-				if (bEvenEntryIndex)
-				{
-					return (IsHovered() && bAllowSelection)
-						? &Style->EvenRowBackgroundHoveredBrush
-						: &Style->EvenRowBackgroundBrush;
-
-				}
-				else
-				{
-					return (IsHovered() && bAllowSelection)
-						? &Style->OddRowBackgroundHoveredBrush
-						: &Style->OddRowBackgroundBrush;
-
-				}
+				return IsHovered()
+					? &Style->InactiveHoveredBrush
+					: &Style->InactiveBrush;
 			}
 		}
-	
+		else if (!bIsSelected && bIsHighlighted)
+		{
+			if (bIsActive)
+			{
+				return IsHovered()
+					? (bEvenEntryIndex ? &Style->EvenRowBackgroundHoveredBrush : &Style->OddRowBackgroundHoveredBrush)
+					: &Style->ActiveHighlightedBrush;
+			}
+			else
+			{
+				return IsHovered()
+					? (bEvenEntryIndex ? &Style->EvenRowBackgroundHoveredBrush : &Style->OddRowBackgroundHoveredBrush)
+					: &Style->InactiveHighlightedBrush;
+			}
+		}
+#if ENGINE_MAJOR_VERSION == 5
+		else if (bItemHasChildren && Style->bUseParentRowBrush && GetIndentLevel() == 0)
+		{
+			return IsHovered() 
+			? &Style->ParentRowBackgroundHoveredBrush	
+			: &Style->ParentRowBackgroundBrush;	
+		}
+#endif
+		else
+		{
+			// Add a slightly lighter background for even rows
+			if (bEvenEntryIndex)
+			{
+				return (IsHovered() && bAllowSelection)
+					? &Style->EvenRowBackgroundHoveredBrush
+					: &Style->EvenRowBackgroundBrush;
+
+			}
+			else
+			{
+				return (IsHovered() && bAllowSelection)
+					? &Style->OddRowBackgroundHoveredBrush
+					: &Style->OddRowBackgroundBrush;
+
+			}
+		}
+	}
+
 	return &Style->InactiveHoveredBrush;
-	
-// #if ENGINE_MAJOR_VERSION == 5
-// 	return STableRow::GetBorder();
-// #else
-// 	return STableRow::GetBorder();
-// #endif
 }
 
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
