@@ -79,13 +79,15 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 		.HitDetectionSplitterHandleSize(5.0f)
 		+ SSplitter::Slot()
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
+			SNew(SSplitter)
+			.Orientation(EOrientation::Orient_Vertical)
+			+ SSplitter::Slot()
 			[
 				BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [local]"), { *LocalAsset->GetName() })), true)
 			]
 
-			+ SVerticalBox::Slot()
+			+ SSplitter::Slot()
+			.Value(this, &SDataTableVisualDiff::GetRowDetailViewSplitterValue)
 			[
 				BuildRowDetailView(true)
 			]
@@ -93,18 +95,30 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 
 		+ SSplitter::Slot()
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
+			SNew(SSplitter)
+			.Orientation(EOrientation::Orient_Vertical)
+			+ SSplitter::Slot()
 			[
 				BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [Remote]"), { *RemoteAsset->GetName() })), false)
 			]
 
-			+ SVerticalBox::Slot()
+			+ SSplitter::Slot()
+			.Value(this, &SDataTableVisualDiff::GetRowDetailViewSplitterValue)
 			[
 				BuildRowDetailView(false)
 			]
 		]
 	];
+}
+
+float SDataTableVisualDiff::GetRowDetailViewSplitterValue() const
+{
+	if (RowDetailViewLocal && RowDetailViewLocal->GetVisibility() == EVisibility::SelfHitTestInvisible)
+	{
+		return 1.f;
+	}
+	
+	return 0.f;
 }
 
 TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(FText InTitle, bool bIsLocal)

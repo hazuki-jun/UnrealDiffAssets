@@ -19,9 +19,14 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
-	void Refresh(const FName& RowName);
+	void Refresh(const FName& InRowName);
+
+	FText RowTitle() const;
 	
 protected:
 	bool bIsLocal = true;
+	
 	TSharedPtr<class SDataTableVisualDiff> DataTableVisualDiff;
+
+	FName RowName;
 };

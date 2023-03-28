@@ -21,6 +21,8 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 	{
 		DataTableVisualDiff->RowDetailViewRemote = SharedThis(this);
 	}
+
+	// UDataTable* DataTable = Cast<UDataTable>(DataTableVisualDiff->GetAssetObject(bIsLocal)); 
 	
 	// static const FSlateBrush* MajorTabBackgroundBrush = FAppStyle::Get().GetBrush("Brushes.Title");
 	// static const FSlateBrush* MinorTabBackgroundBrush = FAppStyle::Get().GetBrush("Brushes.Background");
@@ -28,22 +30,43 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 	
 	this->ChildSlot
 	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.AutoHeight()
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
 		[
-			// tab well area
 			SNew(SBorder)
 			.BorderImage(FAppStyle::Get().GetBrush("Brushes.Title"))
-			.VAlign(VAlign_Bottom)
-			.Padding(0.0f)
+		]
+
+		+ SOverlay::Slot()
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(SBorder)
+				.BorderImage(FAppStyle::Get().GetBrush("Brushes.Background"))
+				.VAlign(VAlign_Bottom)
+				.Padding(0.0f)
+				[
+					SNew(STextBlock)
+					.Text(this, &SUnrealDiffDataTableRowDetailView::RowTitle)
+				]
+			]
 		]
 	];
 }
 
-void SUnrealDiffDataTableRowDetailView::Refresh(const FName& RowName)
+void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
 {
+	RowName = InRowName;
 	SetVisibility(EVisibility::SelfHitTestInvisible);
+}
+
+FText SUnrealDiffDataTableRowDetailView::RowTitle() const
+{
+	return FText::FromName(RowName);
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

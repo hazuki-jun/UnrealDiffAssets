@@ -23,6 +23,8 @@ public:
 	void Construct(const FArguments& InArgs);
 
 	TSharedRef<SWidget> BuildWidgetContent();
+
+	float GetRowDetailViewSplitterValue() const;
 	
 	TSharedRef<SWidget> BuildLayoutWidget(FText InTitle, bool bIsLocal);
 
