@@ -21,6 +21,11 @@ void UDiffClassCollectionSubsystem::Initialize(FSubsystemCollectionBase& Collect
 {
 	Super::Initialize(Collection);
 
+	CollectSupportedClasses();
+}
+
+void UDiffClassCollectionSubsystem::CollectSupportedClasses()
+{
 	for (TObjectIterator<UClass> It; It; ++It)
 	{
 		UClass* Class = *It;
@@ -28,7 +33,7 @@ void UDiffClassCollectionSubsystem::Initialize(FSubsystemCollectionBase& Collect
 		auto UnrealDiffSupportClassFactory = Cast<UUnrealDiffSupportClassFactory>(Class->GetDefaultObject());
 		if (UnrealDiffSupportClassFactory)
 		{
-			SupportedClasses.Add(UnrealDiffSupportClassFactory->GetSupportedClass(), UnrealDiffSupportClassFactory);
+			SupportedClasses.Add(UnrealDiffSupportClassFactory->GetSupportedClass());
 		}
 	}
 }
@@ -39,7 +44,7 @@ bool UDiffClassCollectionSubsystem::IsSupported(UObject* Object)
 	TWeakPtr<IAssetTypeActions> Actions = AssetToolsModule.Get().GetAssetTypeActionsForClass( Object->GetClass() );
 	UClass* SupportClass = Actions.Pin()->GetSupportedClass();
 
-	return SupportClass && SupportedClasses.Find(SupportClass->GetFName());
+	return SupportClass && SupportedClasses.Contains(SupportClass->GetFName());
 }
 
 TSharedRef<SCompoundWidget> UDiffClassCollectionSubsystem::CreateVisualDiffWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
@@ -48,11 +53,19 @@ TSharedRef<SCompoundWidget> UDiffClassCollectionSubsystem::CreateVisualDiffWidge
 	TWeakPtr<IAssetTypeActions> Actions = AssetToolsModule.Get().GetAssetTypeActionsForClass( InLocalAsset->GetClass() );
 	UClass* SupportClass = Actions.Pin()->GetSupportedClass();
 
-	if (auto Object = SupportedClasses.Find(SupportClass->GetFName()))
+	if (!SupportedClasses.Contains(SupportClass->GetFName()))
 	{
-		if (*Object)
+		return SNew(SWindow);
+	}
+	
+	for (TObjectIterator<UClass> It; It; ++It)
+	{
+		UClass* Class = *It;
+		
+		auto UnrealDiffSupportClassFactory = Cast<UUnrealDiffSupportClassFactory>(Class->GetDefaultObject());
+		if (UnrealDiffSupportClassFactory && UnrealDiffSupportClassFactory->GetSupportedClass().IsEqual(SupportClass->GetFName()))
 		{
-			return (*Object)->FactoryCreateVisualWidget(ParentWindow, InLocalAsset, InRemoteAsset);	
+			return UnrealDiffSupportClassFactory->FactoryCreateVisualWidget(ParentWindow, InLocalAsset, InRemoteAsset);	
 		}
 	}
 	

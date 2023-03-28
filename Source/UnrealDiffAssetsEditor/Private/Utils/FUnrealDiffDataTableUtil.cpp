@@ -104,12 +104,12 @@ bool FUnrealDiffDataTableUtil::HasAnyDifferenceRowToRow(UDataTable* InLocalDataT
 {
 	FString LocalStructDataText;
 	FString RemoteStructDataText;
-	if (bIgnorePropertyName)
-	{
-		ExportRowValueText(LocalStructDataText, InLocalDataTable, RowName);
-		ExportRowValueText(RemoteStructDataText, InRemoteDataTable, RowName);
-	}
-	else
+	// if (bIgnorePropertyName)
+	// {
+	// 	ExportRowValueText(LocalStructDataText, InLocalDataTable, RowName);
+	// 	ExportRowValueText(RemoteStructDataText, InRemoteDataTable, RowName);
+	// }
+	// else
 	{
 		ExportRowText(LocalStructDataText, InLocalDataTable, RowName);
 		ExportRowText(RemoteStructDataText, InRemoteDataTable, RowName);

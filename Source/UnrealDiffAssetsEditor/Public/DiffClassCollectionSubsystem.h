@@ -21,12 +21,14 @@ public:
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+	void CollectSupportedClasses();
+	
 	bool IsSupported(UObject* Object);
 
 	TSharedRef<SCompoundWidget> CreateVisualDiffWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset);
 	
 protected:
-	TMap<FName, class UUnrealDiffSupportClassFactory*> SupportedClasses;
+	TSet<FName> SupportedClasses;
 };
 
 #define GDiffClassCollectionSubsystem UDiffClassCollectionSubsystem::Get()

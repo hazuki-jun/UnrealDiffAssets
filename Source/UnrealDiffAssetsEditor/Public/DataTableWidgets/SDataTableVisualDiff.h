@@ -26,6 +26,8 @@ public:
 	
 	TSharedRef<SWidget> BuildLayoutWidget(FText InTitle, bool bIsLocal);
 
+	TSharedRef<SWidget> BuildRowDetailView(bool bIsLocal);
+	
 	/**
 	 * @brief 选中行/鼠标点击了行
 	 * @param bIsLocal 
@@ -63,6 +65,8 @@ public:
 	 */
 	void MergeAction_DeleteRow(FName RowName);
 
+	void ShowDifference_RowToRow(const FName& RowName);
+	
 	void RefreshLayout();
 	
 	//~ Begin Ctrl + C 
@@ -89,6 +93,9 @@ public:
 	
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutLocal;
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutRemote;
+	TSharedPtr<class SUnrealDiffDataTableRowDetailView> RowDetailViewLocal;
+	TSharedPtr<class SUnrealDiffDataTableRowDetailView> RowDetailViewRemote;
+	
 	
 protected:
 	TSharedPtr<SWindow> ParentWindow;

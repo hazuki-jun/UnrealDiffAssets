@@ -8,6 +8,7 @@
 #include "SlateOptMacros.h"
 #include "UnrealDiffAssetDelegate.h"
 #include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
+#include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Utils/FUnrealDiffDataTableUtil.h"
 #include "Widgets/Input/SSearchBox.h"
@@ -59,6 +60,14 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 {
 	return SNew(SOverlay)
 	+ SOverlay::Slot()
+	.HAlign(HAlign_Fill)
+	.VAlign(VAlign_Fill)
+	[
+		SNew(SImage)
+		.ColorAndOpacity(FSlateColor(FLinearColor(0.0, 0.0, 0.0, 1.0)))
+	]
+	
+	+ SOverlay::Slot()
 	[
 		SNew(SSplitter)
 #if ENGINE_MAJOR_VERSION == 4
@@ -70,12 +79,30 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 		.HitDetectionSplitterHandleSize(5.0f)
 		+ SSplitter::Slot()
 		[
-			BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [local]"), { *LocalAsset->GetName() })), true)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			[
+				BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [local]"), { *LocalAsset->GetName() })), true)
+			]
+
+			+ SVerticalBox::Slot()
+			[
+				BuildRowDetailView(true)
+			]
 		]
 
 		+ SSplitter::Slot()
 		[
-			BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [Remote]"), { *RemoteAsset->GetName() })), false)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			[
+				BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [Remote]"), { *RemoteAsset->GetName() })), false)
+			]
+
+			+ SVerticalBox::Slot()
+			[
+				BuildRowDetailView(false)
+			]
 		]
 	];
 }
@@ -83,6 +110,14 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(FText InTitle, bool bIsLocal)
 {
 	return SNew(SUnrealDiffDataTableLayout).Title(InTitle).IsLocal(bIsLocal).DataTableVisual(SharedThis(this));
+}
+
+TSharedRef<SWidget> SDataTableVisualDiff::BuildRowDetailView(bool bIsLocal)
+{
+	return SNew(SUnrealDiffDataTableRowDetailView)
+		.Visibility(EVisibility::Collapsed)
+		.IsLocal(bIsLocal)
+		.DataTableVisualDiff(SharedThis(this));
 }
 
 void SDataTableVisualDiff::OnRowSelectionChanged(bool bIsLocal, FName RowId)
@@ -162,6 +197,17 @@ void SDataTableVisualDiff::MergeAction_DeleteRow(FName RowName)
 	FUnrealDiffDataTableUtil::DeleteRow(DataTableLocal, RowName);
 
 	RefreshLayout();
+}
+
+void SDataTableVisualDiff::ShowDifference_RowToRow(const FName& RowName)
+{
+	if (!RowDetailViewLocal || !RowDetailViewRemote)
+	{
+		return;
+	}
+
+	RowDetailViewLocal->Refresh(RowName);
+	RowDetailViewRemote->Refresh(RowName);
 }
 
 void SDataTableVisualDiff::RefreshLayout()

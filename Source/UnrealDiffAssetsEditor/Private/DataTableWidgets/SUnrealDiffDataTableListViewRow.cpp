@@ -43,6 +43,15 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 	{
 		Tooltip =  FText::FromString(FString::Format(TEXT("Added row {0}"), { *RowDataPtr->RowId.ToString() }));
 	}
+	else if (RowDataPtr->bHasAnyDifference)
+	{
+		Tooltip =  FText::FromString(FString::Format(TEXT("Row {0} changed"), { *RowDataPtr->RowId.ToString() }));
+	}
+	else
+	{
+		// SetEnabled(false);
+		SetColorAndOpacity(FLinearColor(0.2, 0.2, 0.2, 1.0));
+	}
 	
 	SetToolTipText(Tooltip);
 	
@@ -196,12 +205,12 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 		);
 	}
 	
-	// MenuBuilder.AddMenuEntry(
-	// LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
-	// LOCTEXT("DataTableRowMenuActions_ShowDifferencTooltip", "Show Difference"),
-	// 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Diff"),
-	// 	FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference))
-	// );
+	MenuBuilder.AddMenuEntry(
+	LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
+	LOCTEXT("DataTableRowMenuActions_ShowDifferencTooltip", "Show Difference"),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Diff"),
+		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference))
+	);
 	
 	return MenuBuilder.MakeWidget();
 }
@@ -236,6 +245,10 @@ void SUnrealDiffDataTableListViewRow::OnMenuActionCopyValue()
 
 void SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference()
 {
+	if (DataTableVisual)
+	{
+		DataTableVisual->ShowDifference_RowToRow(RowDataPtr->RowId);
+	}
 }
 
 void SUnrealDiffDataTableListViewRow::OnMenuActionMerge()
