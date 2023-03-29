@@ -4,6 +4,7 @@
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
+#include "DataTableWidgets/SUnrealDiffDataTableDetailTree.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -22,15 +23,26 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 		DataTableVisualDiff->RowDetailViewRemote = SharedThis(this);
 	}
 
-	// UDataTable* DataTable = Cast<UDataTable>(DataTableVisualDiff->GetAssetObject(bIsLocal)); 
-	
-	// static const FSlateBrush* MajorTabBackgroundBrush = FAppStyle::Get().GetBrush("Brushes.Title");
-	// static const FSlateBrush* MinorTabBackgroundBrush = FAppStyle::Get().GetBrush("Brushes.Background");
-	// return bShowingTitleBarArea ? MajorTabBackgroundBrush : MinorTabBackgroundBrush;
+	SAssignNew(DetailTree, SUnrealDiffDataTableDetailTree);
 	
 	this->ChildSlot
 	[
-		SNew(SOverlay)
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		[
+			BuildRowTitle()
+		]
+
+		+ SVerticalBox::Slot()
+		[
+			DetailTree.ToSharedRef()
+		]
+	];
+}
+
+TSharedRef<SWidget> SUnrealDiffDataTableRowDetailView::BuildRowTitle()
+{
+	return SNew(SOverlay)
 		+ SOverlay::Slot()
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Fill)
@@ -54,14 +66,22 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 					.Text(this, &SUnrealDiffDataTableRowDetailView::RowTitle)
 				]
 			]
-		]
-	];
+		];
 }
 
 void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
 {
-	RowName = InRowName;
-	SetVisibility(EVisibility::SelfHitTestInvisible);
+	if (!DetailTree.IsValid())
+	{
+		return;
+	}
+
+	if (DataTableVisualDiff)
+	{
+		RowName = InRowName;
+		// DetailTree->SetStructure();
+		SetVisibility(EVisibility::SelfHitTestInvisible);
+	}
 }
 
 FText SUnrealDiffDataTableRowDetailView::RowTitle() const

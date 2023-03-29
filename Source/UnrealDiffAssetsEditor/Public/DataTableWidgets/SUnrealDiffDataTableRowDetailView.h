@@ -19,6 +19,8 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+	TSharedRef<SWidget> BuildRowTitle();
+	
 	void Refresh(const FName& InRowName);
 
 	FText RowTitle() const;
@@ -28,5 +30,7 @@ protected:
 	
 	TSharedPtr<class SDataTableVisualDiff> DataTableVisualDiff;
 
+	TSharedPtr<class SUnrealDiffDataTableDetailTree> DetailTree;
+	
 	FName RowName;
 };

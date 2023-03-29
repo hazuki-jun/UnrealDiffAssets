@@ -261,10 +261,9 @@ FReply SDataTableVisualDiff::OnKeyUp(const FGeometry& MyGeometry, const FKeyEven
 	return SCompoundWidget::OnKeyUp(MyGeometry, InKeyEvent);
 }
 
-
 int32 SDataTableVisualDiff::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
-	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
-	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+                                    const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
+                                    const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
 	int32 Ret = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
@@ -375,6 +374,7 @@ void SDataTableVisualDiff::SyncVerticalScrollOffset(bool bIsLocal, float NewOffs
 		}
 	}
 }
+
 
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

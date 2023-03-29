@@ -22,6 +22,8 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+	
 	TSharedRef<SWidget> BuildWidgetContent();
 
 	float GetRowDetailViewSplitterValue() const;
@@ -29,6 +31,8 @@ public:
 	TSharedRef<SWidget> BuildLayoutWidget(FText InTitle, bool bIsLocal);
 
 	TSharedRef<SWidget> BuildRowDetailView(bool bIsLocal);
+
+	TSharedPtr<SWindow> GetParentWindow() const { return ParentWindow; }
 	
 	/**
 	 * @brief 选中行/鼠标点击了行
@@ -75,10 +79,10 @@ public:
 	virtual FReply OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	//~ End Ctrl + C
-	
-	TSharedPtr<SWindow> GetParentWindow() const { return ParentWindow; }
 
-	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+	//~ Begin Row Detail View
+	
+	//~ End Row Detail View
 	
 public:
 	//~ Cell
@@ -97,8 +101,7 @@ public:
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutRemote;
 	TSharedPtr<class SUnrealDiffDataTableRowDetailView> RowDetailViewLocal;
 	TSharedPtr<class SUnrealDiffDataTableRowDetailView> RowDetailViewRemote;
-	
-	
+
 protected:
 	TSharedPtr<SWindow> ParentWindow;
 	
