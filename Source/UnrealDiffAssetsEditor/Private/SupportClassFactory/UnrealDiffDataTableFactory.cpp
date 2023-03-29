@@ -5,7 +5,7 @@
 
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 
-TSharedRef<SCompoundWidget> UUnrealDiffDataTableFactory::FactoryCreateVisualWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
+TSharedRef<SWidget> UUnrealDiffDataTableFactory::FactoryCreateVisualWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
 {
 	return SNew(SDataTableVisualDiff)
 		.ParentWindow(ParentWindow)

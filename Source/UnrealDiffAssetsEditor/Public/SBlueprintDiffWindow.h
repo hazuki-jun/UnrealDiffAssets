@@ -20,7 +20,7 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	
-	TSharedRef<SCompoundWidget> GetBlueprintDiffWidget(UObject* LocalAsset, UObject* RemoteAsset);
+	TSharedRef<SWidget> GetBlueprintDiffWidget(UObject* LocalAsset, UObject* RemoteAsset);
 	
 	static TSharedPtr<SBlueprintDiffWindow> CreateWindow(UObject* LocalAsset, UObject* RemoteAsset);
 };

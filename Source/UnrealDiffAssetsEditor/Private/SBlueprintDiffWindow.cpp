@@ -39,7 +39,7 @@ void SBlueprintDiffWindow::Construct(const FArguments& InArgs)
 	});
 }
 
-TSharedRef<SCompoundWidget> SBlueprintDiffWindow::GetBlueprintDiffWidget(UObject* LocalAsset, UObject* RemoteAsset)
+TSharedRef<SWidget> SBlueprintDiffWindow::GetBlueprintDiffWidget(UObject* LocalAsset, UObject* RemoteAsset)
 {
 	return GDiffClassCollectionSubsystem.CreateVisualDiffWidget(SharedThis(this), LocalAsset, RemoteAsset);
 }
@@ -50,12 +50,9 @@ TSharedPtr<SBlueprintDiffWindow> SBlueprintDiffWindow::CreateWindow(UObject* Loc
 	{
 		return SNew(SBlueprintDiffWindow);
 	}
-
-	FText WindowTitle;
 	
 	TSharedPtr<SBlueprintDiffWindow> Window =
 		SNew(SBlueprintDiffWindow)
-			.WindowTitel(WindowTitle)
 			.LocalAsset(LocalAsset)
 			.RemoteAsset(RemoteAsset);
 					

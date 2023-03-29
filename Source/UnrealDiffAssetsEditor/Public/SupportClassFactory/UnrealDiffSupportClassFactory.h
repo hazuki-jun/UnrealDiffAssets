@@ -20,7 +20,7 @@ public:
 	
 	virtual FName GetSupportedClass();
 
-	virtual TSharedRef<SCompoundWidget> FactoryCreateVisualWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset);
+	virtual TSharedRef<SWidget> FactoryCreateVisualWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset);
 	
 	FName SupportClassName;
 };

@@ -11,6 +11,8 @@ public:
 	static const ISlateStyle& Get();
 	static FName GetStyleSetName();
 
+	static FSlateIcon GetAppSlateIcon(const FName StyleName);
+	
 private:
 	static TSharedRef< class FSlateStyleSet > Create();
 	static TSharedPtr< class FSlateStyleSet > StyleInstance;

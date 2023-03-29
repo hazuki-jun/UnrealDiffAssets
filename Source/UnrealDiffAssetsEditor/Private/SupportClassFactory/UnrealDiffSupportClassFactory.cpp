@@ -13,7 +13,7 @@ FName UUnrealDiffSupportClassFactory::GetSupportedClass()
 	return SupportClassName;
 }
 
-TSharedRef<SCompoundWidget> UUnrealDiffSupportClassFactory::FactoryCreateVisualWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
+TSharedRef<SWidget> UUnrealDiffSupportClassFactory::FactoryCreateVisualWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
 {
-	return SNew(SWindow);
+	return SNullWidget::NullWidget;
 }

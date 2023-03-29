@@ -25,7 +25,7 @@ public:
 	
 	bool IsSupported(UObject* Object);
 
-	TSharedRef<SCompoundWidget> CreateVisualDiffWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset);
+	TSharedRef<SWidget> CreateVisualDiffWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset);
 	
 protected:
 	TSet<FName> SupportedClasses;

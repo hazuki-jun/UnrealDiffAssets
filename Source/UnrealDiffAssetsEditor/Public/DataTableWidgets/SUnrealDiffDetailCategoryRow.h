@@ -10,9 +10,7 @@
 class UNREALDIFFASSETSEDITOR_API SUnrealDiffDetailCategoryRow : public SUnrealDiffDetailTableRowBase
 {
 public:
-	SLATE_BEGIN_ARGS(SUnrealDiffDetailCategoryRow)
-		{
-		}
+	SLATE_BEGIN_ARGS(SUnrealDiffDetailCategoryRow) {}
 
 	SLATE_END_ARGS()
 

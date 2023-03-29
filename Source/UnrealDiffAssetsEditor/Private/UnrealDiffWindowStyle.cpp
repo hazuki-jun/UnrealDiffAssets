@@ -38,6 +38,15 @@ FName FUnrealDiffWindowStyle::GetStyleSetName()
 	return StyleSetName;
 }
 
+FSlateIcon FUnrealDiffWindowStyle::GetAppSlateIcon(const FName StyleName)
+{
+#if ENGINE_MAJOR_VERSION == 4
+	return FSlateIcon(FEditorStyle::GetStyleSetName(), StyleName);
+#else
+	return FSlateIcon(FAppStyle::GetAppStyleSetName(), StyleName);
+#endif
+}
+
 TSharedRef<FSlateStyleSet> FUnrealDiffWindowStyle::Create()
 {
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("UnrealDiffWindowStyle"));

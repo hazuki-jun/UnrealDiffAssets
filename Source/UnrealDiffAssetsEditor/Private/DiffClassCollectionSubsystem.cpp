@@ -47,7 +47,7 @@ bool UDiffClassCollectionSubsystem::IsSupported(UObject* Object)
 	return SupportClass && SupportedClasses.Contains(SupportClass->GetFName());
 }
 
-TSharedRef<SCompoundWidget> UDiffClassCollectionSubsystem::CreateVisualDiffWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
+TSharedRef<SWidget> UDiffClassCollectionSubsystem::CreateVisualDiffWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
 {
 	FAssetToolsModule& AssetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools");
 	TWeakPtr<IAssetTypeActions> Actions = AssetToolsModule.Get().GetAssetTypeActionsForClass( InLocalAsset->GetClass() );
@@ -55,7 +55,7 @@ TSharedRef<SCompoundWidget> UDiffClassCollectionSubsystem::CreateVisualDiffWidge
 
 	if (!SupportedClasses.Contains(SupportClass->GetFName()))
 	{
-		return SNew(SWindow);
+		return SNullWidget::NullWidget;
 	}
 	
 	for (TObjectIterator<UClass> It; It; ++It)
@@ -69,5 +69,5 @@ TSharedRef<SCompoundWidget> UDiffClassCollectionSubsystem::CreateVisualDiffWidge
 		}
 	}
 	
-	return SNew(SWindow);
+	return SNullWidget::NullWidget;
 }

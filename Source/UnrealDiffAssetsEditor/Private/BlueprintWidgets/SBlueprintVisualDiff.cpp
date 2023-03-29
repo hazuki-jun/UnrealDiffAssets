@@ -11,6 +11,7 @@
 
 #include "UnrealDiffAssetDelegate.h"
 #include "UnrealDiffClipboardData.h"
+#include "UnrealDiffWindowStyle.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 
@@ -46,20 +47,13 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SBlueprintVisualDiff::Construct(const FArguments& InArgs)
 {
-	FSlateIcon MergeIcon;
-#if ENGINE_MAJOR_VERSION == 4
-	MergeIcon = FSlateIcon(FEditorStyle::GetStyleSetName(), "ContentReference.UseSelectionFromContentBrowser");
-#else
-	MergeIcon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentReference.UseSelectionFromContentBrowser");
-#endif
-	
 	FToolBarBuilder GraphToolbarBuilder(TSharedPtr< const FUICommandList >(), FMultiBoxCustomization::None);
 	GraphToolbarBuilder.AddToolBarButton(
 		FUIAction(FExecuteAction::CreateSP(this, &SBlueprintVisualDiff::OnActionMerge))
 		, NAME_None
 		, LOCTEXT("UseSelectedLabel", "Merge")
 		, LOCTEXT("UseSelectedTooltip", "Use Selected Difference")
-		, MergeIcon
+		, FUnrealDiffWindowStyle::GetAppSlateIcon("ContentReference.UseSelectionFromContentBrowser")
 	);
 
 	LocalAsset = InArgs._LocalAsset;

@@ -18,7 +18,7 @@ class UNREALDIFFASSETSEDITOR_API UUnrealDiffBlueprintFactory : public UUnrealDif
 public:
 	UUnrealDiffBlueprintFactory() { SupportClassName = TEXT("Blueprint"); }
 
-	virtual TSharedRef<SCompoundWidget> FactoryCreateVisualWidget(TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset) override;
+	virtual TSharedRef<SWidget> FactoryCreateVisualWidget(TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset) override;
 };
 
 /**
@@ -32,7 +32,7 @@ class UNREALDIFFASSETSEDITOR_API UUnrealDiffWidgetBlueprintFactory : public UUnr
 public:
 	UUnrealDiffWidgetBlueprintFactory() { SupportClassName = TEXT("WidgetBlueprint"); }
 
-	virtual TSharedRef<SCompoundWidget> FactoryCreateVisualWidget(TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset) override;
+	virtual TSharedRef<SWidget> FactoryCreateVisualWidget(TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset) override;
 };
 
 /**
@@ -46,5 +46,5 @@ class UNREALDIFFASSETSEDITOR_API UUnrealDiffAnimationBlueprintFactory : public U
 public:
 	UUnrealDiffAnimationBlueprintFactory() { SupportClassName = TEXT("AnimBlueprint"); }
 
-	virtual TSharedRef<SCompoundWidget> FactoryCreateVisualWidget(TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset) override;
+	virtual TSharedRef<SWidget> FactoryCreateVisualWidget(TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset) override;
 };

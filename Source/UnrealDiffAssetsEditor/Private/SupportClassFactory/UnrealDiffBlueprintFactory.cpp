@@ -5,7 +5,7 @@
 
 #include "BlueprintWidgets/SBlueprintVisualDiff.h"
 
-TSharedRef<SCompoundWidget> UUnrealDiffBlueprintFactory::FactoryCreateVisualWidget(TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
+TSharedRef<SWidget> UUnrealDiffBlueprintFactory::FactoryCreateVisualWidget(TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
 {
 	return SNew(SBlueprintVisualDiff)
 		.ParentWindow(ParentWindow)
@@ -13,7 +13,7 @@ TSharedRef<SCompoundWidget> UUnrealDiffBlueprintFactory::FactoryCreateVisualWidg
 		.RemoteAsset(InRemoteAsset);
 }
 
-TSharedRef<SCompoundWidget> UUnrealDiffWidgetBlueprintFactory::FactoryCreateVisualWidget(
+TSharedRef<SWidget> UUnrealDiffWidgetBlueprintFactory::FactoryCreateVisualWidget(
 	TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
 {
 	return SNew(SBlueprintVisualDiff)
@@ -22,7 +22,7 @@ TSharedRef<SCompoundWidget> UUnrealDiffWidgetBlueprintFactory::FactoryCreateVisu
 		.RemoteAsset(InRemoteAsset);
 }
 
-TSharedRef<SCompoundWidget> UUnrealDiffAnimationBlueprintFactory::FactoryCreateVisualWidget(
+TSharedRef<SWidget> UUnrealDiffAnimationBlueprintFactory::FactoryCreateVisualWidget(
 	TSharedPtr<SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset)
 {
 	return SNew(SBlueprintVisualDiff)

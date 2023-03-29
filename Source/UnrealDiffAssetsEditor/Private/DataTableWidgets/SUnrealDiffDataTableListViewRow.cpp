@@ -7,6 +7,7 @@
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
 #include "UnrealDiffAssetDelegate.h"
+#include "UnrealDiffWindowStyle.h"
 #include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
@@ -172,22 +173,14 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 	MenuBuilder.AddMenuEntry(
 		LOCTEXT("DataTableRowMenuActions_CopyName", "Copy Name"),
 		LOCTEXT("DataTableRowMenuActions_CopyNamTooltip", "Copy row name"),
-#if ENGINE_MAJOR_VERSION == 4
-		FSlateIcon(FEditorStyle::GetStyleSetName(), "GenericCommands.Copy"),
-#else
-		FSlateIcon(FAppStyle::GetAppStyleSetName(), "GenericCommands.Copy"),
-#endif
+		FUnrealDiffWindowStyle::GetAppSlateIcon("GenericCommands.Copy"),
 		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionCopyName))
 	);
 	
 	MenuBuilder.AddMenuEntry(
 		LOCTEXT("DataTableRowMenuActions_Copy", "Copy Value"),
 		LOCTEXT("DataTableRowMenuActions_CopyTooltip", "Copy this row"),
-#if ENGINE_MAJOR_VERSION == 4
-		FSlateIcon(FEditorStyle::GetStyleSetName(), "GenericCommands.Copy"),
-#else
-		FSlateIcon(FAppStyle::GetAppStyleSetName(), "GenericCommands.Copy"),
-#endif
+		FUnrealDiffWindowStyle::GetAppSlateIcon("GenericCommands.Copy"),
 		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionCopyValue))
 	);
 	
@@ -196,11 +189,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 		MenuBuilder.AddMenuEntry(
 			LOCTEXT("DataTableRowMenuActions_MergeRow", "Merge Row"),
 			LOCTEXT("DataTableRowMenuActions_MergeRowTooltip", "Merge this row to left"),
-#if ENGINE_MAJOR_VERSION == 4
-			FSlateIcon(FEditorStyle::GetStyleSetName(), "ContentReference.UseSelectionFromContentBrowser"),
-#else
-			FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentReference.UseSelectionFromContentBrowser"),
-#endif
+			FUnrealDiffWindowStyle::GetAppSlateIcon("ContentReference.UseSelectionFromContentBrowser"),
 			FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionMerge))
 		);
 	}
@@ -208,7 +197,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 	MenuBuilder.AddMenuEntry(
 	LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
 	LOCTEXT("DataTableRowMenuActions_ShowDifferencTooltip", "Show Difference"),
-		FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Diff"),
+		FUnrealDiffWindowStyle::GetAppSlateIcon("SourceControl.Actions.Diff"),
 		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference))
 	);
 	
