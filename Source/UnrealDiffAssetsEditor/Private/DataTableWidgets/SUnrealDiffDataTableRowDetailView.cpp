@@ -5,6 +5,7 @@
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
+#include "DataTableWidgets/SUnrealDiffDataTableDetailRowSelector.h"
 #include "DataTableWidgets/SUnrealDiffDataTableDetailTree.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -25,11 +26,12 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 	}
 
 	SAssignNew(DetailTree, SUnrealDiffDataTableDetailTree);
-	
+
 	this->ChildSlot
 	[
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
+		.AutoHeight()
 		[
 			BuildRowTitle()
 		]
@@ -43,31 +45,16 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 
 TSharedRef<SWidget> SUnrealDiffDataTableRowDetailView::BuildRowTitle()
 {
-	return SNew(SOverlay)
-		+ SOverlay::Slot()
-		.HAlign(HAlign_Fill)
-		.VAlign(VAlign_Fill)
-		[
-			SNew(SBorder)
-			.BorderImage(FUnrealDiffWindowStyle::GetAppSlateBrush("Brushes.Title"))
-		]
-
-		+ SOverlay::Slot()
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				SNew(SBorder)
-				.BorderImage(FUnrealDiffWindowStyle::GetAppSlateBrush("Brushes.Background"))
-				.VAlign(VAlign_Bottom)
-				.Padding(0.0f)
-				[
-					SNew(STextBlock)
-					.Text(this, &SUnrealDiffDataTableRowDetailView::RowTitle)
-				]
-			]
-		];
+	TArray<FName> Rows;
+	if (DataTableVisualDiff)
+	{
+		if (auto DataTable = Cast<UDataTable>(DataTableVisualDiff->GetAssetObject(bIsLocal)))
+		{
+			Rows = DataTable->GetRowNames();
+		}
+	}
+	
+	return SAssignNew(RowSelector, SUnrealDiffDataTableDetailRowSelector).Rows(Rows).SelectedRowName(RowName);
 }
 
 void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
@@ -80,14 +67,14 @@ void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
 	if (DataTableVisualDiff)
 	{
 		RowName = InRowName;
+		if (RowSelector.IsValid())
+		{
+			RowSelector->OnRowSelected(RowName);
+		}
+		
 		DetailTree->SetStructure(DataTableVisualDiff->GetStructure());
 		SetVisibility(EVisibility::SelfHitTestInvisible);
 	}
-}
-
-FText SUnrealDiffDataTableRowDetailView::RowTitle() const
-{
-	return FText::FromName(RowName);
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

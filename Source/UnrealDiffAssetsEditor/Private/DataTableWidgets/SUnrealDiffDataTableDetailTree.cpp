@@ -12,9 +12,6 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SUnrealDiffDataTableDetailTree::Construct(const FArguments& InArgs)
 {
-	TSharedPtr<FUnrealDiffCategoryItemNode> RootNode = MakeShareable(new FUnrealDiffCategoryItemNode());
-	TreeNodes.Add(RootNode);
-	
 	ChildSlot
 	[
 		SAssignNew(MyTreeView, STreeView<TSharedPtr<FUnrealDiffDetailTreeNode>>)
@@ -44,23 +41,29 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FStructOnScope> Cur
 	}
 
 	TreeNodes.Empty();
-	TSharedPtr<FUnrealDiffCategoryItemNode> RootNode = MakeShareable(new FUnrealDiffCategoryItemNode());
-	TreeNodes.Add(RootNode);
-	
-	// TArray<FProperty*> StructMembers;   
-	// auto ScriptStruct = CurrentRow->GetStruct();
-	// if (ScriptStruct)
-	// {
-	// 	for (TFieldIterator<FProperty> It(ScriptStruct); It; ++It)
-	// 	{
-	// 		FProperty* StructMember = *It;
-	// 		StructMembers.Add(StructMember);
-	// 		// FObjectEditorUtils::GetCategoryFName(StructMember), 
-	// 		TSharedPtr<FUnrealDiffDetailItemNode> NewNode = MakeShareable(new FUnrealDiffDetailItemNode());
-	// 		TreeNodes.Add(NewNode);
-	// 	}
-	// }
+	TArray<FProperty*> StructMembers;
+	TSet<FName> Categories;
+	auto ScriptStruct = CurrentRow->GetStruct();
+	if (ScriptStruct)
+	{
+		for (TFieldIterator<FProperty> It(ScriptStruct); It; ++It)
+		{
+			FProperty* StructMember = *It;
+			StructMembers.Add(StructMember);
 
+			// TSharedPtr<FUnrealDiffDetailItemNode> NewNode = MakeShareable(new FUnrealDiffDetailItemNode());
+			// TreeNodes.Add(NewNode);
+			
+			Categories.Add(FObjectEditorUtils::GetCategoryFName(StructMember));
+		}
+	}
+
+	for (const auto& Category : Categories)
+	{
+		TSharedPtr<FUnrealDiffCategoryItemNode> RootNode = MakeShareable(new FUnrealDiffCategoryItemNode(Category));
+		TreeNodes.Add(RootNode);
+	}
+	
 	MyTreeView->RequestTreeRefresh();
 }
 

@@ -4,7 +4,7 @@
 
 TSharedRef<ITableRow> FUnrealDiffCategoryItemNode::GenerateWidgetForTableView(const TSharedRef<STableViewBase>& OwnerTable)
 {
-	return SNew(SUnrealDiffDetailCategoryRow);
+	return SNew(SUnrealDiffDetailCategoryRow, OwnerTable).CategoryName(CategoryName);
 }
 
 void FUnrealDiffCategoryItemNode::GetChildren(TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& OutChildren)

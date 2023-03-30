@@ -11,11 +11,14 @@ class UNREALDIFFASSETSEDITOR_API SUnrealDiffDetailCategoryRow : public SUnrealDi
 {
 public:
 	SLATE_BEGIN_ARGS(SUnrealDiffDetailCategoryRow) {}
-
+		SLATE_ARGUMENT(FName, CategoryName)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
-	void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView);
 
-	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+protected:
+	const FSlateBrush* GetBackgroundImage() const;
+	FSlateColor GetInnerBackgroundColor() const;
+	FSlateColor GetOuterBackgroundColor() const;
 };

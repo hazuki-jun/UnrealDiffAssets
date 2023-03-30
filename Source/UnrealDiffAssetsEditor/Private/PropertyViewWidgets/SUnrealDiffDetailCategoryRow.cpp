@@ -4,11 +4,12 @@
 #include "PropertyViewWidgets/SUnrealDiffDetailCategoryRow.h"
 
 #include "SlateOptMacros.h"
+#include "UnrealDiffWindowStyle.h"
 #include "PropertyViewWidgets/SUnrealDiffDetailExpanderArrow.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs)
+void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView)
 {
 	TSharedRef<SHorizontalBox> HeaderBox = SNew(SHorizontalBox)
 		// + SHorizontalBox::Slot()
@@ -32,25 +33,84 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs)
 		.FillWidth(1)
 		[
 			SNew(STextBlock)
+			.Text(FText::FromName(InArgs._CategoryName))
 			// .Text(InArgs._DisplayName)
 			// .Font(FAppStyle::Get().GetFontStyle(bIsInnerCategory ? PropertyEditorConstants::PropertyFontStyle : PropertyEditorConstants::CategoryFontStyle))
-			// .TextStyle(FAppStyle::Get(), "DetailsView.CategoryTextStyle")
+			.TextStyle(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.CategoryTextStyle")
 		];
 	
 	
-	ChildSlot
+	this->ChildSlot
 	[
-		HeaderBox
+		SNew(SBorder)
+		.BorderImage(FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.GridLine"))
+		.Padding(FMargin(0, 0, 0, 1))
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			[
+				SNew(SBorder)
+				.BorderImage(this, &SUnrealDiffDetailCategoryRow::GetBackgroundImage)
+				.BorderBackgroundColor(this, &SUnrealDiffDetailCategoryRow::GetInnerBackgroundColor)
+				.Padding(0)
+				[
+					SNew(SBox)
+					.MinDesiredHeight(26.f)
+					[
+						HeaderBox
+					]
+				]
+			]
+			// + SHorizontalBox::Slot()
+			// .HAlign(HAlign_Right)
+			// .AutoWidth()
+			// [
+			// 	SNew(SBorder)
+			// 	.BorderImage_Lambda(GetScrollbarWellBrush)
+			// 	.BorderBackgroundColor_Lambda(GetScrollbarWellTint)
+			// 	.Padding(FMargin(0, 0, SDetailTableRowBase::ScrollBarPadding, 0))
+			// ]
+		]
 	];
-	
+
+	STableRow< TSharedPtr< FUnrealDiffDetailTreeNode > >::ConstructInternal(
+	STableRow::FArguments()
+		.Style(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.TreeView.TableRow")
+		.ShowSelection(false),
+		InOwnerTableView);
 }
 
-int32 SUnrealDiffDetailCategoryRow::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
-	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
-	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+const FSlateBrush* SUnrealDiffDetailCategoryRow::GetBackgroundImage() const
 {
-	LayerId = SBorder::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-	return LayerId;
+	return FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryTop");
+	
+	// if (bShowBorder)
+	// {
+	// 	if (bIsInnerCategory)
+	// 	{
+	// 		return FAppStyle::Get().GetBrush("DetailsView.CategoryMiddle");
+	// 	}
+	//
+	// 	// intentionally no hover on outer categories
+	// 	return FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryTop");
+	// }
+	//
+	// return nullptr;
+}
+
+FSlateColor SUnrealDiffDetailCategoryRow::GetInnerBackgroundColor() const
+{
+	return FSlateColor(FLinearColor::White);
+}
+
+FSlateColor SUnrealDiffDetailCategoryRow::GetOuterBackgroundColor() const
+{
+	if (IsHovered())
+	{
+		return FUnrealDiffWindowStyle::GetAppSlateColor("Colors.Header");
+	}
+
+	return FUnrealDiffWindowStyle::GetAppSlateColor("Colors.Panel");
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

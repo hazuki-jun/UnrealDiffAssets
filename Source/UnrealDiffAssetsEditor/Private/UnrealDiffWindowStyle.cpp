@@ -38,6 +38,15 @@ FName FUnrealDiffWindowStyle::GetStyleSetName()
 	return StyleSetName;
 }
 
+const ISlateStyle& FUnrealDiffWindowStyle::GetAppStyle()
+{
+#if ENGINE_MAJOR_VERSION == 4
+	return FEditorStyle::Get();
+#else
+	return FAppStyle::Get();
+#endif
+}
+
 FSlateIcon FUnrealDiffWindowStyle::GetAppSlateIcon(const FName StyleName)
 {
 #if ENGINE_MAJOR_VERSION == 4
@@ -53,6 +62,15 @@ const FSlateBrush* FUnrealDiffWindowStyle::GetAppSlateBrush(const FName StyleNam
 	return FEditorStyle::Get().GetBrush("Brushes.Title");
 #else
 	return FAppStyle::Get().GetBrush("Brushes.Title");
+#endif
+}
+
+const FSlateColor FUnrealDiffWindowStyle::GetAppSlateColor(const FName ColorName)
+{
+#if ENGINE_MAJOR_VERSION == 4
+	return FEditorStyle::Get().GetSlateColor(ColorName);
+#else
+	return FAppStyle::Get().GetSlateColor(ColorName);
 #endif
 }
 

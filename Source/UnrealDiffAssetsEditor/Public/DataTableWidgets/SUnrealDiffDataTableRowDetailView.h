@@ -22,11 +22,11 @@ public:
 	TSharedRef<SWidget> BuildRowTitle();
 	
 	void Refresh(const FName& InRowName);
-
-	FText RowTitle() const;
 	
 protected:
 	bool bIsLocal = true;
+
+	TSharedPtr<class SUnrealDiffDataTableDetailRowSelector> RowSelector;
 	
 	TSharedPtr<class SDataTableVisualDiff> DataTableVisualDiff;
 
