@@ -26,6 +26,7 @@ private:
 	FReply OnExpanderClicked();
 	
 private:
+	bool bIsExpanded = false;
 	TWeakPtr<class SUnrealDiffDetailTableRowBase> Row;
 	TSharedPtr<SButton> ExpanderArrow;
 };

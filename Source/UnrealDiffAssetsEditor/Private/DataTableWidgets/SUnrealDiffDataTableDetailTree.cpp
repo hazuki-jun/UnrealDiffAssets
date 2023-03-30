@@ -39,9 +39,8 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FStructOnScope> Cur
 	{
 		return;
 	}
-
+	
 	TreeNodes.Empty();
-	TArray<FProperty*> StructMembers;
 	TSet<FName> Categories;
 	auto ScriptStruct = CurrentRow->GetStruct();
 	if (ScriptStruct)
@@ -49,19 +48,17 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FStructOnScope> Cur
 		for (TFieldIterator<FProperty> It(ScriptStruct); It; ++It)
 		{
 			FProperty* StructMember = *It;
-			StructMembers.Add(StructMember);
-
+			FName CategoryName =  FObjectEditorUtils::GetCategoryFName(StructMember);
 			// TSharedPtr<FUnrealDiffDetailItemNode> NewNode = MakeShareable(new FUnrealDiffDetailItemNode());
 			// TreeNodes.Add(NewNode);
-			
-			Categories.Add(FObjectEditorUtils::GetCategoryFName(StructMember));
+			Categories.Add(CategoryName);
 		}
 	}
 
 	for (const auto& Category : Categories)
 	{
-		TSharedPtr<FUnrealDiffCategoryItemNode> RootNode = MakeShareable(new FUnrealDiffCategoryItemNode(Category));
-		TreeNodes.Add(RootNode);
+		TSharedPtr<FUnrealDiffCategoryItemNode> CategoryNode = MakeShareable(new FUnrealDiffCategoryItemNode(Category));
+		TreeNodes.Add(CategoryNode);
 	}
 	
 	MyTreeView->RequestTreeRefresh();

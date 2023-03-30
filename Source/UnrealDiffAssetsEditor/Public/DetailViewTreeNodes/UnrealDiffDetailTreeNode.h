@@ -21,4 +21,7 @@ public:
 	 * @param OutChildren [out]	The array to add children to
 	 */
 	virtual void GetChildren(TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& OutChildren) = 0;
+
+protected:
+	TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> ChildNodes;
 };

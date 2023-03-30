@@ -31,6 +31,8 @@ void SUnrealDiffDetailExpanderArrow::Construct(const FArguments& InArgs, TShared
 				SNew(SImage)
 				.Image(this, &SUnrealDiffDetailExpanderArrow::GetExpanderImage)
 				.ColorAndOpacity(FSlateColor::UseSubduedForeground())
+				// SNew(STextBlock)
+				// .Text(FText::FromString(TEXT("Arrow")))
 			]
 		]
 	];
@@ -58,21 +60,20 @@ const FSlateBrush* SUnrealDiffDetailExpanderArrow::GetExpanderImage() const
 	}
 
 	FName ResourceName;
-	// const bool bIsItemExpanded = RowPtr->IsItemExpanded();
-	// if (bIsItemExpanded)
-	// {
-	// 	if (ExpanderArrow->IsHovered())
-	// 	{
-	// 		static const FName ExpandedHoveredName = "TreeArrow_Expanded_Hovered";
-	// 		ResourceName = ExpandedHoveredName;
-	// 	}
-	// 	else
-	// 	{
-	// 		static const FName ExpandedName = "TreeArrow_Expanded";
-	// 		ResourceName = ExpandedName;
-	// 	}
-	// }
-	// else
+	if (bIsExpanded)
+	{
+		if (ExpanderArrow->IsHovered())
+		{
+			static const FName ExpandedHoveredName = "TreeArrow_Expanded_Hovered";
+			ResourceName = ExpandedHoveredName;
+		}
+		else
+		{
+			static const FName ExpandedName = "TreeArrow_Expanded";
+			ResourceName = ExpandedName;
+		}
+	}
+	else
 	{
 		if (ExpanderArrow->IsHovered())
 		{
@@ -91,7 +92,8 @@ const FSlateBrush* SUnrealDiffDetailExpanderArrow::GetExpanderImage() const
 
 FReply SUnrealDiffDetailExpanderArrow::OnExpanderClicked()
 {
-	return FReply::Unhandled();
+	bIsExpanded = !bIsExpanded;
+	return FReply::Handled();
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

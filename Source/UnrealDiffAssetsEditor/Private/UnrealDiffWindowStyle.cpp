@@ -59,13 +59,13 @@ FSlateIcon FUnrealDiffWindowStyle::GetAppSlateIcon(const FName StyleName)
 const FSlateBrush* FUnrealDiffWindowStyle::GetAppSlateBrush(const FName StyleName)
 {
 #if ENGINE_MAJOR_VERSION == 4
-	return FEditorStyle::Get().GetBrush("Brushes.Title");
+	return FEditorStyle::Get().GetBrush(StyleName);
 #else
-	return FAppStyle::Get().GetBrush("Brushes.Title");
+	return FAppStyle::Get().GetBrush(StyleName);
 #endif
 }
 
-const FSlateColor FUnrealDiffWindowStyle::GetAppSlateColor(const FName ColorName)
+FSlateColor FUnrealDiffWindowStyle::GetAppSlateColor(const FName ColorName)
 {
 #if ENGINE_MAJOR_VERSION == 4
 	return FEditorStyle::Get().GetSlateColor(ColorName);
