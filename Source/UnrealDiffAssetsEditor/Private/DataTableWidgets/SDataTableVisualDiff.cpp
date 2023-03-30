@@ -58,6 +58,9 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 
 TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 {
+	TAttribute<float> RowDetailViewSplitterValue;
+	RowDetailViewSplitterValue.BindRaw(this, &SDataTableVisualDiff::GetRowDetailViewSplitterValue);
+	
 	return SNew(SOverlay)
 	+ SOverlay::Slot()
 	.HAlign(HAlign_Fill)
@@ -87,7 +90,7 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 			]
 
 			+ SSplitter::Slot()
-			.Value(this, &SDataTableVisualDiff::GetRowDetailViewSplitterValue)
+			.Value(RowDetailViewSplitterValue)
 			[
 				BuildRowDetailView(true)
 			]
@@ -103,7 +106,7 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 			]
 
 			+ SSplitter::Slot()
-			.Value(this, &SDataTableVisualDiff::GetRowDetailViewSplitterValue)
+			.Value(RowDetailViewSplitterValue)
 			[
 				BuildRowDetailView(false)
 			]

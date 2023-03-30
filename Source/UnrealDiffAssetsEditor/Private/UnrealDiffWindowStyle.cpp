@@ -47,6 +47,15 @@ FSlateIcon FUnrealDiffWindowStyle::GetAppSlateIcon(const FName StyleName)
 #endif
 }
 
+const FSlateBrush* FUnrealDiffWindowStyle::GetAppSlateBrush(const FName StyleName)
+{
+#if ENGINE_MAJOR_VERSION == 4
+	return FEditorStyle::Get().GetBrush("Brushes.Title");
+#else
+	return FAppStyle::Get().GetBrush("Brushes.Title");
+#endif
+}
+
 TSharedRef<FSlateStyleSet> FUnrealDiffWindowStyle::Create()
 {
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("UnrealDiffWindowStyle"));

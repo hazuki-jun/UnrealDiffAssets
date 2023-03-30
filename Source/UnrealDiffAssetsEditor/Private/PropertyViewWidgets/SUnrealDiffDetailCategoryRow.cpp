@@ -49,38 +49,7 @@ int32 SUnrealDiffDetailCategoryRow::OnPaint(const FPaintArgs& Args, const FGeome
 	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
 	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-	// TSharedRef< ITypedTableView<ItemType> > OwnerTable = OwnerTablePtr.Pin().ToSharedRef();
-	// const bool bIsActive = OwnerTable->AsWidget()->HasKeyboardFocus();
-	//
-	// if (const ItemType* MyItemPtr = GetItemForThis(OwnerTable))
-	// {
-	// 	if (bIsActive && OwnerTable->Private_UsesSelectorFocus() && OwnerTable->Private_HasSelectorFocus(*MyItemPtr))
-	// 	{
-	// 		FSlateDrawElement::MakeBox(
-	// 			OutDrawElements,
-	// 			LayerId,
-	// 			AllottedGeometry.ToPaintGeometry(),
-	// 			&Style->SelectorFocusedBrush,
-	// 			ESlateDrawEffect::None,
-	// 			Style->SelectorFocusedBrush.GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint()
-	// 		);
-	// 	}
-	// }
-
 	LayerId = SBorder::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-
-	if (ItemDropZone.IsSet())
-	{
-		if (PaintDropIndicatorEvent.IsBound())
-		{
-			LayerId = PaintDropIndicatorEvent.Execute(ItemDropZone.GetValue(), Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-		}
-		else
-		{
-			OnPaintDropIndicator(ItemDropZone.GetValue(), Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-		}
-	}
-
 	return LayerId;
 }
 

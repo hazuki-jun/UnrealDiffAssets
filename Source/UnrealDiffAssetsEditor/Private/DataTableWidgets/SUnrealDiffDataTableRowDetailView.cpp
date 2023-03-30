@@ -4,6 +4,7 @@
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
+#include "UnrealDiffWindowStyle.h"
 #include "DataTableWidgets/SUnrealDiffDataTableDetailTree.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -48,7 +49,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableRowDetailView::BuildRowTitle()
 		.VAlign(VAlign_Fill)
 		[
 			SNew(SBorder)
-			.BorderImage(FAppStyle::Get().GetBrush("Brushes.Title"))
+			.BorderImage(FUnrealDiffWindowStyle::GetAppSlateBrush("Brushes.Title"))
 		]
 
 		+ SOverlay::Slot()
@@ -58,7 +59,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableRowDetailView::BuildRowTitle()
 			.AutoHeight()
 			[
 				SNew(SBorder)
-				.BorderImage(FAppStyle::Get().GetBrush("Brushes.Background"))
+				.BorderImage(FUnrealDiffWindowStyle::GetAppSlateBrush("Brushes.Background"))
 				.VAlign(VAlign_Bottom)
 				.Padding(0.0f)
 				[

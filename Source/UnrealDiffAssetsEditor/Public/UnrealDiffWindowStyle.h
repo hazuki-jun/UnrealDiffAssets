@@ -12,6 +12,7 @@ public:
 	static FName GetStyleSetName();
 
 	static FSlateIcon GetAppSlateIcon(const FName StyleName);
+	static const FSlateBrush* GetAppSlateBrush(const FName StyleName);
 	
 private:
 	static TSharedRef< class FSlateStyleSet > Create();

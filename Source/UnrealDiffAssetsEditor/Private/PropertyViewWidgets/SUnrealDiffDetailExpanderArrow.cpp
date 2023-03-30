@@ -4,6 +4,7 @@
 #include "PropertyViewWidgets/SUnrealDiffDetailExpanderArrow.h"
 
 #include "SlateOptMacros.h"
+#include "UnrealDiffWindowStyle.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -49,7 +50,7 @@ const FSlateBrush* SUnrealDiffDetailExpanderArrow::GetExpanderImage() const
 	TSharedPtr<SUnrealDiffDetailTableRowBase> RowPtr = Row.Pin();
 	if (!RowPtr.IsValid())
 	{
-		return FAppStyle::Get().GetBrush("NoBrush");
+		return FUnrealDiffWindowStyle::GetAppSlateBrush("NoBrush");
 	}
 
 	FName ResourceName;
@@ -81,7 +82,7 @@ const FSlateBrush* SUnrealDiffDetailExpanderArrow::GetExpanderImage() const
 		}
 	}
 
-	return FAppStyle::Get().GetBrush(ResourceName);
+	return FUnrealDiffWindowStyle::GetAppSlateBrush(ResourceName);
 }
 
 FReply SUnrealDiffDetailExpanderArrow::OnExpanderClicked()
