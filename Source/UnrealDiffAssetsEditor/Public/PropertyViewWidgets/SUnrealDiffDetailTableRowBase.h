@@ -8,7 +8,7 @@
 /**
  * 
  */
-class UNREALDIFFASSETSEDITOR_API SUnrealDiffDetailTableRowBase : public STableRow< TSharedPtr< class UnrealDataTableDetailTreeNode > >
+class UNREALDIFFASSETSEDITOR_API SUnrealDiffDetailTableRowBase : public STableRow< TSharedPtr< class FUnrealDiffDetailTreeNode > >
 {
 public:
 	SLATE_BEGIN_ARGS(SUnrealDiffDetailTableRowBase) {}

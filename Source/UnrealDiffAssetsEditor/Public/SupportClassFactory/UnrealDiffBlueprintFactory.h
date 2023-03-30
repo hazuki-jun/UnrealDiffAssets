@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "UnrealDiffSupportClassFactory.h"
-#include "UObject/Object.h"
 #include "UnrealDiffBlueprintFactory.generated.h"
 
 /**

@@ -18,9 +18,15 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
-	TSharedRef<ITableRow> OnGenerateRowForDetailTree( TSharedPtr<class UnrealDataTableDetailTreeNode> InTreeNode, const TSharedRef<STableViewBase>& OwnerTable );
+	TSharedRef<ITableRow> OnGenerateRowForDetailTree( TSharedPtr<class FUnrealDiffDetailTreeNode> InTreeNode, const TSharedRef<STableViewBase>& OwnerTable );
+	void OnGetChildrenForDetailTree( TSharedPtr<class FUnrealDiffDetailTreeNode> InTreeNode, TArray< TSharedPtr<class FUnrealDiffDetailTreeNode> >& OutChildren );
 	
-	TArray<TSharedPtr<class UnrealDataTableDetailTreeNode>> RootTreeNodes;
+	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> TreeNodes;
 
 	void SetStructure(TSharedPtr<FStructOnScope> CurrentRow);
+
+protected:
+	TSharedPtr<STreeView<TSharedPtr<class FUnrealDiffDetailTreeNode>>> MyTreeView;
 };
+
+

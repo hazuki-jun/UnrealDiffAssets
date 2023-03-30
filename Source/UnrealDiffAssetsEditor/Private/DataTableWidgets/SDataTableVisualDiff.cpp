@@ -134,6 +134,12 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildRowDetailView(bool bIsLocal)
 		.DataTableVisualDiff(SharedThis(this));
 }
 
+TSharedPtr<FStructOnScope> SDataTableVisualDiff::GetStructure()
+{
+	UDataTable* DataTable = Cast<UDataTable>(LocalAsset); 
+	return MakeShareable(new FStructOnScope(DataTable->RowStruct));
+}
+
 void SDataTableVisualDiff::OnRowSelectionChanged(bool bIsLocal, FName RowId)
 {
 	bIsLocalDataTableSelected = bIsLocal;

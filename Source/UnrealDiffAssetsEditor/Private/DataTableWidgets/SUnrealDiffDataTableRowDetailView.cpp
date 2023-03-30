@@ -79,7 +79,7 @@ void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
 	if (DataTableVisualDiff)
 	{
 		RowName = InRowName;
-		// DetailTree->SetStructure();
+		DetailTree->SetStructure(DataTableVisualDiff->GetStructure());
 		SetVisibility(EVisibility::SelfHitTestInvisible);
 	}
 }

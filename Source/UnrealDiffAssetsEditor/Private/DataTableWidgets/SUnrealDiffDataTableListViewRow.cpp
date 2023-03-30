@@ -194,12 +194,12 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 		);
 	}
 	
-	MenuBuilder.AddMenuEntry(
-	LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
-	LOCTEXT("DataTableRowMenuActions_ShowDifferencTooltip", "Show Difference"),
-		FUnrealDiffWindowStyle::GetAppSlateIcon("SourceControl.Actions.Diff"),
-		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference))
-	);
+	// MenuBuilder.AddMenuEntry(
+	// LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
+	// LOCTEXT("DataTableRowMenuActions_ShowDifferencTooltip", "Show Difference"),
+	// 	FUnrealDiffWindowStyle::GetAppSlateIcon("SourceControl.Actions.Diff"),
+	// 	FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference))
+	// );
 	
 	return MenuBuilder.MakeWidget();
 }

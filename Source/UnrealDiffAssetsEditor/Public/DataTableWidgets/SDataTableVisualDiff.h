@@ -33,6 +33,8 @@ public:
 	TSharedRef<SWidget> BuildRowDetailView(bool bIsLocal);
 
 	TSharedPtr<SWindow> GetParentWindow() const { return ParentWindow; }
+
+	TSharedPtr<FStructOnScope> GetStructure();
 	
 	/**
 	 * @brief 选中行/鼠标点击了行
