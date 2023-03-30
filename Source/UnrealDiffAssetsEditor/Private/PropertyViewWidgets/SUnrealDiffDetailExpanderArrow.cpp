@@ -7,7 +7,7 @@
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SUnrealDiffDetailExpanderArrow::Construct(const FArguments& InArgs)
+void SUnrealDiffDetailExpanderArrow::Construct(const FArguments& InArgs, TSharedPtr<class SUnrealDiffDetailTableRowBase> RowData)
 {
 	ChildSlot
 	[

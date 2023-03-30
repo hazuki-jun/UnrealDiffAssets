@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "DataTableWidgets/SUnrealDiffDetailSingleItemRow.h"
+#include "PropertyViewWidgets/SUnrealDiffDetailSingleItemRow.h"
 
 #include "SlateOptMacros.h"
 

@@ -1,6 +1,6 @@
 ﻿#include "UnrealDataTableDetailTreeNode.h"
 
-#include "DataTableWidgets/SUnrealDiffDetailTableRowBase.h"
+#include "PropertyViewWidgets/SUnrealDiffDetailTableRowBase.h"
 
 
 UnrealDataTableDetailTreeNode::UnrealDataTableDetailTreeNode()
