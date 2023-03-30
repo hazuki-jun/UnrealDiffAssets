@@ -6,10 +6,14 @@
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
 
+#define LOCTEXT_NAMESPACE "SUnrealDiffDetailExpanderArrow"
+
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SUnrealDiffDetailExpanderArrow::Construct(const FArguments& InArgs, TSharedPtr<class SUnrealDiffDetailTableRowBase> RowData)
 {
+	Row = RowData;
+	
 	ChildSlot
 	[
 	SNew(SBox)
@@ -91,3 +95,5 @@ FReply SUnrealDiffDetailExpanderArrow::OnExpanderClicked()
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+#undef LOCTEXT_NAMESPACE
