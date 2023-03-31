@@ -25,8 +25,8 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 		DataTableVisualDiff->RowDetailViewRemote = SharedThis(this);
 	}
 
-	SAssignNew(DetailTree, SUnrealDiffDataTableDetailTree);
-
+	SAssignNew(DetailTree, SUnrealDiffDataTableDetailTree, this);
+	// DetailTree->DetailView = AsWeak();
 	this->ChildSlot
 	[
 		SNew(SVerticalBox)

@@ -93,6 +93,24 @@ const FSlateBrush* SUnrealDiffDetailExpanderArrow::GetExpanderImage() const
 FReply SUnrealDiffDetailExpanderArrow::OnExpanderClicked()
 {
 	bIsExpanded = !bIsExpanded;
+	
+	TSharedPtr<SUnrealDiffDetailTableRowBase> RowPtr = Row.Pin();
+	if (!RowPtr.IsValid())
+	{
+		return FReply::Unhandled();
+	}
+
+	// Recurse the expansion if "shift" is being pressed
+	const FModifierKeysState ModKeyState = FSlateApplication::Get().GetModifierKeys();
+	if (ModKeyState.IsShiftDown())
+	{
+		RowPtr->Private_OnExpanderArrowShiftClicked();
+	}
+	else
+	{
+		RowPtr->ToggleExpansion();
+	}
+
 	return FReply::Handled();
 }
 

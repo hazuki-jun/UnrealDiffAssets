@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/SCompoundWidget.h"
+#include "PropertyViewWidgets/SUnrealDiffDetailView.h"
+#include "PropertyViewWidgets/UnrealDiffDetailColumnSizeData.h"
 
 /**
  * 
  */
-class UNREALDIFFASSETSEDITOR_API SUnrealDiffDataTableRowDetailView : public SCompoundWidget
+class UNREALDIFFASSETSEDITOR_API SUnrealDiffDataTableRowDetailView : public SUnrealDiffDetailView
 {
 public:
 	SLATE_BEGIN_ARGS(SUnrealDiffDataTableRowDetailView) {}
@@ -22,8 +23,12 @@ public:
 	TSharedRef<SWidget> BuildRowTitle();
 	
 	void Refresh(const FName& InRowName);
+
+	virtual FUnrealDiffDetailColumnSizeData& GetColumnSizeData() override { return DetailColumnSizeData; }
 	
 protected:
+	FUnrealDiffDetailColumnSizeData DetailColumnSizeData;
+	
 	bool bIsLocal = true;
 
 	TSharedPtr<class SUnrealDiffDataTableDetailRowSelector> RowSelector;

@@ -22,6 +22,10 @@ public:
 	 */
 	virtual void GetChildren(TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& OutChildren) = 0;
 
-protected:
+	/** @return The details view that this node is in */
+	virtual class SUnrealDiffDetailView* GetDetailsView() const = 0;
+	
+	virtual const FProperty* GetProperty() const { return nullptr; };
+	
 	TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> ChildNodes;
 };

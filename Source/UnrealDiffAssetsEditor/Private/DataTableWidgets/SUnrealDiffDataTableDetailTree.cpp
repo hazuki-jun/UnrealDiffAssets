@@ -10,8 +10,10 @@
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SUnrealDiffDataTableDetailTree::Construct(const FArguments& InArgs)
+void SUnrealDiffDataTableDetailTree::Construct(const FArguments& InArgs, class SUnrealDiffDetailView* DetailView_)
 {
+	DetailView = DetailView_;
+	
 	ChildSlot
 	[
 		SAssignNew(MyTreeView, STreeView<TSharedPtr<FUnrealDiffDetailTreeNode>>)
@@ -39,6 +41,8 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FStructOnScope> Cur
 	{
 		return;
 	}
+
+	TMap<FName, TArray<FProperty*>> StructMembers;
 	
 	TreeNodes.Empty();
 	TSet<FName> Categories;
@@ -51,13 +55,17 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FStructOnScope> Cur
 			FName CategoryName =  FObjectEditorUtils::GetCategoryFName(StructMember);
 			// TSharedPtr<FUnrealDiffDetailItemNode> NewNode = MakeShareable(new FUnrealDiffDetailItemNode());
 			// TreeNodes.Add(NewNode);
-			Categories.Add(CategoryName);
+			// Categories.Add(CategoryName);
+
+			auto& Found = StructMembers.FindOrAdd(CategoryName);
+			Found.Add(StructMember);
 		}
 	}
 
-	for (const auto& Category : Categories)
+	for (const auto& Category : StructMembers)
 	{
-		TSharedPtr<FUnrealDiffCategoryItemNode> CategoryNode = MakeShareable(new FUnrealDiffCategoryItemNode(Category));
+		TSharedPtr<FUnrealDiffCategoryItemNode> CategoryNode = MakeShareable(new FUnrealDiffCategoryItemNode(Category.Key, DetailView));
+		CategoryNode->ChildPropertyArray = Category.Value;
 		TreeNodes.Add(CategoryNode);
 	}
 	
