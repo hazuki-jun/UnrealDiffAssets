@@ -80,6 +80,11 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSh
 		InOwnerTableView);
 }
 
+bool SUnrealDiffDetailCategoryRow::HasChildren() const
+{
+	return true;
+}
+
 const FSlateBrush* SUnrealDiffDetailCategoryRow::GetBackgroundImage() const
 {
 	return FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryTop");

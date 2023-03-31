@@ -17,6 +17,8 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView);
 
+	virtual bool HasChildren() const override;
+	
 protected:
 	const FSlateBrush* GetBackgroundImage() const;
 	FSlateColor GetInnerBackgroundColor() const;

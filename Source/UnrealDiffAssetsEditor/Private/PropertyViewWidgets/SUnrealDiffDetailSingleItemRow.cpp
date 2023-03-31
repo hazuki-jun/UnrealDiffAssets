@@ -7,6 +7,7 @@
 #include "UnrealDiffWindowStyle.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
+#include "PropertyViewWidgets/SUnrealDiffDetailExpanderArrow.h"
 #include "PropertyViewWidgets/SUnrealDiffPropertyNameWidget.h"
 #include "PropertyViewWidgets/SUnrealDiffPropertyValueWidget.h"
 
@@ -57,6 +58,16 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 			.MinDesiredHeight(22.f)
 			[
 				SNew( SHorizontalBox )
+				+ SHorizontalBox::Slot()
+				[
+					SNew(SBox)
+					.WidthOverride(16.f)
+					.HeightOverride(16.f)
+					[
+						SNew(SUnrealDiffDetailExpanderArrow, SharedThis(this))
+					]
+				]
+				
 				+ SHorizontalBox::Slot()
 				.HAlign(HAlign_Fill)
 				.VAlign(VAlign_Fill)

@@ -46,8 +46,7 @@ EVisibility SUnrealDiffDetailExpanderArrow::GetExpanderVisibility() const
 	{
 		return EVisibility::Collapsed;
 	}
-
-	// return RowPtr->DoesItemHaveChildren() ? EVisibility::Visible : EVisibility::Hidden;
+	
 	return EVisibility::Visible;
 }
 
