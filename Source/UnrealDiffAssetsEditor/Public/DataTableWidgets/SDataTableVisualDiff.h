@@ -83,7 +83,7 @@ public:
 	//~ End Ctrl + C
 
 	//~ Begin Row Detail View
-	
+	const uint8* GetPropertyData(const FProperty* InProperty);
 	//~ End Row Detail View
 	
 public:

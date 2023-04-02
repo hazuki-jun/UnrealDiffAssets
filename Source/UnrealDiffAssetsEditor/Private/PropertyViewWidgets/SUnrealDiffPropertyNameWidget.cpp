@@ -11,9 +11,14 @@ void SUnrealDiffPropertyNameWidget::Construct(const FArguments& InArgs)
 {
 	ChildSlot
 	[
-		SNew(STextBlock)
-		.Text(InArgs._DisplayNameText)
-		.Font(FCoreStyle::GetDefaultFontStyle("Regular", 8))
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		.VAlign(VAlign_Center)
+		[
+			SNew(STextBlock)
+			.Text(InArgs._DisplayNameText)
+			.Font(FCoreStyle::GetDefaultFontStyle("Regular", 8))
+		]
 	];
 }
 

@@ -5,6 +5,7 @@
 
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
+#include "PropertyViewWidgets/SUnrealDiffDetailTableRowBase.h"
 
 #define LOCTEXT_NAMESPACE "SUnrealDiffDetailExpanderArrow"
 
@@ -44,10 +45,10 @@ EVisibility SUnrealDiffDetailExpanderArrow::GetExpanderVisibility() const
 	TSharedPtr<SUnrealDiffDetailTableRowBase> RowPtr = Row.Pin();
 	if (!RowPtr.IsValid())
 	{
-		return EVisibility::Collapsed;
+		return EVisibility::Hidden;
 	}
 	
-	return EVisibility::Visible;
+	return RowPtr->DoesItemHaveChildren() ? EVisibility::Visible : EVisibility::Hidden;
 }
 
 const FSlateBrush* SUnrealDiffDetailExpanderArrow::GetExpanderImage() const

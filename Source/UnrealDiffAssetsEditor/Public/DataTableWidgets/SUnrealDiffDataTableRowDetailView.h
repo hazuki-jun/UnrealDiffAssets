@@ -6,6 +6,15 @@
 #include "PropertyViewWidgets/SUnrealDiffDetailView.h"
 #include "PropertyViewWidgets/UnrealDiffDetailColumnSizeData.h"
 
+class FUnrealDiffStructOnScope
+{
+public:
+	class UDataTable* DataTable;
+	FName CurrentRowName;
+	TSharedPtr<class FStructOnScope> StructureData; 
+};
+
+
 /**
  * 
  */

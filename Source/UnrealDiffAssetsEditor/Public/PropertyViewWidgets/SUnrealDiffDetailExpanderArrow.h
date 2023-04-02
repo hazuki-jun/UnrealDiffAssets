@@ -18,7 +18,6 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs, TSharedPtr<class SUnrealDiffDetailTableRowBase> RowData);
 
-	
 private:
 
 	EVisibility GetExpanderVisibility() const;

@@ -23,8 +23,12 @@ public:
 	
 	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> TreeNodes;
 
-	void SetStructure(TSharedPtr<FStructOnScope> CurrentRow);
+	void SetStructure(TSharedPtr<class FUnrealDiffStructOnScope> Structure);
 
+	TMap<FName, TArray<FProperty*>> GetStructMembers(TSharedPtr<class FUnrealDiffStructOnScope> Structure);
+	
+	const uint8* GetPropertyData(UDataTable* DataTable, const FProperty* InProperty);
+	
 	class SUnrealDiffDetailView* DetailView;
 	
 protected:

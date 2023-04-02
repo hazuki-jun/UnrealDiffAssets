@@ -72,7 +72,12 @@ void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
 			RowSelector->OnRowSelected(RowName);
 		}
 		
-		DetailTree->SetStructure(DataTableVisualDiff->GetStructure());
+		TSharedPtr<FUnrealDiffStructOnScope> StructOnScope = MakeShareable(new FUnrealDiffStructOnScope());
+		StructOnScope->DataTable = Cast<UDataTable>(DataTableVisualDiff->GetLocalAsset());
+		StructOnScope->CurrentRowName = InRowName;
+		StructOnScope->StructureData = DataTableVisualDiff->GetStructure();
+		
+		DetailTree->SetStructure(StructOnScope);
 		SetVisibility(EVisibility::SelfHitTestInvisible);
 	}
 }

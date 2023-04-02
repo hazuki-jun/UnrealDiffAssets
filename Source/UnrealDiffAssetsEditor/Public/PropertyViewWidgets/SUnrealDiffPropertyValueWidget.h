@@ -12,11 +12,12 @@ class UNREALDIFFASSETSEDITOR_API SUnrealDiffPropertyValueWidget : public SCompou
 {
 public:
 	SLATE_BEGIN_ARGS(SUnrealDiffPropertyValueWidget)
-		{
-		}
+		{}
 
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
-	void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs, TWeakPtr<class FUnrealDiffDetailTreeNode> InOwnerTreeNode);
+
+	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
 };

@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "UnrealDiffDetailTreeNode.h"
 
 class FUnrealDiffCategoryItemNode : public FUnrealDiffDetailTreeNode, public TSharedFromThis<FUnrealDiffCategoryItemNode>
@@ -14,8 +15,6 @@ public:
 	virtual void GetChildren(TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& OutChildren) override;
 
 	virtual class SUnrealDiffDetailView* GetDetailsView() const override;
-	
-	TArray<class FProperty*> ChildPropertyArray;
 	
 	FName CategoryName;
 

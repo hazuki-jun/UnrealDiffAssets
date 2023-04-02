@@ -5,6 +5,7 @@
 
 #include "ObjectEditorUtils.h"
 #include "SlateOptMacros.h"
+#include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffCategoryItemNode.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailItemNode.h"
 
@@ -35,41 +36,84 @@ void SUnrealDiffDataTableDetailTree::OnGetChildrenForDetailTree(TSharedPtr<FUnre
 	InTreeNode->GetChildren(OutChildren);
 }
 
-void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FStructOnScope> CurrentRow)
+void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOnScope> Structure)
 {
-	if (!CurrentRow.IsValid())
+	if (!Structure.IsValid())
 	{
 		return;
 	}
 
 	TMap<FName, TArray<FProperty*>> StructMembers;
-	
 	TreeNodes.Empty();
-	TSet<FName> Categories;
-	auto ScriptStruct = CurrentRow->GetStruct();
-	if (ScriptStruct)
-	{
-		for (TFieldIterator<FProperty> It(ScriptStruct); It; ++It)
-		{
-			FProperty* StructMember = *It;
-			FName CategoryName =  FObjectEditorUtils::GetCategoryFName(StructMember);
-			// TSharedPtr<FUnrealDiffDetailItemNode> NewNode = MakeShareable(new FUnrealDiffDetailItemNode());
-			// TreeNodes.Add(NewNode);
-			// Categories.Add(CategoryName);
 
-			auto& Found = StructMembers.FindOrAdd(CategoryName);
-			Found.Add(StructMember);
-		}
-	}
+	StructMembers = GetStructMembers(Structure);
 
 	for (const auto& Category : StructMembers)
 	{
 		TSharedPtr<FUnrealDiffCategoryItemNode> CategoryNode = MakeShareable(new FUnrealDiffCategoryItemNode(Category.Key, DetailView));
-		CategoryNode->ChildPropertyArray = Category.Value;
+
+		for (const auto Property : Category.Value)
+		{
+			TSharedPtr<FUnrealDiffPropertyData> PropertyData = MakeShareable(new FUnrealDiffPropertyData());
+			PropertyData->RowData = GetPropertyData(Structure->DataTable, Property);
+			PropertyData->Property = Property;
+			CategoryNode->ChildPropertyArray.Add(PropertyData);
+		}
+		
 		TreeNodes.Add(CategoryNode);
 	}
 	
 	MyTreeView->RequestTreeRefresh();
+}
+
+TMap<FName, TArray<FProperty*>> SUnrealDiffDataTableDetailTree::GetStructMembers(TSharedPtr<FUnrealDiffStructOnScope> Structure)
+{
+	TMap<FName, TArray<FProperty*>> StructMembers;
+	
+	auto ScriptStruct = Structure->StructureData->GetStruct();
+	if (ScriptStruct)
+	{
+		for (TFieldIterator<FProperty> It(ScriptStruct); It; ++It)
+		{
+			FProperty* Property = *It;
+			if (CastField<FObjectProperty>(Property))
+			{
+				continue;
+			}
+			
+			FName CategoryName =  FObjectEditorUtils::GetCategoryFName(Property);
+			if (CategoryName.IsNone())
+			{
+				CategoryName = Structure->CurrentRowName;
+			}
+			auto& Found = StructMembers.FindOrAdd(CategoryName);
+			Found.Add(Property);
+		}
+	}
+
+	return StructMembers;
+}
+
+const uint8* SUnrealDiffDataTableDetailTree::GetPropertyData(UDataTable* DataTable, const FProperty* InProperty)
+{
+	if (!DataTable)
+	{
+		return nullptr;
+	}
+
+	auto RowMap = DataTable->GetRowMap();
+	for (auto RowIt = RowMap.CreateConstIterator(); RowIt; ++RowIt)
+	{
+		for (TFieldIterator<FProperty> It(DataTable->RowStruct); It; ++It)
+		{
+			if (*It == InProperty)
+			{
+				return RowIt.Value();
+			}
+		}
+	}
+	
+	return nullptr;
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

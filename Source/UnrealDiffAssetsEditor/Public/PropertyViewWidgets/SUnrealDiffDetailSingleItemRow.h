@@ -16,9 +16,9 @@ public:
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
-	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TSharedRef<FUnrealDiffDetailTreeNode> InOwnerTreeNode);
+	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TSharedRef<class FUnrealDiffDetailTreeNode> InOwnerTreeNode);
 
-	TWeakPtr<FUnrealDiffDetailTreeNode> OwnerTreeNode;
+	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
 
 protected:
 	FSlateColor GetOuterBackgroundColor() const;

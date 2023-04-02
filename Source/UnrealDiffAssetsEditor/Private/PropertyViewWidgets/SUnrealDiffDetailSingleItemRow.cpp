@@ -18,7 +18,8 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TSharedRef<FUnrealDiffDetailTreeNode> InOwnerTreeNode)
 {
 	OwnerTreeNode = InOwnerTreeNode;
-	const FProperty* Property = OwnerTreeNode.Pin()->GetProperty(); 
+	check(OwnerTreeNode.Pin()->PropertyData.Get());
+	const FProperty* Property = OwnerTreeNode.Pin()->PropertyData->Property.Get(); 
 	
 	SUnrealDiffDetailView* DetailsView =  InOwnerTreeNode->GetDetailsView();
 	FUnrealDiffDetailColumnSizeData& ColumnSizeData = DetailsView->GetColumnSizeData();
@@ -43,7 +44,7 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 			.Value(ColumnSizeData.GetWholeRowColumnWidth())
 			.OnSlotResized(ColumnSizeData.GetOnWholeRowColumnResized())
 			[
-				SNew(SUnrealDiffPropertyValueWidget)
+				SNew(SUnrealDiffPropertyValueWidget, OwnerTreeNode)
 			]
 		];
 	
@@ -59,16 +60,6 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 			[
 				SNew( SHorizontalBox )
 				+ SHorizontalBox::Slot()
-				[
-					SNew(SBox)
-					.WidthOverride(16.f)
-					.HeightOverride(16.f)
-					[
-						SNew(SUnrealDiffDetailExpanderArrow, SharedThis(this))
-					]
-				]
-				
-				+ SHorizontalBox::Slot()
 				.HAlign(HAlign_Fill)
 				.VAlign(VAlign_Fill)
 				[
@@ -77,7 +68,28 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 					.BorderBackgroundColor(this, &SUnrealDiffDetailSingleItemRow::GetOuterBackgroundColor)
 					.Padding(0)
 					[
-						Widget
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot()
+						.AutoWidth()
+						[
+							SNew(SBorder)
+							.BorderImage(FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryMiddle"))
+							.BorderBackgroundColor(this, &SUnrealDiffDetailSingleItemRow::GetInnerBackgroundColor)
+							[
+								SNew(SBox)
+								.WidthOverride(16.f)
+								.HeightOverride(16.f)
+								[
+									SNew(SUnrealDiffDetailExpanderArrow, SharedThis(this))
+								]
+							]
+						]
+						+ SHorizontalBox::Slot()
+						.HAlign(HAlign_Fill)
+						.VAlign(VAlign_Fill)
+						[
+							Widget
+						]
 					]
 				]
 			]

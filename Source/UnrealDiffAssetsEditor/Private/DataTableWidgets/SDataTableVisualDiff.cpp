@@ -270,6 +270,29 @@ FReply SDataTableVisualDiff::OnKeyUp(const FGeometry& MyGeometry, const FKeyEven
 	return SCompoundWidget::OnKeyUp(MyGeometry, InKeyEvent);
 }
 
+const uint8* SDataTableVisualDiff::GetPropertyData(const FProperty* InProperty)
+{
+	UDataTable* DataTable = Cast<UDataTable>(LocalAsset);
+	if (!DataTable)
+	{
+		return nullptr;
+	}
+
+	auto RowMap = DataTable->GetRowMap();
+	for (auto RowIt = RowMap.CreateConstIterator(); RowIt; ++RowIt)
+	{
+		for (TFieldIterator<FProperty> It(DataTable->RowStruct); It; ++It)
+		{
+			if (*It == InProperty)
+			{
+				return RowIt.Value();
+			}
+		}
+	}
+	
+	return nullptr;
+}
+
 int32 SDataTableVisualDiff::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
                                     const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
                                     const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const

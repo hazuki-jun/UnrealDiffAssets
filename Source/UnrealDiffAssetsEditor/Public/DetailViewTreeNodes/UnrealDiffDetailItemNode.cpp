@@ -9,12 +9,17 @@ TSharedRef<ITableRow> FUnrealDiffDetailItemNode::GenerateWidgetForTableView(cons
 
 void FUnrealDiffDetailItemNode::GetChildren(TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& OutChildren)
 {
-	
-}
-
-const FProperty* FUnrealDiffDetailItemNode::GetProperty() const
-{
-	return Property.Get();
+	for (const auto Property : ChildPropertyArray)
+	{
+		TSharedPtr<FUnrealDiffDetailItemNode> CategoryNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+		CategoryNode->PropertyData = Property;
+		if (const FStructProperty* StructProp = CastField<FStructProperty>(Property->Property.Get()))
+		{
+			// return MakeShareable(new FStructOnScope(StructProp->Struct));
+		}
+		
+		OutChildren.Add(CategoryNode);
+	}
 }
 
 SUnrealDiffDetailView* FUnrealDiffDetailItemNode::GetDetailsView() const
