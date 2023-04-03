@@ -63,10 +63,7 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOn
 		TSharedPtr<FUnrealDiffCategoryItemNode> CategoryNode = MakeShareable(new FUnrealDiffCategoryItemNode(Category.Key, DetailView));
 		for (const auto Property : Category.Value)
 		{
-			TSharedPtr<FUnrealDiffPropertyData> PropertyData = MakeShareable(new FUnrealDiffPropertyData());
-			PropertyData->StructData = GetRowData(Property);
-			PropertyData->Property = Property;
-			CategoryNode->ChildPropertyArray.Add(PropertyData);
+			CategoryNode->ChildPropertyArray.Add(Property);
 		}
 		
 		CategoryNode->GenerateChildren();

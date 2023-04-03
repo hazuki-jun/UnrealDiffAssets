@@ -18,8 +18,8 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TSharedRef<FUnrealDiffDetailTreeNode> InOwnerTreeNode)
 {
 	OwnerTreeNode = InOwnerTreeNode;
-	check(OwnerTreeNode.Pin()->PropertyData.Get());
-	const FProperty* Property = OwnerTreeNode.Pin()->PropertyData->Property.Get(); 
+	check(OwnerTreeNode.Pin()->Property.Get());
+	const FProperty* Property = OwnerTreeNode.Pin()->Property.Get(); 
 	
 	SUnrealDiffDetailView* DetailsView =  InOwnerTreeNode->GetDetailsView();
 	FUnrealDiffDetailColumnSizeData& ColumnSizeData = DetailsView->GetColumnSizeData();

@@ -14,139 +14,8 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SUnrealDiffPropertyValueWidget::Construct(const FArguments& InArgs, TWeakPtr<FUnrealDiffDetailTreeNode> InOwnerTreeNode)
 {
 	OwnerTreeNode = InOwnerTreeNode;
-	const FProperty* Property = OwnerTreeNode.Pin().Get()->PropertyData->Property.Get();
+	const FProperty* Property = OwnerTreeNode.Pin().Get()->Property.Get();
 	FText Value = GetValueText(Property);
-	if (Property)
-	{
-		if (auto StructProperty = CastField<FStructProperty>(Property))
-		{
-			auto CppType = StructProperty->GetCPPType(nullptr, 0);
-			if (CppType.Equals(TEXT("FVector"), ESearchCase::IgnoreCase))
-			{
-				
-			}
-			else if (CppType.Equals(TEXT("FVector2D"), ESearchCase::IgnoreCase))
-			{
-				
-			}
-			else
-			{
-				
-			}
-		}
-		else if (CastField<FArrayProperty>(Property))
-		{
-			
-		}
-		else if (CastField<FSetProperty>(Property))
-		{
-			
-		}
-		else if (CastField<FMapProperty>(Property))
-		{
-			
-		}
-		// else if (auto FloatProperty = CastField<FFloatProperty>(Property))
-		// {
-			// FloatProperty->GetPropertyValue()
-			// FString ValueStr;
-			// const auto StructData = OwnerTreeNode.Pin().Get()->PropertyData->StructData;
-			// if (!StructData)
-			// {
-			// 	return;
-			// }
-			//
-			// Property->ExportText_InContainer(0, ValueStr, StructData, StructData, NULL, PPF_None);
-			// Value = DataTableUtils::GetPropertyValueAsText(Property, StructData);	
-		// }
-		else
-		{
-			if (const auto StructData = OwnerTreeNode.Pin().Get()->PropertyData->StructData)
-			{
-				const void* Data = Property->ContainerPtrToValuePtr<void>(StructData, 0);
-				
-				// Value = DataTableUtils::GetPropertyValueAsText(Property, StructData);
-			}
-			else
-			{
-				
-				if (auto StructOnScope = OwnerTreeNode.Pin().Get()->PropertyData->StructOnScope)
-				{
-					for (TPropertyValueIterator<const FProperty> It(StructOnScope->GetStruct(), StructOnScope->GetStructMemory()); It; ++It)
-					{
-						if (Property == It.Key())
-						{
-							const void* PropertyValue = It.Value();
-						}
-					}	
-				}
-			}
-			
-			// if (const auto StructData = OwnerTreeNode.Pin().Get()->PropertyData->StructData)
-			// {
-			// 	Value = DataTableUtils::GetPropertyValueAsText(Property, StructData);
-			// }
-			// else if (OwnerTreeNode.Pin().Get()->PropertyData->StructOnScope.IsValid())
-			// {
-			// 	auto Parnet = OwnerTreeNode.Pin().Get()->PropertyData->StructOnScope->GetStruct();
-			// 	
-			// 	auto StructMemory = OwnerTreeNode.Pin().Get()->PropertyData->StructOnScope->GetStructMemory();
-			// 	if (StructMemory && Parnet)
-			// 	{
-			// 		if(auto ValueAddress = Property->ContainerPtrToValuePtr<uint8>(StructMemory, 0))
-			// 		{
-			// 			if (*ValueAddress != '\0')
-			// 			{
-			// 				FString ValueStr;
-			// 				Property->ExportText_InContainer(0, ValueStr, Parnet, Parnet, NULL, PPF_None);
-			// 				Value = FText::FromString(ValueStr);	
-			// 			}
-			// 		}
-			// 	}
-			// }
-		}
-		// else if (auto IntProperty = CastField<FIntProperty>(Property))
-		// {
-		// 	const auto StructData = OwnerTreeNode.Pin().Get()->PropertyData->StructData;
-		// 	if (!StructData)
-		// 	{
-		// 		return;
-		// 	}
-		// 	int32 IntValue;
-		// 	IntProperty->GetValue_InContainer(StructData, &IntValue);
-		// 	Value = FText::FromString(FString::FromInt(IntValue));
-		// }
-		// else if (auto StrProperty = CastField<FStrProperty>(Property))
-		// {
-		// 	const auto StructData = OwnerTreeNode.Pin().Get()->PropertyData->StructData;
-		// 	if (!StructData)
-		// 	{
-		// 		return;
-		// 	}
-		// 	FString StrValue;
-		// 	StrProperty->GetValue_InContainer(StructData, &StrValue);
-		// 	Value = FText::FromString(StrValue);
-		// }
-		// else if (auto NameProperty = CastField<FNameProperty>(Property))
-		// {
-		// 	const auto StructData = OwnerTreeNode.Pin().Get()->PropertyData->StructData;
-		// 	if (!StructData)
-		// 	{
-		// 		return;
-		// 	}
-		// 	FName NameValue;
-		// 	NameProperty->GetValue_InContainer(StructData, &NameValue);
-		// 	Value = FText::FromName(NameValue);
-		// }
-		// else if (auto TextProperty = CastField<FTextProperty>(Property))
-		// {
-		// 	FString ValueStr;
-		// 	const auto StructData = OwnerTreeNode.Pin().Get()->PropertyData->StructData;
-		// 	Property->ExportText_InContainer(0, ValueStr, StructData, StructData, NULL, PPF_None);
-		// 	Value = DataTableUtils::GetPropertyValueAsText(Property, StructData);	
-		// }
-	}
-	
 	ChildSlot
 	[
 		SNew(SOverlay)
@@ -165,7 +34,7 @@ void SUnrealDiffPropertyValueWidget::Construct(const FArguments& InArgs, TWeakPt
 FText SUnrealDiffPropertyValueWidget::GetValueText(const FProperty* InProperty)
 {
 	FText OutText;
-	const void* StructData = GetRowData(OwnerTreeNode.Pin()->GetDetailsView()->GetCurrentRowName());
+	const void* StructData = OwnerTreeNode.Pin()->GetStructData(0);
 	
 	if (const FEnumProperty* EnumProp = CastField<const FEnumProperty>(InProperty))
 	{
@@ -181,19 +50,26 @@ FText SUnrealDiffPropertyValueWidget::GetValueText(const FProperty* InProperty)
 		}
 		else if (NumProp->IsInteger())
 		{
-			if (OwnerTreeNode.Pin()->PropertyData->ParentStructProperty.Get())
-			{
-				auto ParentStructData = OwnerTreeNode.Pin()->PropertyData->ParentStructProperty->ContainerPtrToValuePtr<void>(StructData);
-				auto ValueAddress =  NumProp->ContainerPtrToValuePtr<void>(ParentStructData, 0);
-				const int64 PropertyValue = NumProp->GetSignedIntPropertyValue(ValueAddress);
-				OutText = FText::FromString(FString::FromInt(PropertyValue));
-			}
-			else
+			if (StructData)
 			{
 				auto ValueAddress =  NumProp->ContainerPtrToValuePtr<void>(StructData, 0);
 				const int64 PropertyValue = NumProp->GetSignedIntPropertyValue(ValueAddress);
 				OutText = FText::FromString(FString::FromInt(PropertyValue));
 			}
+			
+			// if (OwnerTreeNode.Pin()->PropertyData->ParentStructProperty.Get())
+			// {
+			// 	auto ParentStructData = OwnerTreeNode.Pin()->PropertyData->ParentStructProperty->ContainerPtrToValuePtr<void>(StructData);
+			// 	auto ValueAddress =  NumProp->ContainerPtrToValuePtr<void>(ParentStructData, 0);
+			// 	const int64 PropertyValue = NumProp->GetSignedIntPropertyValue(ValueAddress);
+			// 	OutText = FText::FromString(FString::FromInt(PropertyValue));
+			// }
+			// else
+			// {
+			// 	auto ValueAddress =  NumProp->ContainerPtrToValuePtr<void>(StructData, 0);
+			// 	const int64 PropertyValue = NumProp->GetSignedIntPropertyValue(ValueAddress);
+			// 	OutText = FText::FromString(FString::FromInt(PropertyValue));
+			// }
 			// JsonWriter->WriteValue(Identifier, PropertyValue);
 		}
 		else if (NumProp->IsA(FFloatProperty::StaticClass()))

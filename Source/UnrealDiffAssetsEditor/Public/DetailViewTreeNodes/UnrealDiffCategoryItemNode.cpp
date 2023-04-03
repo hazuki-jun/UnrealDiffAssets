@@ -28,23 +28,30 @@ void FUnrealDiffCategoryItemNode::GenerateChildren()
 	for (const auto ChildPropertyData : ChildPropertyArray)
 	{
 		TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
-		DetailItemNode->PropertyData = ChildPropertyData;
-		if (const FStructProperty* StructProp = CastField<FStructProperty>(ChildPropertyData->Property.Get()))
-		{
-			if (DetailView)
-			{
-				for (TFieldIterator<FProperty> It(StructProp->Struct); It; ++It)
-				{
-					TSharedPtr<FStructOnScope> StructOnScope = MakeShareable(new FStructOnScope(StructProp->Struct));
-					TSharedPtr<FUnrealDiffPropertyData> TempPropertyData = MakeShareable(new FUnrealDiffPropertyData());
-					TempPropertyData->ParentStructProperty = StructProp;
-					TempPropertyData->Property = *It;
-					TempPropertyData->StructOnScope = StructOnScope;
-					DetailItemNode->ChildPropertyArray.Add(TempPropertyData);
-				}
-			}
-		}
+		DetailItemNode->Property = ChildPropertyData;
 		DetailItemNode->GenerateChildren();
+		DetailItemNode->ParentNode = AsShared();
 		Children.Add(DetailItemNode);
 	}
+}
+
+const void* FUnrealDiffCategoryItemNode::GetStructData(int32 ArrayIndex)
+{
+	if (!DetailView)
+	{
+		return nullptr;
+	}
+
+	if (auto DataTable = DetailView->GetDataTable())
+	{
+		for (const auto& RowIt : DataTable->GetRowMap())
+		{
+			if (RowIt.Key.IsEqual(DetailView->GetCurrentRowName()))
+			{
+				return RowIt.Value;
+			}
+		}
+	}
+
+	return nullptr;
 }

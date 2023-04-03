@@ -2,7 +2,6 @@
 
 #include "ObjectEditorUtils.h"
 #include "PropertyViewWidgets/SUnrealDiffDetailSingleItemRow.h"
-#include "PropertyViewWidgets/SUnrealDiffDetailView.h"
 
 TSharedRef<ITableRow> FUnrealDiffDetailItemNode::GenerateWidgetForTableView(const TSharedRef<STableViewBase>& OwnerTable)
 {
@@ -24,31 +23,34 @@ SUnrealDiffDetailView* FUnrealDiffDetailItemNode::GetDetailsView() const
 
 void FUnrealDiffDetailItemNode::GenerateChildren()
 {
-	for (const auto ChildProperty : ChildPropertyArray)
+	if (const FStructProperty* StructProp = CastField<FStructProperty>(Property.Get()))
 	{
-		TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
-		DetailItemNode->PropertyData = ChildProperty;
-		
-		if (const FStructProperty* StructProp = CastField<FStructProperty>(ChildProperty->Property.Get()))
+		for (TFieldIterator<FProperty> It(StructProp->Struct); It; ++It)
 		{
-			if (DetailView)
-			{
-				for (TFieldIterator<FProperty> It(StructProp->Struct); It; ++It)
-				{
-					// auto StructData = StructOnScope->GetStructMemory();
-					// TempPropertyData->StructData = It->ContainerPtrToValuePtr<uint8>(StructData, 0);
-					
-					TSharedPtr<FStructOnScope> StructOnScope = MakeShareable(new FStructOnScope(StructProp->Struct));
-					TSharedPtr<FUnrealDiffPropertyData> TempPropertyData = MakeShareable(new FUnrealDiffPropertyData());
-					TempPropertyData->ParentStructProperty = StructProp;
-					TempPropertyData->Property = *It;
-					TempPropertyData->StructOnScope = StructOnScope;
-					DetailItemNode->ChildPropertyArray.Add(TempPropertyData);
-				}
-			}		
+			TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+			DetailItemNode->Property = *It;
+			DetailItemNode->GenerateChildren();
+			DetailItemNode->ParentNode = AsShared();
+			Children.Add(DetailItemNode);
 		}
-		DetailItemNode->GenerateChildren();
-		Children.Add(DetailItemNode);
 	}
+}
+
+const void* FUnrealDiffDetailItemNode::GetStructData(int32 ArrayIndex)
+{
+	if (ParentNode.IsValid())
+	{
+		auto ParentStructData = ParentNode.Pin()->GetStructData();
+		if (const FStructProperty* StructProp = CastField<FStructProperty>(Property.Get()))
+		{
+			if (ParentStructData)
+			{
+				return StructProp->ContainerPtrToValuePtr<void>(ParentStructData, ArrayIndex);
+			}
+		}
+		return ParentStructData;
+	}
+	
+	return nullptr;
 }
 

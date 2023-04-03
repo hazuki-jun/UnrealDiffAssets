@@ -2,14 +2,6 @@
 
 #include "CoreMinimal.h"
 
-struct FUnrealDiffPropertyData
-{
-	TWeakFieldPtr<const class FStructProperty> ParentStructProperty = nullptr;
-	TWeakFieldPtr<const class FProperty> Property;
-	const uint8* StructData = nullptr;
-	TSharedPtr<FStructOnScope> StructOnScope;
-};
-
 class FUnrealDiffDetailTreeNode
 {
 public:
@@ -32,10 +24,11 @@ public:
 
 	/** @return The details view that this node is in */
 	virtual class SUnrealDiffDetailView* GetDetailsView() const = 0;
+
+	virtual const void* GetStructData(int32 ArrayIndex = 0) { return nullptr; }
 	
-	TSharedPtr<FUnrealDiffPropertyData> PropertyData;
-
-	TArray<TSharedPtr<FUnrealDiffPropertyData>> ChildPropertyArray;
-
+	TWeakFieldPtr<const class FProperty> Property;
+	
+protected:
 	TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> Children;
 };

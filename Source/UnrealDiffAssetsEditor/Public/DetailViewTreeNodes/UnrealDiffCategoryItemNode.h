@@ -17,8 +17,12 @@ public:
 	virtual class SUnrealDiffDetailView* GetDetailsView() const override;
 
 	virtual void GenerateChildren();
+
+	virtual const void* GetStructData(int32 ArrayIndex = 0) override;
 	
 	FName CategoryName;
 
 	class SUnrealDiffDetailView* DetailView;
+	
+	TArray<TWeakFieldPtr<const class FProperty>> ChildPropertyArray;
 };

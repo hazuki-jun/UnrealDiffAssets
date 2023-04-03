@@ -16,6 +16,10 @@ public:
 	virtual class SUnrealDiffDetailView* GetDetailsView() const override;
 
 	virtual void GenerateChildren();
+
+	virtual const void* GetStructData(int32 ArrayIndex = 0) override;
+
+	TWeakPtr<FUnrealDiffDetailTreeNode> ParentNode;
 	
 	class SUnrealDiffDetailView* DetailView;
 };
