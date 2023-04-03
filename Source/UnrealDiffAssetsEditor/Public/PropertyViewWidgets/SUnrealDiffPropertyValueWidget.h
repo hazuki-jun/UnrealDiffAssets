@@ -19,5 +19,9 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs, TWeakPtr<class FUnrealDiffDetailTreeNode> InOwnerTreeNode);
 
+	FText GetValueText(const FProperty* InProperty);
+
+	const void* GetRowData(const FName& RowName);
+	
 	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
 };

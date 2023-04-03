@@ -82,4 +82,19 @@ void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
 	}
 }
 
+UDataTable* SUnrealDiffDataTableRowDetailView::GetDataTable()
+{
+	if (DataTableVisualDiff)
+	{
+		return Cast<UDataTable>(DataTableVisualDiff->GetAssetObject(bIsLocal));
+	}
+	
+	return SUnrealDiffDetailView::GetDataTable();
+}
+
+FName SUnrealDiffDataTableRowDetailView::GetCurrentRowName()
+{
+	return RowName;
+}
+
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

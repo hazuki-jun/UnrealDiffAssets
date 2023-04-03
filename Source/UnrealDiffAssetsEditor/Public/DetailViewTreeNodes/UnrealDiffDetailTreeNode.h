@@ -4,8 +4,10 @@
 
 struct FUnrealDiffPropertyData
 {
+	TWeakFieldPtr<const class FStructProperty> ParentStructProperty = nullptr;
 	TWeakFieldPtr<const class FProperty> Property;
-	const uint8* RowData;
+	const uint8* StructData = nullptr;
+	TSharedPtr<FStructOnScope> StructOnScope;
 };
 
 class FUnrealDiffDetailTreeNode
@@ -30,8 +32,10 @@ public:
 
 	/** @return The details view that this node is in */
 	virtual class SUnrealDiffDetailView* GetDetailsView() const = 0;
-
+	
 	TSharedPtr<FUnrealDiffPropertyData> PropertyData;
 
 	TArray<TSharedPtr<FUnrealDiffPropertyData>> ChildPropertyArray;
+
+	TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> Children;
 };

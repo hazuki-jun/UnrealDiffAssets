@@ -19,9 +19,10 @@ void SUnrealDiffDataTableDetailTree::Construct(const FArguments& InArgs, class S
 	[
 		SAssignNew(MyTreeView, STreeView<TSharedPtr<FUnrealDiffDetailTreeNode>>)
 		//~ Begin TreeView Interface
-		.TreeItemsSource(&TreeNodes)
+		.TreeItemsSource(&RootTreeNodes)
 		.OnGenerateRow(this, &SUnrealDiffDataTableDetailTree::OnGenerateRowForDetailTree)
 		.OnGetChildren(this, &SUnrealDiffDataTableDetailTree::OnGetChildrenForDetailTree)
+		.OnExpansionChanged(this, &SUnrealDiffDataTableDetailTree::OnItemExpansionChanged)
 		//~ End TreeView Interface
 	];
 }
@@ -36,6 +37,17 @@ void SUnrealDiffDataTableDetailTree::OnGetChildrenForDetailTree(TSharedPtr<FUnre
 	InTreeNode->GetChildren(OutChildren);
 }
 
+void SUnrealDiffDataTableDetailTree::OnItemExpansionChanged(TSharedPtr<FUnrealDiffDetailTreeNode> TreeItem, bool bIsExpanded) const
+{
+	// TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> Children;
+	// TreeItem->GetChildren(Children);
+	//
+	// for (auto WeakChild : Children)
+	// {
+	// 	MyTreeView->SetItemExpansion(WeakChild, true);
+	// }
+}
+
 void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOnScope> Structure)
 {
 	if (!Structure.IsValid())
@@ -43,24 +55,22 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOn
 		return;
 	}
 
-	TMap<FName, TArray<FProperty*>> StructMembers;
-	TreeNodes.Empty();
-
-	StructMembers = GetStructMembers(Structure);
-
+	TMap<FName, TArray<FProperty*>> StructMembers = GetStructMembers(Structure);
+	RootTreeNodes.Empty();
+	
 	for (const auto& Category : StructMembers)
 	{
 		TSharedPtr<FUnrealDiffCategoryItemNode> CategoryNode = MakeShareable(new FUnrealDiffCategoryItemNode(Category.Key, DetailView));
-
 		for (const auto Property : Category.Value)
 		{
 			TSharedPtr<FUnrealDiffPropertyData> PropertyData = MakeShareable(new FUnrealDiffPropertyData());
-			PropertyData->RowData = GetPropertyData(Structure->DataTable, Property);
+			PropertyData->StructData = GetRowData(Property);
 			PropertyData->Property = Property;
 			CategoryNode->ChildPropertyArray.Add(PropertyData);
 		}
 		
-		TreeNodes.Add(CategoryNode);
+		CategoryNode->GenerateChildren();
+		RootTreeNodes.Add(CategoryNode);
 	}
 	
 	MyTreeView->RequestTreeRefresh();
@@ -94,8 +104,9 @@ TMap<FName, TArray<FProperty*>> SUnrealDiffDataTableDetailTree::GetStructMembers
 	return StructMembers;
 }
 
-const uint8* SUnrealDiffDataTableDetailTree::GetPropertyData(UDataTable* DataTable, const FProperty* InProperty)
+const uint8* SUnrealDiffDataTableDetailTree::GetRowData(const FProperty* InProperty)
 {
+	UDataTable* DataTable = Cast<UDataTable>(DetailView->GetDataTable());
 	if (!DataTable)
 	{
 		return nullptr;

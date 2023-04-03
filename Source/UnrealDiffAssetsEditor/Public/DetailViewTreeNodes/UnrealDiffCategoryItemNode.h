@@ -15,6 +15,8 @@ public:
 	virtual void GetChildren(TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& OutChildren) override;
 
 	virtual class SUnrealDiffDetailView* GetDetailsView() const override;
+
+	virtual void GenerateChildren();
 	
 	FName CategoryName;
 

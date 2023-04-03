@@ -1,6 +1,8 @@
 ﻿#include "UnrealDiffDetailItemNode.h"
 
+#include "ObjectEditorUtils.h"
 #include "PropertyViewWidgets/SUnrealDiffDetailSingleItemRow.h"
+#include "PropertyViewWidgets/SUnrealDiffDetailView.h"
 
 TSharedRef<ITableRow> FUnrealDiffDetailItemNode::GenerateWidgetForTableView(const TSharedRef<STableViewBase>& OwnerTable)
 {
@@ -9,16 +11,9 @@ TSharedRef<ITableRow> FUnrealDiffDetailItemNode::GenerateWidgetForTableView(cons
 
 void FUnrealDiffDetailItemNode::GetChildren(TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& OutChildren)
 {
-	for (const auto Property : ChildPropertyArray)
+	for (auto Child : Children)
 	{
-		TSharedPtr<FUnrealDiffDetailItemNode> CategoryNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
-		CategoryNode->PropertyData = Property;
-		if (const FStructProperty* StructProp = CastField<FStructProperty>(Property->Property.Get()))
-		{
-			// return MakeShareable(new FStructOnScope(StructProp->Struct));
-		}
-		
-		OutChildren.Add(CategoryNode);
+		OutChildren.Add(Child);
 	}
 }
 
@@ -26,3 +21,34 @@ SUnrealDiffDetailView* FUnrealDiffDetailItemNode::GetDetailsView() const
 {
 	return DetailView;
 }
+
+void FUnrealDiffDetailItemNode::GenerateChildren()
+{
+	for (const auto ChildProperty : ChildPropertyArray)
+	{
+		TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+		DetailItemNode->PropertyData = ChildProperty;
+		
+		if (const FStructProperty* StructProp = CastField<FStructProperty>(ChildProperty->Property.Get()))
+		{
+			if (DetailView)
+			{
+				for (TFieldIterator<FProperty> It(StructProp->Struct); It; ++It)
+				{
+					// auto StructData = StructOnScope->GetStructMemory();
+					// TempPropertyData->StructData = It->ContainerPtrToValuePtr<uint8>(StructData, 0);
+					
+					TSharedPtr<FStructOnScope> StructOnScope = MakeShareable(new FStructOnScope(StructProp->Struct));
+					TSharedPtr<FUnrealDiffPropertyData> TempPropertyData = MakeShareable(new FUnrealDiffPropertyData());
+					TempPropertyData->ParentStructProperty = StructProp;
+					TempPropertyData->Property = *It;
+					TempPropertyData->StructOnScope = StructOnScope;
+					DetailItemNode->ChildPropertyArray.Add(TempPropertyData);
+				}
+			}		
+		}
+		DetailItemNode->GenerateChildren();
+		Children.Add(DetailItemNode);
+	}
+}
+

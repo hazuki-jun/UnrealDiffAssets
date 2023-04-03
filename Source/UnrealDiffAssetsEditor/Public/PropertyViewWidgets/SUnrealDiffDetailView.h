@@ -20,4 +20,8 @@ public:
 
 public:
 	virtual class FUnrealDiffDetailColumnSizeData& GetColumnSizeData() = 0;
+
+	virtual UDataTable* GetDataTable() { return nullptr; }
+
+	virtual FName GetCurrentRowName() { return NAME_None; }
 };

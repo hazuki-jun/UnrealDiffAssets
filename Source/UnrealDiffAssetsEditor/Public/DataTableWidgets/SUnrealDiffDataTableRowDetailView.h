@@ -14,7 +14,6 @@ public:
 	TSharedPtr<class FStructOnScope> StructureData; 
 };
 
-
 /**
  * 
  */
@@ -33,7 +32,11 @@ public:
 	
 	void Refresh(const FName& InRowName);
 
+	//~ Begin SUnrealDiffDetailView Interface
 	virtual FUnrealDiffDetailColumnSizeData& GetColumnSizeData() override { return DetailColumnSizeData; }
+	virtual UDataTable* GetDataTable() override;
+	virtual FName GetCurrentRowName() override;
+	//~ Begin SUnrealDiffDetailView Interface
 	
 protected:
 	FUnrealDiffDetailColumnSizeData DetailColumnSizeData;

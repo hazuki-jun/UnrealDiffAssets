@@ -20,16 +20,17 @@ public:
 
 	TSharedRef<ITableRow> OnGenerateRowForDetailTree( TSharedPtr<class FUnrealDiffDetailTreeNode> InTreeNode, const TSharedRef<STableViewBase>& OwnerTable );
 	void OnGetChildrenForDetailTree( TSharedPtr<class FUnrealDiffDetailTreeNode> InTreeNode, TArray< TSharedPtr<class FUnrealDiffDetailTreeNode> >& OutChildren );
+	void OnItemExpansionChanged(TSharedPtr<class FUnrealDiffDetailTreeNode> TreeItem, bool bIsExpanded) const;
 	
-	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> TreeNodes;
+	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> RootTreeNodes;
 
 	void SetStructure(TSharedPtr<class FUnrealDiffStructOnScope> Structure);
 
 	TMap<FName, TArray<FProperty*>> GetStructMembers(TSharedPtr<class FUnrealDiffStructOnScope> Structure);
 	
-	const uint8* GetPropertyData(UDataTable* DataTable, const FProperty* InProperty);
-	
-	class SUnrealDiffDetailView* DetailView;
+	class SUnrealDiffDetailView* DetailView = nullptr;
+
+	const uint8* GetRowData(const FProperty* InProperty);
 	
 protected:
 	TSharedPtr<STreeView<TSharedPtr<class FUnrealDiffDetailTreeNode>>> MyTreeView;
