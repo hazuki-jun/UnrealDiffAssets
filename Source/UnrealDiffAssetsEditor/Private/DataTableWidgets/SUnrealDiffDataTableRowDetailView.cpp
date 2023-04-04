@@ -7,6 +7,7 @@
 #include "UnrealDiffWindowStyle.h"
 #include "DataTableWidgets/SUnrealDiffDataTableDetailRowSelector.h"
 #include "DataTableWidgets/SUnrealDiffDataTableDetailTree.h"
+#include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -15,17 +16,8 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 	bIsLocal = InArgs._IsLocal;
 	DataTableVisualDiff = InArgs._DataTableVisualDiff;
 	check(DataTableVisualDiff)
-	
-	if (bIsLocal)
-	{
-		DataTableVisualDiff->RowDetailViewLocal = SharedThis(this);
-	}
-	else
-	{
-		DataTableVisualDiff->RowDetailViewRemote = SharedThis(this);
-	}
 
-	SAssignNew(DetailTree, SUnrealDiffDataTableDetailTree, this);
+	SAssignNew(MyDetailTree, SUnrealDiffDataTableDetailTree, this);
 	// DetailTree->DetailView = AsWeak();
 	this->ChildSlot
 	[
@@ -38,7 +30,7 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 
 		+ SVerticalBox::Slot()
 		[
-			DetailTree.ToSharedRef()
+			MyDetailTree.ToSharedRef()
 		]
 	];
 }
@@ -59,7 +51,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableRowDetailView::BuildRowTitle()
 
 void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
 {
-	if (!DetailTree.IsValid())
+	if (!MyDetailTree.IsValid())
 	{
 		return;
 	}
@@ -77,7 +69,7 @@ void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
 		StructOnScope->CurrentRowName = InRowName;
 		StructOnScope->StructureData = DataTableVisualDiff->GetStructure();
 		
-		DetailTree->SetStructure(StructOnScope);
+		MyDetailTree->SetStructure(StructOnScope);
 		SetVisibility(EVisibility::SelfHitTestInvisible);
 	}
 }
@@ -96,5 +88,28 @@ FName SUnrealDiffDataTableRowDetailView::GetCurrentRowName()
 {
 	return RowName;
 }
+
+SDataTableVisualDiff* SUnrealDiffDataTableRowDetailView::GetDataTableVisualDiff()
+{
+	return DataTableVisualDiff.Get();
+}
+
+void SUnrealDiffDataTableRowDetailView::SetItemExpansion(bool bIsExpand, int32 NodeIndex)
+{
+	if (!MyDetailTree)
+	{
+		return;
+	}
+
+	for (int32 i = 0; i < AllNodes.Num(); ++i)
+	{
+		if (AllNodes[i]->GetNodeIndex() == NodeIndex)
+		{
+			MyDetailTree->SetItemExpansion(bIsExpand, AllNodes[i]);
+			return;
+		}
+	}
+}
+
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

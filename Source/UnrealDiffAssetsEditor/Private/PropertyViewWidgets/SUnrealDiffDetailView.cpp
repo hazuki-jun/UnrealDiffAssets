@@ -17,4 +17,21 @@ void SUnrealDiffDetailView::Construct(const FArguments& InArgs)
 	*/
 }
 
+
+void SUnrealDiffDetailView::AppendCacheNodes(TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> InNodes)
+{
+	AllNodes.Append(InNodes);
+}
+
+void SUnrealDiffDetailView::AddCacheNode(TSharedPtr<FUnrealDiffDetailTreeNode> InNode)
+{
+	AllNodes.Add(InNode);
+}
+
+TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> SUnrealDiffDetailView::GetCachedNodes() const
+{
+	return AllNodes;
+}
+
+
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

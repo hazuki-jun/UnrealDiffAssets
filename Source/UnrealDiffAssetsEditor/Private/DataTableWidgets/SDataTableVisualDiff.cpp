@@ -131,10 +131,22 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(FText InTitle, bool 
 
 TSharedRef<SWidget> SDataTableVisualDiff::BuildRowDetailView(bool bIsLocal)
 {
-	return SNew(SUnrealDiffDataTableRowDetailView)
+	if (bIsLocal)
+	{
+		SAssignNew(RowDetailViewLocal,SUnrealDiffDataTableRowDetailView)
 		.Visibility(EVisibility::Collapsed)
 		.IsLocal(bIsLocal)
 		.DataTableVisualDiff(SharedThis(this));
+		return RowDetailViewLocal.ToSharedRef();
+	}
+	else
+	{
+		SAssignNew(RowDetailViewRemote,SUnrealDiffDataTableRowDetailView)
+		.Visibility(EVisibility::Collapsed)
+		.IsLocal(bIsLocal)
+		.DataTableVisualDiff(SharedThis(this));
+		return RowDetailViewRemote.ToSharedRef();
+	}
 }
 
 TSharedPtr<FStructOnScope> SDataTableVisualDiff::GetStructure()
@@ -291,6 +303,24 @@ const uint8* SDataTableVisualDiff::GetPropertyData(const FProperty* InProperty)
 	}
 	
 	return nullptr;
+}
+
+void SDataTableVisualDiff::SyncExpandedAction(bool bIsLocal, bool bIsExpanded, int32 NodeIndex)
+{
+	if (bIsLocal)
+	{
+		if (RowDetailViewRemote)
+		{
+			RowDetailViewRemote->SetItemExpansion(bIsExpanded, NodeIndex);
+		}
+	}
+	else
+	{
+		if (RowDetailViewLocal)
+		{
+			RowDetailViewLocal->SetItemExpansion(bIsExpanded, NodeIndex);
+		}
+	}
 }
 
 int32 SDataTableVisualDiff::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,

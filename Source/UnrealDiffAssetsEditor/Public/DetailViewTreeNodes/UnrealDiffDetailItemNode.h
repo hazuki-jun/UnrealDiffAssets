@@ -22,4 +22,7 @@ public:
 	TWeakPtr<FUnrealDiffDetailTreeNode> ParentNode;
 	
 	class SUnrealDiffDetailView* DetailView;
+
+protected:
+	const void* GetContainerData(const void* InStructData);
 };

@@ -29,6 +29,20 @@ public:
 	
 	TWeakFieldPtr<const class FProperty> Property;
 	
+	bool bIsInContainer = false;
+
+	TWeakFieldPtr<const class FProperty> ContainerProperty;
+
+	uint8* RowDataInContainer = nullptr;
+	
+	int32 PropertyIndex = -1;
+	
+	int32 GetNodeIndex() const { return NodeIndex; }
+	
+	void SetNodeIndex(int32 InNodeIndex) { NodeIndex = InNodeIndex; }
+	
 protected:
 	TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> Children;
+
+	int32 NodeIndex = -1;
 };

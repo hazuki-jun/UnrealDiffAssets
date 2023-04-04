@@ -32,6 +32,8 @@ public:
 
 	const uint8* GetRowData(const FProperty* InProperty);
 	
+	void SetItemExpansion(bool bIsExpand, TSharedPtr<class FUnrealDiffDetailTreeNode> TreeItem);
+	
 protected:
 	TSharedPtr<STreeView<TSharedPtr<class FUnrealDiffDetailTreeNode>>> MyTreeView;
 };

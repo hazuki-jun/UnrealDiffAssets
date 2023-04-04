@@ -21,7 +21,11 @@ public:
 
 	FText GetValueText(const FProperty* InProperty);
 
-	const void* GetRowData(const FName& RowName);
+	FText GetValueTextInContainer(const FProperty* InProperty);
+
+	FText GetValueTextFromStructData(const void* InStructData, const FProperty* InProperty);
 	
 	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
 };
+
+

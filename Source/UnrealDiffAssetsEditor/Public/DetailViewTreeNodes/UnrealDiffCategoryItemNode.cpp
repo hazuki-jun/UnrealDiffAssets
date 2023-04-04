@@ -7,7 +7,7 @@
 
 TSharedRef<ITableRow> FUnrealDiffCategoryItemNode::GenerateWidgetForTableView(const TSharedRef<STableViewBase>& OwnerTable)
 {
-	return SNew(SUnrealDiffDetailCategoryRow, OwnerTable).CategoryName(CategoryName);
+	return SNew(SUnrealDiffDetailCategoryRow, OwnerTable, AsShared()).CategoryName(CategoryName);
 }
 
 void FUnrealDiffCategoryItemNode::GetChildren(TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& OutChildren)
@@ -28,9 +28,14 @@ void FUnrealDiffCategoryItemNode::GenerateChildren()
 	for (const auto ChildPropertyData : ChildPropertyArray)
 	{
 		TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+		if (DetailView)
+		{
+			DetailItemNode->SetNodeIndex(DetailView->GetCachedNodeNum());
+			DetailView->AddCacheNode(DetailItemNode);
+		}
+		DetailItemNode->ParentNode = AsShared();
 		DetailItemNode->Property = ChildPropertyData;
 		DetailItemNode->GenerateChildren();
-		DetailItemNode->ParentNode = AsShared();
 		Children.Add(DetailItemNode);
 	}
 }

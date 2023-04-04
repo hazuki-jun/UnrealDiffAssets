@@ -5,9 +5,11 @@
 
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
+#include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
 #include "PropertyViewWidgets/SUnrealDiffDetailExpanderArrow.h"
+#include "PropertyViewWidgets/SUnrealDiffDetailRowIndent.h"
 #include "PropertyViewWidgets/SUnrealDiffPropertyNameWidget.h"
 #include "PropertyViewWidgets/SUnrealDiffPropertyValueWidget.h"
 
@@ -19,7 +21,8 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 {
 	OwnerTreeNode = InOwnerTreeNode;
 	check(OwnerTreeNode.Pin()->Property.Get());
-	const FProperty* Property = OwnerTreeNode.Pin()->Property.Get(); 
+	
+	// const FProperty* Property = OwnerTreeNode.Pin()->Property.Get(); 
 	
 	SUnrealDiffDetailView* DetailsView =  InOwnerTreeNode->GetDetailsView();
 	FUnrealDiffDetailColumnSizeData& ColumnSizeData = DetailsView->GetColumnSizeData();
@@ -37,7 +40,7 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 			.Value(ColumnSizeData.GetWholeRowColumnWidth())
 			.OnSlotResized(ColumnSizeData.GetOnWholeRowColumnResized())
 			[
-				SNew(SUnrealDiffPropertyNameWidget).DisplayNameText(Property->GetDisplayNameText())
+				SNew(SUnrealDiffPropertyNameWidget, OwnerTreeNode)
 			]
 
 			+ SSplitter::Slot()
@@ -72,6 +75,12 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 						+ SHorizontalBox::Slot()
 						.AutoWidth()
 						[
+							SNew(SUnrealDiffDetailRowIndent, SharedThis(this))
+						]
+						
+						+ SHorizontalBox::Slot()
+						.AutoWidth()
+						[
 							SNew(SBorder)
 							.BorderImage(FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryMiddle"))
 							.BorderBackgroundColor(this, &SUnrealDiffDetailSingleItemRow::GetInnerBackgroundColor)
@@ -81,6 +90,7 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 								.HeightOverride(16.f)
 								[
 									SNew(SUnrealDiffDetailExpanderArrow, SharedThis(this))
+									.OnExpanderClicked(this, &SUnrealDiffDetailSingleItemRow::OnExpanderClicked)
 								]
 							]
 						]
@@ -101,6 +111,29 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 			.Style(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.TreeView.TableRow")
 			.ShowSelection(false),
 			InOwnerTableView);
+}
+
+void SUnrealDiffDetailSingleItemRow::OnExpanderClicked(bool bIsExpanded)
+{
+	if (!OwnerTreeNode.IsValid())
+	{
+		return;
+	}
+
+	auto DetailView = OwnerTreeNode.Pin()->GetDetailsView();
+	if (!DetailView)
+	{
+		return;
+	}
+
+	auto DataTableVisual = DetailView->GetDataTableVisualDiff();
+	
+	if (!DataTableVisual)
+	{
+		return;
+	}
+	
+	DataTableVisual->SyncExpandedAction(DetailView->IsLocalAsset(), bIsExpanded, OwnerTreeNode.Pin()->GetNodeIndex());
 }
 
 FSlateColor SUnrealDiffDetailSingleItemRow::GetOuterBackgroundColor() const

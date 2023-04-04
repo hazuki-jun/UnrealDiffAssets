@@ -65,8 +65,10 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOn
 		{
 			CategoryNode->ChildPropertyArray.Add(Property);
 		}
-		
+		CategoryNode->SetNodeIndex(DetailView->GetCachedNodeNum());
+		DetailView->AddCacheNode(CategoryNode);
 		CategoryNode->GenerateChildren();
+		
 		RootTreeNodes.Add(CategoryNode);
 	}
 	
@@ -122,6 +124,14 @@ const uint8* SUnrealDiffDataTableDetailTree::GetRowData(const FProperty* InPrope
 	}
 	
 	return nullptr;
+}
+
+void SUnrealDiffDataTableDetailTree::SetItemExpansion(bool bIsExpand, TSharedPtr<FUnrealDiffDetailTreeNode> TreeItem)
+{
+	if (MyTreeView)
+	{
+		MyTreeView->SetItemExpansion(TreeItem, bIsExpand);
+	}
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

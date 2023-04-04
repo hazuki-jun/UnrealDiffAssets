@@ -24,4 +24,16 @@ public:
 	virtual UDataTable* GetDataTable() { return nullptr; }
 
 	virtual FName GetCurrentRowName() { return NAME_None; }
+
+	virtual class SDataTableVisualDiff* GetDataTableVisualDiff() { return nullptr; }
+
+	virtual bool IsLocalAsset() { return true; }
+
+	void AppendCacheNodes(TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> InNodes);
+	void AddCacheNode(TSharedPtr<class FUnrealDiffDetailTreeNode> InNode);
+	int32 GetCachedNodeNum() const { return AllNodes.Num(); }
+	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> GetCachedNodes() const;
+	
+protected:
+	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> AllNodes;
 };

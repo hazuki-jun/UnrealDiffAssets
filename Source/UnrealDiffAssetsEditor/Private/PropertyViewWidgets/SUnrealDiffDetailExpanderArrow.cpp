@@ -14,7 +14,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SUnrealDiffDetailExpanderArrow::Construct(const FArguments& InArgs, TSharedPtr<class SUnrealDiffDetailTableRowBase> RowData)
 {
 	Row = RowData;
-	
+	OnExpanderClicked = InArgs._OnExpanderClicked;
 	ChildSlot
 	[
 	SNew(SBox)
@@ -25,7 +25,7 @@ void SUnrealDiffDetailExpanderArrow::Construct(const FArguments& InArgs, TShared
 			.VAlign(VAlign_Center)
 			.HAlign(HAlign_Center)
 			.ClickMethod(EButtonClickMethod::MouseDown)
-			.OnClicked(this, &SUnrealDiffDetailExpanderArrow::OnExpanderClicked)
+			.OnClicked(this, &SUnrealDiffDetailExpanderArrow::HandleOnExpanderClicked)
 			.ContentPadding(0)
 			.IsFocusable(false)
 			[
@@ -90,7 +90,7 @@ const FSlateBrush* SUnrealDiffDetailExpanderArrow::GetExpanderImage() const
 	return FUnrealDiffWindowStyle::GetAppSlateBrush(ResourceName);
 }
 
-FReply SUnrealDiffDetailExpanderArrow::OnExpanderClicked()
+FReply SUnrealDiffDetailExpanderArrow::HandleOnExpanderClicked()
 {
 	bIsExpanded = !bIsExpanded;
 	
@@ -99,18 +99,13 @@ FReply SUnrealDiffDetailExpanderArrow::OnExpanderClicked()
 	{
 		return FReply::Unhandled();
 	}
-
-	// Recurse the expansion if "shift" is being pressed
+	
 	const FModifierKeysState ModKeyState = FSlateApplication::Get().GetModifierKeys();
-	if (ModKeyState.IsShiftDown())
-	{
-		RowPtr->Private_OnExpanderArrowShiftClicked();
-	}
-	else
+	if (!ModKeyState.IsShiftDown())
 	{
 		RowPtr->ToggleExpansion();
 	}
-
+	OnExpanderClicked.ExecuteIfBound(bIsExpanded);
 	return FReply::Handled();
 }
 

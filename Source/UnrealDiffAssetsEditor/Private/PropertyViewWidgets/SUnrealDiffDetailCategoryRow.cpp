@@ -5,12 +5,17 @@
 
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
+#include "DataTableWidgets/SDataTableVisualDiff.h"
+#include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
 #include "PropertyViewWidgets/SUnrealDiffDetailExpanderArrow.h"
+#include "PropertyViewWidgets/SUnrealDiffDetailView.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView)
+void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode_)
 {
+	OwnerTreeNode = OwnerTreeNode_;
+	
 	TSharedRef<SHorizontalBox> HeaderBox = SNew(SHorizontalBox)
 		// + SHorizontalBox::Slot()
 		// .HAlign(HAlign_Left)
@@ -26,6 +31,7 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSh
 		.AutoWidth()
 		[
 			SNew(SUnrealDiffDetailExpanderArrow, SharedThis(this))
+			.OnExpanderClicked(this, &SUnrealDiffDetailCategoryRow::OnExpanderClicked)
 		]
 		+ SHorizontalBox::Slot()
 		.VAlign(VAlign_Center)
@@ -78,6 +84,29 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSh
 		.Style(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.TreeView.TableRow")
 		.ShowSelection(false),
 		InOwnerTableView);
+}
+
+void SUnrealDiffDetailCategoryRow::OnExpanderClicked(bool bIsExpanded)
+{
+	if (!OwnerTreeNode.IsValid())
+	{
+		return;
+	}
+
+	auto DetailView = OwnerTreeNode.Pin()->GetDetailsView();
+	if (!DetailView)
+	{
+		return;
+	}
+
+	auto DataTableVisual = DetailView->GetDataTableVisualDiff();
+	
+	if (!DataTableVisual)
+	{
+		return;
+	}
+	
+	DataTableVisual->SyncExpandedAction(DetailView->IsLocalAsset(), bIsExpanded, OwnerTreeNode.Pin()->GetNodeIndex());
 }
 
 const FSlateBrush* SUnrealDiffDetailCategoryRow::GetBackgroundImage() const

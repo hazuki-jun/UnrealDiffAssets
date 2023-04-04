@@ -84,6 +84,7 @@ public:
 
 	//~ Begin Row Detail View
 	const uint8* GetPropertyData(const FProperty* InProperty);
+	void SyncExpandedAction(bool bIsLocal, bool bIsExpanded, int32 NodeIndex);
 	//~ End Row Detail View
 	
 public:
@@ -103,7 +104,7 @@ public:
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutRemote;
 	TSharedPtr<class SUnrealDiffDataTableRowDetailView> RowDetailViewLocal;
 	TSharedPtr<class SUnrealDiffDataTableRowDetailView> RowDetailViewRemote;
-
+	
 protected:
 	TSharedPtr<SWindow> ParentWindow;
 	

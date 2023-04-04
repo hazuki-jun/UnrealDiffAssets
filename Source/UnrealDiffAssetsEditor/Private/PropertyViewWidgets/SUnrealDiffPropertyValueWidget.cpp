@@ -5,7 +5,6 @@
 
 #include "SlateOptMacros.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
-#include "PropertyViewWidgets/SUnrealDiffDetailView.h"
 
 #define LOCTEXT_NAMESPACE "SUnrealDiffPropertyValueWidget"
 
@@ -23,8 +22,11 @@ void SUnrealDiffPropertyValueWidget::Construct(const FArguments& InArgs, TWeakPt
 		.VAlign(VAlign_Center)
 		[
 			SNew(SBox)
+			.Padding(FMargin(10.f, 0.f, 10.f, 0.f))
 			[
-				SNew(STextBlock)
+				SNew(SEditableTextBox)
+				.IsReadOnly(true)
+				.BackgroundColor(FSlateColor(FLinearColor(0.f, 0.f, 0.f)))
 				.Text(Value)
 			]
 		]
@@ -34,65 +36,142 @@ void SUnrealDiffPropertyValueWidget::Construct(const FArguments& InArgs, TWeakPt
 FText SUnrealDiffPropertyValueWidget::GetValueText(const FProperty* InProperty)
 {
 	FText OutText;
+
+	if (!OwnerTreeNode.IsValid())
+	{
+		return OutText;
+	}
+
+	if (OwnerTreeNode.Pin()->bIsInContainer)
+	{
+		return GetValueTextInContainer(InProperty);
+	}
+	
 	const void* StructData = OwnerTreeNode.Pin()->GetStructData(0);
+	OutText = GetValueTextFromStructData(StructData, InProperty);
+	return OutText;
+}
+
+FText SUnrealDiffPropertyValueWidget::GetValueTextInContainer(const FProperty* InProperty)
+{
+	FText OutText;
+
+	if (!OwnerTreeNode.IsValid() || !InProperty)
+	{
+		return OutText;
+	}
+
+	if (CastField<const FArrayProperty>(InProperty))
+	{
+		SetVisibility(EVisibility::Collapsed);
+		return OutText;
+	}
+	else if (CastField<const FSetProperty>(InProperty))
+	{
+		SetVisibility(EVisibility::Collapsed);
+		return OutText;
+	}
+	else if (CastField<const FMapProperty>(InProperty))
+	{
+		SetVisibility(EVisibility::Collapsed);
+		return OutText;
+	}
+	else if (CastField<const FStructProperty>(InProperty))
+	{
+		SetVisibility(EVisibility::Collapsed);
+		return OutText;
+	}
+	
+	auto StructData = OwnerTreeNode.Pin()->GetStructData();
+	
+	const FProperty* ContainerProperty = OwnerTreeNode.Pin()->ContainerProperty.Get();
+	if (const FArrayProperty* ArrayProp = CastField<const FArrayProperty>(ContainerProperty))
+	{
+		FScriptArrayHelper ArrayHelper(ArrayProp, StructData);
+		if (ArrayHelper.IsValidIndex(OwnerTreeNode.Pin()->PropertyIndex))
+		{
+			const uint8* ArrayEntryData = ArrayHelper.GetRawPtr(OwnerTreeNode.Pin()->PropertyIndex);
+			return GetValueTextFromStructData(ArrayEntryData, InProperty);
+		}	
+	}
+	else if (const FSetProperty* SetProp = CastField<const FSetProperty>(ContainerProperty))
+	{
+		FScriptSetHelper SetHelper(SetProp, StructData);
+		if (SetHelper.IsValidIndex(OwnerTreeNode.Pin()->PropertyIndex))
+		{
+			const uint8* SetEntryData = SetHelper.GetElementPtr(OwnerTreeNode.Pin()->PropertyIndex);
+			return GetValueTextFromStructData(SetEntryData, InProperty);
+		}	
+	}
+	else if (const FMapProperty* MapProp = CastField<const FMapProperty>(ContainerProperty))
+	{
+
+	}
+	
+	return OutText;
+}
+
+FText SUnrealDiffPropertyValueWidget::GetValueTextFromStructData(const void* InStructData, const FProperty* InProperty)
+{
+	FText OutText;
+
+	if (!InStructData || !InProperty)
+	{
+		return OutText;
+	}
 	
 	if (const FEnumProperty* EnumProp = CastField<const FEnumProperty>(InProperty))
 	{
-		// const FString PropertyValue = DataTableUtils::GetPropertyValueAsString(EnumProp, (uint8*)InRowData, DTExportFlags);
-		// JsonWriter->WriteValue(Identifier, PropertyValue);
+		OutText = DataTableUtils::GetPropertyValueAsText(EnumProp, (uint8*)InStructData);
 	}
 	else if (const FNumericProperty *NumProp = CastField<const FNumericProperty>(InProperty))
 	{
 		if (NumProp->IsEnum())
 		{
-			// const FString PropertyValue = DataTableUtils::GetPropertyValueAsString(InProperty, (uint8*)InRowData, DTExportFlags);
-			// JsonWriter->WriteValue(Identifier, PropertyValue);
+			OutText = DataTableUtils::GetPropertyValueAsText(EnumProp, (uint8*)InStructData);
 		}
 		else if (NumProp->IsInteger())
 		{
-			if (StructData)
+			if (InStructData)
 			{
-				auto ValueAddress =  NumProp->ContainerPtrToValuePtr<void>(StructData, 0);
+				auto ValueAddress =  NumProp->ContainerPtrToValuePtr<void>(InStructData, 0);
 				const int64 PropertyValue = NumProp->GetSignedIntPropertyValue(ValueAddress);
 				OutText = FText::FromString(FString::FromInt(PropertyValue));
 			}
-			
-			// if (OwnerTreeNode.Pin()->PropertyData->ParentStructProperty.Get())
-			// {
-			// 	auto ParentStructData = OwnerTreeNode.Pin()->PropertyData->ParentStructProperty->ContainerPtrToValuePtr<void>(StructData);
-			// 	auto ValueAddress =  NumProp->ContainerPtrToValuePtr<void>(ParentStructData, 0);
-			// 	const int64 PropertyValue = NumProp->GetSignedIntPropertyValue(ValueAddress);
-			// 	OutText = FText::FromString(FString::FromInt(PropertyValue));
-			// }
-			// else
-			// {
-			// 	auto ValueAddress =  NumProp->ContainerPtrToValuePtr<void>(StructData, 0);
-			// 	const int64 PropertyValue = NumProp->GetSignedIntPropertyValue(ValueAddress);
-			// 	OutText = FText::FromString(FString::FromInt(PropertyValue));
-			// }
-			// JsonWriter->WriteValue(Identifier, PropertyValue);
 		}
 		else if (NumProp->IsA(FFloatProperty::StaticClass()))
 		{
-			// const float PropertyValue = (float)NumProp->GetFloatingPointPropertyValue(InPropertyData);
-			// JsonWriter->WriteValue(Identifier, PropertyValue);
+			OutText = DataTableUtils::GetPropertyValueAsText(NumProp, (uint8*)InStructData);
+			if (OutText.IsEmpty())
+			{
+				OutText = FText::FromString(TEXT("0.0"));
+			}
+			// const float PropertyValue = (float)NumProp->GetFloatingPointPropertyValue(InStructData);
+			// OutText = FText::FromString(FString::Format(TEXT("{0}"), { PropertyValue }));
 		}
 		else
 		{
-			// const double PropertyValue = NumProp->GetFloatingPointPropertyValue(InPropertyData);
-			// JsonWriter->WriteValue(Identifier, PropertyValue);
+			OutText = DataTableUtils::GetPropertyValueAsText(NumProp, (uint8*)InStructData);
+			if (OutText.IsEmpty())
+			{
+				OutText = FText::FromString(TEXT("0.0"));
+			}
+			
+			// const double PropertyValue = NumProp->GetFloatingPointPropertyValue(InStructData);
+			// OutText = FText::FromString(FString::Format(TEXT("{0}"), { PropertyValue }));
 		}
 	}
 	else if (const FBoolProperty* BoolProp = CastField<const FBoolProperty>(InProperty))
 	{
-		// const bool PropertyValue = BoolProp->GetPropertyValue(InPropertyData);
-		// JsonWriter->WriteValue(Identifier, PropertyValue);
+		const bool PropertyValue = BoolProp->GetPropertyValue(InStructData);
+		OutText = FText::FromString(PropertyValue ? TEXT("true") : TEXT("false"));
 	}
 	else if (const FArrayProperty* ArrayProp = CastField<const FArrayProperty>(InProperty))
 	{
+		SetVisibility(EVisibility::Collapsed);
 		// JsonWriter->WriteArrayStart(Identifier);
 		//
-		// FScriptArrayHelper ArrayHelper(ArrayProp, InPropertyData);
+		// FScriptArrayHelper ArrayHelper(ArrayProp, InStructData);
 		// for (int32 ArrayEntryIndex = 0; ArrayEntryIndex < ArrayHelper.Num(); ++ArrayEntryIndex)
 		// {
 		// 	const uint8* ArrayEntryData = ArrayHelper.GetRawPtr(ArrayEntryIndex);
@@ -103,9 +182,10 @@ FText SUnrealDiffPropertyValueWidget::GetValueText(const FProperty* InProperty)
 	}
 	else if (const FSetProperty* SetProp = CastField<const FSetProperty>(InProperty))
 	{
+		SetVisibility(EVisibility::Collapsed);
 		// JsonWriter->WriteArrayStart(Identifier);
 		//
-		// FScriptSetHelper SetHelper(SetProp, InPropertyData);
+		// FScriptSetHelper SetHelper(SetProp, InStructData);
 		// for (int32 SetSparseIndex = 0; SetSparseIndex < SetHelper.GetMaxIndex(); ++SetSparseIndex)
 		// {
 		// 	if (SetHelper.IsValidIndex(SetSparseIndex))
@@ -119,62 +199,36 @@ FText SUnrealDiffPropertyValueWidget::GetValueText(const FProperty* InProperty)
 	}
 	else if (const FMapProperty* MapProp = CastField<const FMapProperty>(InProperty))
 	{
+		SetVisibility(EVisibility::Collapsed);
 		// JsonWriter->WriteObjectStart(Identifier);
 		//
-		// FScriptMapHelper MapHelper(MapProp, InPropertyData);
+		// FScriptMapHelper MapHelper(MapProp, StructData);
 		// for (int32 MapSparseIndex = 0; MapSparseIndex < MapHelper.GetMaxIndex(); ++MapSparseIndex)
 		// {
-		// 	if (MapHelper.IsValidIndex(MapSparseIndex))
+		// 	if (MapHelper.IsValidIndex(MapSparseIndex) && OwnerTreeNode.Pin()->PropertyIndex == MapSparseIndex)
 		// 	{
 		// 		const uint8* MapKeyData = MapHelper.GetKeyPtr(MapSparseIndex);
 		// 		const uint8* MapValueData = MapHelper.GetValuePtr(MapSparseIndex);
-		//
-		// 		// JSON object keys must always be strings
-		// 		const FString KeyValue = DataTableUtils::GetPropertyValueAsStringDirect(MapHelper.GetKeyProperty(), (uint8*)MapKeyData, DTExportFlags);
-		// 		WriteContainerEntry(MapHelper.GetValueProperty(), MapValueData, &KeyValue);
+		// 		OutText = DataTableUtils::GetPropertyValueAsText(MapHelper.GetValueProperty(), MapValueData);
+		// 		// OutText = DataTableUtils::GetPropertyValueAsText(MapHelper.GetKeyProperty(), MapKeyData);
+		// 		break;
 		// 	}
 		// }
-		//
-		// JsonWriter->WriteObjectEnd();
 	}
 	else if (const FStructProperty* StructProp = CastField<const FStructProperty>(InProperty))
 	{
-		// if (!!(DTExportFlags & EDataTableExportFlags::UseJsonObjectsForStructs))
-		// {
-		// 	JsonWriter->WriteObjectStart(Identifier);
-		// 	WriteStruct(StructProp->Struct, InPropertyData);
-		// 	JsonWriter->WriteObjectEnd();
-		// }
-		// else
-		// {
-		// 	const FString PropertyValue = DataTableUtils::GetPropertyValueAsString(InProperty, (uint8*)InRowData, DTExportFlags);
-		// 	JsonWriter->WriteValue(Identifier, PropertyValue);
-		// }
+		SetVisibility(EVisibility::Collapsed);
 	}
 	else
 	{
-		// const FString PropertyValue = DataTableUtils::GetPropertyValueAsString(InProperty, (uint8*)InRowData, DTExportFlags);
-		// JsonWriter->WriteValue(Identifier, PropertyValue);
-	}
-
-	return OutText;
-}
-
-const void* SUnrealDiffPropertyValueWidget::GetRowData(const FName& RowName)
-{
-	auto DataTable = OwnerTreeNode.Pin()->GetDetailsView()->GetDataTable();
-	if (DataTable)
-	{
-		for (const auto& RowIt : DataTable->GetRowMap())
+		OutText = DataTableUtils::GetPropertyValueAsText(InProperty, (uint8*)InStructData);
+		if (OutText.IsEmpty())
 		{
-			if (RowIt.Key.IsEqual(RowName))
-			{
-				return RowIt.Value;
-			}
+			OutText = FText::FromString(TEXT("None"));
 		}
 	}
-
-	return nullptr;
+	
+	return OutText;	
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

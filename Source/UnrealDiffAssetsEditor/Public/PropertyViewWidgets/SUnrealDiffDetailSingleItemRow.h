@@ -20,6 +20,8 @@ public:
 
 	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
 
+	virtual void OnExpanderClicked(bool bIsExpanded) override;
+
 protected:
 	FSlateColor GetOuterBackgroundColor() const;
 	FSlateColor GetInnerBackgroundColor() const;

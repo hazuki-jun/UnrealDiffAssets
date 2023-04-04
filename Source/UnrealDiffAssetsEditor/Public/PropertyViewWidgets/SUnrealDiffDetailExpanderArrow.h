@@ -11,8 +11,10 @@
 class UNREALDIFFASSETSEDITOR_API SUnrealDiffDetailExpanderArrow : public SCompoundWidget
 {
 public:
+	DECLARE_DELEGATE_OneParam(FOnExpanderClicked, bool)
+	
 	SLATE_BEGIN_ARGS(SUnrealDiffDetailExpanderArrow) {}
-
+		SLATE_EVENT(FOnExpanderClicked, OnExpanderClicked)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -22,10 +24,11 @@ private:
 
 	EVisibility GetExpanderVisibility() const;
 	const FSlateBrush* GetExpanderImage() const;
-	FReply OnExpanderClicked();
+	FReply HandleOnExpanderClicked();
 	
 private:
 	bool bIsExpanded = false;
 	TWeakPtr<class SUnrealDiffDetailTableRowBase> Row;
 	TSharedPtr<SButton> ExpanderArrow;
+	FOnExpanderClicked OnExpanderClicked;
 };

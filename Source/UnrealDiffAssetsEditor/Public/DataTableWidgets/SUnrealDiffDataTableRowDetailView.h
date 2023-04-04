@@ -36,8 +36,12 @@ public:
 	virtual FUnrealDiffDetailColumnSizeData& GetColumnSizeData() override { return DetailColumnSizeData; }
 	virtual UDataTable* GetDataTable() override;
 	virtual FName GetCurrentRowName() override;
+	virtual SDataTableVisualDiff* GetDataTableVisualDiff() override;
+	virtual bool IsLocalAsset() override { return bIsLocal; }
 	//~ Begin SUnrealDiffDetailView Interface
-	
+
+	void SetItemExpansion(bool bIsExpand, int32 NodeIndex);
+
 protected:
 	FUnrealDiffDetailColumnSizeData DetailColumnSizeData;
 	
@@ -47,7 +51,7 @@ protected:
 	
 	TSharedPtr<class SDataTableVisualDiff> DataTableVisualDiff;
 
-	TSharedPtr<class SUnrealDiffDataTableDetailTree> DetailTree;
+	TSharedPtr<class SUnrealDiffDataTableDetailTree> MyDetailTree;
 	
 	FName RowName;
 };

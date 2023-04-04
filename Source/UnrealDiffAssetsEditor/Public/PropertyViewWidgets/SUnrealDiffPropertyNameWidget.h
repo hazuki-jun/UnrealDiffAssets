@@ -12,9 +12,9 @@ class UNREALDIFFASSETSEDITOR_API SUnrealDiffPropertyNameWidget : public SCompoun
 {
 public:
 	SLATE_BEGIN_ARGS(SUnrealDiffPropertyNameWidget) {}
-		SLATE_ARGUMENT(FText, DisplayNameText)
+		// SLATE_ARGUMENT(FText, DisplayNameText)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
-	void Construct(const FArguments& InArgs);
+	void Construct(const FArguments& InArgs, TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerNode);
 };

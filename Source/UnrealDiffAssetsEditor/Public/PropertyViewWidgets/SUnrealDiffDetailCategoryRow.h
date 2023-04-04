@@ -15,10 +15,13 @@ public:
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
-	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView);
+	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode_);
+	virtual void OnExpanderClicked(bool bIsExpanded) override;
 	
 protected:
 	const FSlateBrush* GetBackgroundImage() const;
 	FSlateColor GetInnerBackgroundColor() const;
 	FSlateColor GetOuterBackgroundColor() const;
+
+	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
 };
