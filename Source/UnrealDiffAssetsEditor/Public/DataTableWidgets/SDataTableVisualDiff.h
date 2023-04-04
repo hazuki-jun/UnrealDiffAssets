@@ -84,7 +84,8 @@ public:
 
 	//~ Begin Row Detail View
 	const uint8* GetPropertyData(const FProperty* InProperty);
-	void SyncExpandedAction(bool bIsLocal, bool bIsExpanded, int32 NodeIndex);
+	void SyncDetailViewAction_Expanded(bool bIsLocal, bool bIsExpanded, int32 NodeIndex);
+	void SyncDetailViewAction_VerticalScrollOffset(bool bIsLocal, float ScrollOffset);
 	//~ End Row Detail View
 	
 public:

@@ -133,7 +133,13 @@ void SUnrealDiffDetailSingleItemRow::OnExpanderClicked(bool bIsExpanded)
 		return;
 	}
 	
-	DataTableVisual->SyncExpandedAction(DetailView->IsLocalAsset(), bIsExpanded, OwnerTreeNode.Pin()->GetNodeIndex());
+	DataTableVisual->SyncDetailViewAction_Expanded(DetailView->IsLocalAsset(), bIsExpanded, OwnerTreeNode.Pin()->GetNodeIndex());
+}
+
+int32 SUnrealDiffDetailSingleItemRow::GetIndentLevelForBackgroundColor()
+{
+	IndentLevel = GetIndentLevel() - 1;
+	return IndentLevel;
 }
 
 FSlateColor SUnrealDiffDetailSingleItemRow::GetOuterBackgroundColor() const

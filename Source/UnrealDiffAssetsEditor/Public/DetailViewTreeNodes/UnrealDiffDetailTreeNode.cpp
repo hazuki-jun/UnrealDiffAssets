@@ -8,3 +8,8 @@ FUnrealDiffDetailTreeNode::~FUnrealDiffDetailTreeNode()
 {
 }
 
+const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& FUnrealDiffDetailTreeNode::GetChildNodes()
+{
+	return Children;
+}
+

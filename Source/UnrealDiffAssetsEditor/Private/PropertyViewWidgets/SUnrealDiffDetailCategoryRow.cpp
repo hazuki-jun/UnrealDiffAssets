@@ -15,6 +15,28 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode_)
 {
 	OwnerTreeNode = OwnerTreeNode_;
+	bool bHasAnyDifference = false;
+	
+	const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& ChildNodes = OwnerTreeNode.Pin()->GetChildNodes();
+	for (int32 i = 0; i < ChildNodes.Num(); ++i)
+	{
+		if (ChildNodes[i] && ChildNodes[i]->bHasAnyDifference)
+		{
+			OwnerTreeNode.Pin()->bHasAnyDifference = true;
+			bHasAnyDifference = true;
+			break;
+		}
+	}
+	
+	FSlateColor SlateColor;
+	if (bHasAnyDifference)
+	{
+		SlateColor = FLinearColor(1.0, 1.0, 0.1, 1.0);
+	}
+	else
+	{
+		SlateColor = FLinearColor(1.f, 1.f, 1.f, 1.f);	
+	}
 	
 	TSharedRef<SHorizontalBox> HeaderBox = SNew(SHorizontalBox)
 		// + SHorizontalBox::Slot()
@@ -43,8 +65,8 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSh
 			// .Text(InArgs._DisplayName)
 			// .Font(FAppStyle::Get().GetFontStyle(bIsInnerCategory ? PropertyEditorConstants::PropertyFontStyle : PropertyEditorConstants::CategoryFontStyle))
 			.TextStyle(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.CategoryTextStyle")
+			.ColorAndOpacity(SlateColor)
 		];
-	
 	
 	this->ChildSlot
 	[
@@ -106,7 +128,7 @@ void SUnrealDiffDetailCategoryRow::OnExpanderClicked(bool bIsExpanded)
 		return;
 	}
 	
-	DataTableVisual->SyncExpandedAction(DetailView->IsLocalAsset(), bIsExpanded, OwnerTreeNode.Pin()->GetNodeIndex());
+	DataTableVisual->SyncDetailViewAction_Expanded(DetailView->IsLocalAsset(), bIsExpanded, OwnerTreeNode.Pin()->GetNodeIndex());
 }
 
 const FSlateBrush* SUnrealDiffDetailCategoryRow::GetBackgroundImage() const

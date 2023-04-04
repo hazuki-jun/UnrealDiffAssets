@@ -37,6 +37,10 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 			DetailItemNode->ParentNode = AsShared();
 			DetailItemNode->Property = *It;
 			DetailItemNode->GenerateChildren();
+			if (const auto StructData = GetStructData(0))
+			{
+				DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(*It, (const uint8*)StructData);
+			}
 			Children.Add(DetailItemNode);
 		}
 	}
@@ -90,9 +94,12 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 				DetailItemNode->Property = SetHelper.GetElementProperty();
 				DetailItemNode->ParentNode = AsShared();
 				DetailItemNode->RowDataInContainer = SetHelper.GetElementPtr(SetSparseIndex);
+				if (DetailItemNode->RowDataInContainer)
+				{
+					DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(DetailItemNode->Property.Get(), DetailItemNode->RowDataInContainer);
+				}
 				DetailItemNode->GenerateChildren();
 				Children.Add(DetailItemNode);
-				// const uint8* SetEntryData = SetHelper.GetElementPtr(SetSparseIndex);
 			}
 		}
 	}
@@ -117,6 +124,10 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 			DetailItemNode->PropertyIndex = ArrayEntryIndex;
 			DetailItemNode->Property = ArrayProp->Inner;
 			DetailItemNode->RowDataInContainer = ArrayHelper.GetRawPtr(ArrayEntryIndex);
+			if (DetailItemNode->RowDataInContainer)
+			{
+				DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(DetailItemNode->Property.Get(), DetailItemNode->RowDataInContainer);
+			}
 			DetailItemNode->ParentNode = AsShared();
 			DetailItemNode->GenerateChildren();
 			Children.Add(DetailItemNode);

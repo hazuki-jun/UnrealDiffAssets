@@ -40,6 +40,12 @@ public:
 	int32 GetNodeIndex() const { return NodeIndex; }
 	
 	void SetNodeIndex(int32 InNodeIndex) { NodeIndex = InNodeIndex; }
+
+	FText ValueText;
+	
+	bool bHasAnyDifference = false;
+
+	const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& GetChildNodes();
 	
 protected:
 	TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> Children;

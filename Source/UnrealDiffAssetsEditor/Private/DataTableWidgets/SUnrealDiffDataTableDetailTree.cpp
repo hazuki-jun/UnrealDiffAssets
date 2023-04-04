@@ -5,6 +5,7 @@
 
 #include "ObjectEditorUtils.h"
 #include "SlateOptMacros.h"
+#include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffCategoryItemNode.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailItemNode.h"
@@ -23,6 +24,7 @@ void SUnrealDiffDataTableDetailTree::Construct(const FArguments& InArgs, class S
 		.OnGenerateRow(this, &SUnrealDiffDataTableDetailTree::OnGenerateRowForDetailTree)
 		.OnGetChildren(this, &SUnrealDiffDataTableDetailTree::OnGetChildrenForDetailTree)
 		.OnExpansionChanged(this, &SUnrealDiffDataTableDetailTree::OnItemExpansionChanged)
+		.OnTreeViewScrolled(this, &SUnrealDiffDataTableDetailTree::HandleTableViewScrolled)
 		//~ End TreeView Interface
 	];
 }
@@ -46,6 +48,14 @@ void SUnrealDiffDataTableDetailTree::OnItemExpansionChanged(TSharedPtr<FUnrealDi
 	// {
 	// 	MyTreeView->SetItemExpansion(WeakChild, true);
 	// }
+}
+
+void SUnrealDiffDataTableDetailTree::HandleTableViewScrolled(double InScrollOffset)
+{
+	if (const auto DataTableVisualDiff = DetailView->GetDataTableVisualDiff())
+	{
+		DataTableVisualDiff->SyncDetailViewAction_VerticalScrollOffset(DetailView->IsLocalAsset(), InScrollOffset);
+	}
 }
 
 void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOnScope> Structure)
@@ -131,6 +141,14 @@ void SUnrealDiffDataTableDetailTree::SetItemExpansion(bool bIsExpand, TSharedPtr
 	if (MyTreeView)
 	{
 		MyTreeView->SetItemExpansion(TreeItem, bIsExpand);
+	}
+}
+
+void SUnrealDiffDataTableDetailTree::SetVerticalScrollOffset(float ScrollOffset)
+{
+	if (MyTreeView)
+	{
+		MyTreeView->SetScrollOffset(ScrollOffset);
 	}
 }
 

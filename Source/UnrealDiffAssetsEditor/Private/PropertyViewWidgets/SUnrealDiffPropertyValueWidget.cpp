@@ -12,6 +12,8 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SUnrealDiffPropertyValueWidget::Construct(const FArguments& InArgs, TWeakPtr<FUnrealDiffDetailTreeNode> InOwnerTreeNode)
 {
+	auto Font = FCoreStyle::GetDefaultFontStyle("Regular", 8);
+	
 	OwnerTreeNode = InOwnerTreeNode;
 	const FProperty* Property = OwnerTreeNode.Pin().Get()->Property.Get();
 	FText Value = GetValueText(Property);

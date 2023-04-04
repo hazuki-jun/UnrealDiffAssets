@@ -28,7 +28,7 @@ void SUnrealDiffDetailView::AddCacheNode(TSharedPtr<FUnrealDiffDetailTreeNode> I
 	AllNodes.Add(InNode);
 }
 
-TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> SUnrealDiffDetailView::GetCachedNodes() const
+const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& SUnrealDiffDetailView::GetCachedNodes()
 {
 	return AllNodes;
 }

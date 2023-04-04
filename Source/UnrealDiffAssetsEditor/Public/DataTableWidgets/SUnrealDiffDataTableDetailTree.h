@@ -21,6 +21,7 @@ public:
 	TSharedRef<ITableRow> OnGenerateRowForDetailTree( TSharedPtr<class FUnrealDiffDetailTreeNode> InTreeNode, const TSharedRef<STableViewBase>& OwnerTable );
 	void OnGetChildrenForDetailTree( TSharedPtr<class FUnrealDiffDetailTreeNode> InTreeNode, TArray< TSharedPtr<class FUnrealDiffDetailTreeNode> >& OutChildren );
 	void OnItemExpansionChanged(TSharedPtr<class FUnrealDiffDetailTreeNode> TreeItem, bool bIsExpanded) const;
+	void HandleTableViewScrolled(double InScrollOffset);
 	
 	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> RootTreeNodes;
 
@@ -33,9 +34,15 @@ public:
 	const uint8* GetRowData(const FProperty* InProperty);
 	
 	void SetItemExpansion(bool bIsExpand, TSharedPtr<class FUnrealDiffDetailTreeNode> TreeItem);
+
+	void SetVerticalScrollOffset(float ScrollOffset);
 	
 protected:
 	TSharedPtr<STreeView<TSharedPtr<class FUnrealDiffDetailTreeNode>>> MyTreeView;
 };
+
+
+
+
 
 

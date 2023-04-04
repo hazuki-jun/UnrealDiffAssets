@@ -9,6 +9,7 @@
 #include "UnrealDiffAssetDelegate.h"
 #include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
+#include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Utils/FUnrealDiffDataTableUtil.h"
 #include "Widgets/Input/SSearchBox.h"
@@ -243,6 +244,24 @@ void SDataTableVisualDiff::ShowDifference_RowToRow(const FName& RowName)
 
 	RowDetailViewLocal->Refresh(RowName);
 	RowDetailViewRemote->Refresh(RowName);
+
+	const auto& CacheNodesLocal = RowDetailViewLocal->GetCachedNodes();
+	const auto& CacheNodesRemote = RowDetailViewRemote->GetCachedNodes();
+	for (int32 i = 0; i < CacheNodesLocal.Num(); ++i)
+	{
+		if (CacheNodesRemote.IsValidIndex(i))
+		{
+			if (!CacheNodesRemote[i]->ValueText.ToString().Equals(CacheNodesLocal[i]->ValueText.ToString()))
+			{
+				CacheNodesRemote[i]->bHasAnyDifference = true;
+				CacheNodesLocal[i]->bHasAnyDifference = true;
+			}
+		}
+		else
+		{
+			return;
+		}
+	}
 }
 
 void SDataTableVisualDiff::RefreshLayout()
@@ -254,8 +273,13 @@ void SDataTableVisualDiff::RefreshLayout()
 
 	DataTableLayoutLocal->Refresh();
 	DataTableLayoutRemote->Refresh();
-}
 
+	if (RowDetailViewLocal && RowDetailViewRemote)
+	{
+		RowDetailViewLocal->SetVisibility(EVisibility::Collapsed);
+		RowDetailViewRemote->SetVisibility(EVisibility::Collapsed);
+	}
+}
 
 FReply SDataTableVisualDiff::OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
 {
@@ -305,7 +329,7 @@ const uint8* SDataTableVisualDiff::GetPropertyData(const FProperty* InProperty)
 	return nullptr;
 }
 
-void SDataTableVisualDiff::SyncExpandedAction(bool bIsLocal, bool bIsExpanded, int32 NodeIndex)
+void SDataTableVisualDiff::SyncDetailViewAction_Expanded(bool bIsLocal, bool bIsExpanded, int32 NodeIndex)
 {
 	if (bIsLocal)
 	{
@@ -319,6 +343,24 @@ void SDataTableVisualDiff::SyncExpandedAction(bool bIsLocal, bool bIsExpanded, i
 		if (RowDetailViewLocal)
 		{
 			RowDetailViewLocal->SetItemExpansion(bIsExpanded, NodeIndex);
+		}
+	}
+}
+
+void SDataTableVisualDiff::SyncDetailViewAction_VerticalScrollOffset(bool bIsLocal, float ScrollOffset)
+{
+	if (bIsLocal)
+	{
+		if (RowDetailViewRemote)
+		{
+			RowDetailViewRemote->SetVerticalScrollOffset(ScrollOffset);
+		}
+	}
+	else
+	{
+		if (RowDetailViewLocal)
+		{
+			RowDetailViewLocal->SetVerticalScrollOffset(ScrollOffset);
 		}
 	}
 }

@@ -21,7 +21,7 @@ public:
 	virtual void OnExpanderClicked(bool bIsExpanded) {}
 
 	virtual int32 GetIndentLevelForBackgroundColor() { return IndentLevel; }
-
+	
 protected:
 	int32 IndentLevel = 0;
 };

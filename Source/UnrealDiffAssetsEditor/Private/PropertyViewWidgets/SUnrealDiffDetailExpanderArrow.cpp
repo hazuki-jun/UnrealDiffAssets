@@ -60,7 +60,7 @@ const FSlateBrush* SUnrealDiffDetailExpanderArrow::GetExpanderImage() const
 	}
 
 	FName ResourceName;
-	if (bIsExpanded)
+	if (RowPtr->IsItemExpanded())
 	{
 		if (ExpanderArrow->IsHovered())
 		{
@@ -92,8 +92,6 @@ const FSlateBrush* SUnrealDiffDetailExpanderArrow::GetExpanderImage() const
 
 FReply SUnrealDiffDetailExpanderArrow::HandleOnExpanderClicked()
 {
-	bIsExpanded = !bIsExpanded;
-	
 	TSharedPtr<SUnrealDiffDetailTableRowBase> RowPtr = Row.Pin();
 	if (!RowPtr.IsValid())
 	{
@@ -105,7 +103,7 @@ FReply SUnrealDiffDetailExpanderArrow::HandleOnExpanderClicked()
 	{
 		RowPtr->ToggleExpansion();
 	}
-	OnExpanderClicked.ExecuteIfBound(bIsExpanded);
+	OnExpanderClicked.ExecuteIfBound(RowPtr->IsItemExpanded());
 	return FReply::Handled();
 }
 

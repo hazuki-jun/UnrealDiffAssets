@@ -22,6 +22,7 @@ public:
 
 	virtual void OnExpanderClicked(bool bIsExpanded) override;
 
+	virtual int32 GetIndentLevelForBackgroundColor() override;
 protected:
 	FSlateColor GetOuterBackgroundColor() const;
 	FSlateColor GetInnerBackgroundColor() const;

@@ -41,7 +41,8 @@ public:
 	//~ Begin SUnrealDiffDetailView Interface
 
 	void SetItemExpansion(bool bIsExpand, int32 NodeIndex);
-
+	void SetVerticalScrollOffset(float ScrollOffset);
+	
 protected:
 	FUnrealDiffDetailColumnSizeData DetailColumnSizeData;
 	

@@ -30,9 +30,12 @@ public:
 	virtual bool IsLocalAsset() { return true; }
 
 	void AppendCacheNodes(TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> InNodes);
+	
 	void AddCacheNode(TSharedPtr<class FUnrealDiffDetailTreeNode> InNode);
+	
 	int32 GetCachedNodeNum() const { return AllNodes.Num(); }
-	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> GetCachedNodes() const;
+	
+	const TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>>& GetCachedNodes();
 	
 protected:
 	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> AllNodes;

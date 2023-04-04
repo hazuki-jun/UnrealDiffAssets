@@ -35,6 +35,10 @@ void FUnrealDiffCategoryItemNode::GenerateChildren()
 		}
 		DetailItemNode->ParentNode = AsShared();
 		DetailItemNode->Property = ChildPropertyData;
+		if (const auto StructData = GetStructData(0))
+		{
+			DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(DetailItemNode->Property.Get(), (const uint8*)StructData);
+		}
 		DetailItemNode->GenerateChildren();
 		Children.Add(DetailItemNode);
 	}

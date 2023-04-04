@@ -187,19 +187,22 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 	if (!bIsLocal)
 	{
 		MenuBuilder.AddMenuEntry(
-			LOCTEXT("DataTableRowMenuActions_MergeRow", "Merge Row"),
-			LOCTEXT("DataTableRowMenuActions_MergeRowTooltip", "Merge this row to left"),
+			LOCTEXT("DataTableRowMenuActions_MergeRow", "Paste To Left"),
+			LOCTEXT("DataTableRowMenuActions_MergeRowTooltip", "Paste this row to left"),
 			FUnrealDiffWindowStyle::GetAppSlateIcon("ContentReference.UseSelectionFromContentBrowser"),
 			FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionMerge))
 		);
 	}
-	
-	MenuBuilder.AddMenuEntry(
-	LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
-	LOCTEXT("DataTableRowMenuActions_ShowDifferencTooltip", "Show Difference"),
-		FUnrealDiffWindowStyle::GetAppSlateIcon("SourceControl.Actions.Diff"),
-		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference))
-	);
+
+	if (RowDataPtr->bHasAnyDifference)
+	{
+		MenuBuilder.AddMenuEntry(
+		LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
+		LOCTEXT("DataTableRowMenuActions_ShowDifferencTooltip", "Show Difference"),
+			FUnrealDiffWindowStyle::GetAppSlateIcon("SourceControl.Actions.Diff"),
+			FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference))
+		);
+	}
 	
 	return MenuBuilder.MakeWidget();
 }

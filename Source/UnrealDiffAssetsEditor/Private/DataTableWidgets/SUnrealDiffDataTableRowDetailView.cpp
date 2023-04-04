@@ -51,6 +51,8 @@ TSharedRef<SWidget> SUnrealDiffDataTableRowDetailView::BuildRowTitle()
 
 void SUnrealDiffDataTableRowDetailView::Refresh(const FName& InRowName)
 {
+	AllNodes.Empty();
+	
 	if (!MyDetailTree.IsValid())
 	{
 		return;
@@ -108,6 +110,14 @@ void SUnrealDiffDataTableRowDetailView::SetItemExpansion(bool bIsExpand, int32 N
 			MyDetailTree->SetItemExpansion(bIsExpand, AllNodes[i]);
 			return;
 		}
+	}
+}
+
+void SUnrealDiffDataTableRowDetailView::SetVerticalScrollOffset(float ScrollOffset)
+{
+	if (MyDetailTree)
+	{
+		MyDetailTree->SetVerticalScrollOffset(ScrollOffset);
 	}
 }
 

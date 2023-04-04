@@ -21,6 +21,16 @@ void SUnrealDiffPropertyNameWidget::Construct(const FArguments& InArgs, TWeakPtr
 	{
 		DisplayNameText = OwnerNode.Pin()->Property->GetDisplayNameText(); 
 	}
+
+	FSlateColor SlateColor;
+	if (OwnerNode.Pin()->bHasAnyDifference)
+	{
+		SlateColor = FLinearColor(1.0, 1.0, 0.1, 1.0);
+	}
+	else
+	{
+		SlateColor = FLinearColor(1.f, 1.f, 1.f, 1.f);	
+	}
 	
 	ChildSlot
 	[
@@ -31,9 +41,11 @@ void SUnrealDiffPropertyNameWidget::Construct(const FArguments& InArgs, TWeakPtr
 			SNew(STextBlock)
 			.Text(DisplayNameText)
 			.Font(FCoreStyle::GetDefaultFontStyle("Regular", 8))
+			.ColorAndOpacity(SlateColor)
 		]
 	];
 }
+
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 

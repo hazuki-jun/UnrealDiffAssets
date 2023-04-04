@@ -23,6 +23,8 @@ public:
 	
 	class SUnrealDiffDetailView* DetailView;
 
+	bool bIsExpanded = false;
+	
 protected:
 	const void* GetContainerData(const void* InStructData);
 };
