@@ -16,7 +16,7 @@ void SUnrealDiffPropertyValueWidget::Construct(const FArguments& InArgs, TWeakPt
 	
 	OwnerTreeNode = InOwnerTreeNode;
 	const FProperty* Property = OwnerTreeNode.Pin().Get()->Property.Get();
-	FText Value = GetValueText(Property);
+	ValueText = GetValueText(Property);
 	ChildSlot
 	[
 		SNew(SOverlay)
@@ -29,10 +29,23 @@ void SUnrealDiffPropertyValueWidget::Construct(const FArguments& InArgs, TWeakPt
 				SNew(SEditableTextBox)
 				.IsReadOnly(true)
 				.BackgroundColor(FSlateColor(FLinearColor(0.f, 0.f, 0.f)))
-				.Text(Value)
+				.Text(this, &SUnrealDiffPropertyValueWidget::GetText)
 			]
 		]
 	];
+}
+
+void SUnrealDiffPropertyValueWidget::Refresh()
+{
+	if (OwnerTreeNode.Pin().Get())
+	{
+		ValueText = GetValueText(OwnerTreeNode.Pin().Get()->Property.Get());
+	}
+}
+
+FText SUnrealDiffPropertyValueWidget::GetText() const
+{
+	return ValueText;
 }
 
 FText SUnrealDiffPropertyValueWidget::GetValueText(const FProperty* InProperty)

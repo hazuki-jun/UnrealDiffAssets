@@ -442,6 +442,11 @@ bool SUnrealDiffDataTableLayout::IsCellEnable(const FName& InColumnId, const FNa
 	return true;
 }
 
+TArray<FUnrealDiffDataTableRowListViewDataPtr>& SUnrealDiffDataTableLayout::GetVisibleRows()
+{
+	return VisibleRows;
+}
+
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 #undef LOCTEXT_NAMESPACE

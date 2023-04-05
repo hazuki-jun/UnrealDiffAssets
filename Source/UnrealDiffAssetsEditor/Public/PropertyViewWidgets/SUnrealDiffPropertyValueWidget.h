@@ -19,13 +19,21 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs, TWeakPtr<class FUnrealDiffDetailTreeNode> InOwnerTreeNode);
 
+	FText GetText() const;
+	
 	FText GetValueText(const FProperty* InProperty);
 
 	FText GetValueTextInContainer(const FProperty* InProperty);
 
 	FText GetValueTextFromStructData(const void* InStructData, const FProperty* InProperty);
+
+	void Refresh();
 	
 	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
+
+protected:
+	FText ValueText;
 };
+
 
 

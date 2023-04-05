@@ -9,6 +9,7 @@
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffCategoryItemNode.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailItemNode.h"
+#include "PropertyViewWidgets/SUnrealDiffDetailSingleItemRow.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -81,7 +82,7 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOn
 		
 		RootTreeNodes.Add(CategoryNode);
 	}
-	
+
 	MyTreeView->RequestTreeRefresh();
 }
 
@@ -149,6 +150,22 @@ void SUnrealDiffDataTableDetailTree::SetVerticalScrollOffset(float ScrollOffset)
 	if (MyTreeView)
 	{
 		MyTreeView->SetScrollOffset(ScrollOffset);
+	}
+}
+
+void SUnrealDiffDataTableDetailTree::RefreshWidgetFromItem(TSharedPtr<FUnrealDiffDetailTreeNode> InItem)
+{
+	if (MyTreeView)
+	{
+		auto TableRow = MyTreeView->WidgetFromItem(InItem);
+		if (TableRow)
+		{
+			SUnrealDiffDetailSingleItemRow* SingleItemRow = static_cast<SUnrealDiffDetailSingleItemRow*>(TableRow.Get());
+			if (SingleItemRow)
+			{
+				SingleItemRow->Refresh();
+			}
+		}
 	}
 }
 

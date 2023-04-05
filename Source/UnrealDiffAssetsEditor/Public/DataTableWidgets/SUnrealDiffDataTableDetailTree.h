@@ -36,6 +36,8 @@ public:
 	void SetItemExpansion(bool bIsExpand, TSharedPtr<class FUnrealDiffDetailTreeNode> TreeItem);
 
 	void SetVerticalScrollOffset(float ScrollOffset);
+
+	void RefreshWidgetFromItem(TSharedPtr<class FUnrealDiffDetailTreeNode> InItem);
 	
 protected:
 	TSharedPtr<STreeView<TSharedPtr<class FUnrealDiffDetailTreeNode>>> MyTreeView;

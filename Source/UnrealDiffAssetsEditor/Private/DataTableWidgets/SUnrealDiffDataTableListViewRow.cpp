@@ -272,6 +272,8 @@ FReply SUnrealDiffDataTableListViewRow::OnKeyDown(const FGeometry& MyGeometry, c
 
 TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::GenerateWidgetForColumn(const FName& InColumnId)
 {
+	ColumnId = InColumnId;
+	
 	if (InColumnId.IsEqual(TEXT("RowNumber")))
 	{
 		return SNew(SBox)
@@ -285,7 +287,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::GenerateWidgetForColumn(con
 				.TextStyle(FAppStyle::Get(), "DataTableEditor.CellText")
 #endif
 				.Text(FText::FromString(FString::FromInt(RowDataPtr->RowNum)))
-				.ColorAndOpacity(DataTableLayout->GetCellTextColor(InColumnId, RowDataPtr->RowId))
+				.ColorAndOpacity(this, &SUnrealDiffDataTableListViewRow::HandleTextColorAndOpacity)
 			];
 	}
 	
@@ -298,11 +300,16 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::GenerateWidgetForColumn(con
 				SNew(SInlineEditableTextBlock)
 				.IsReadOnly(true)
 				.Text(FText::FromName(RowDataPtr->RowId))
-				.ColorAndOpacity(DataTableLayout->GetCellTextColor(InColumnId, RowDataPtr->RowId))
+				.ColorAndOpacity(this, &SUnrealDiffDataTableListViewRow::HandleTextColorAndOpacity)
 			];
 	}
 	
 	return MakeCellWidget(InColumnId);
+}
+
+FSlateColor SUnrealDiffDataTableListViewRow::HandleTextColorAndOpacity() const
+{
+	return DataTableLayout->GetCellTextColor(ColumnId, RowDataPtr->RowId);
 }
 
 TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeCellWidget(const FName& InColumnId)
@@ -319,7 +326,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeCellWidget(const FName&
 			.TextStyle(FAppStyle::Get(), "DataTableEditor.CellText")
 #endif
 			.Text(DataTableLayout->GetCellText(InColumnId, RowDataPtr->RowId))
-			.ColorAndOpacity(DataTableLayout->GetCellTextColor(InColumnId, RowDataPtr->RowId))
+			.ColorAndOpacity(this, &SUnrealDiffDataTableListViewRow::HandleTextColorAndOpacity)
 		];
 }
 

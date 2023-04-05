@@ -15,7 +15,10 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 	bIsLocal = InArgs._IsLocal;
 	DataTableVisualDiff = InArgs._DataTableVisualDiff;
 	check(DataTableVisualDiff)
-
+	
+	FWindowStyle WindowStyle = FCoreStyle::Get().GetWidgetStyle<FWindowStyle>("Window");
+	CloseButtonStyle = WindowStyle.CloseButtonStyle;
+	
 	SAssignNew(MyDetailTree, SUnrealDiffDataTableDetailTree, this);
 	// DetailTree->DetailView = AsWeak();
 	this->ChildSlot
@@ -24,7 +27,32 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			BuildRowTitle()
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			[
+				BuildRowTitle()
+			]
+
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.VAlign(VAlign_Center)
+			[
+				SNew(SBox)
+				.WidthOverride(32.f)
+				.HeightOverride(32.f)
+				[
+					SAssignNew(CloseButton, SButton)
+					.IsFocusable(false)
+					.ContentPadding(0.0f)
+					.OnClicked(this, &SUnrealDiffDataTableRowDetailView::CloseButton_OnClicked)
+					.Cursor(EMouseCursor::Default)
+					.ToolTipText(FText::FromString(TEXT("Close detail view")))
+					.ButtonStyle(FCoreStyle::Get(), "NoBorder")
+					[
+						SNew(SImage).Image(this, &SUnrealDiffDataTableRowDetailView::GetCloseImage)
+					]
+				]
+			]
 		]
 
 		+ SVerticalBox::Slot()
@@ -32,6 +60,32 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 			MyDetailTree.ToSharedRef()
 		]
 	];
+}
+
+const FSlateBrush* SUnrealDiffDataTableRowDetailView::GetCloseImage() const
+{
+	if (CloseButton->IsPressed())
+	{
+		return &CloseButtonStyle.Pressed;
+	}
+
+	if (CloseButton->IsHovered())
+	{
+		return &CloseButtonStyle.Hovered;
+	}
+
+	return &CloseButtonStyle.Normal;
+}
+
+FReply SUnrealDiffDataTableRowDetailView::CloseButton_OnClicked()
+{
+	if (DataTableVisualDiff)
+	{
+		DataTableVisualDiff->CloseDetailView();
+		
+		return FReply::Handled();
+	}
+	return FReply::Unhandled();
 }
 
 TSharedRef<SWidget> SUnrealDiffDataTableRowDetailView::BuildRowTitle()
@@ -117,6 +171,14 @@ void SUnrealDiffDataTableRowDetailView::SetVerticalScrollOffset(float ScrollOffs
 	if (MyDetailTree)
 	{
 		MyDetailTree->SetVerticalScrollOffset(ScrollOffset);
+	}
+}
+
+void SUnrealDiffDataTableRowDetailView::RefreshWidgetFromItem(TSharedPtr<FUnrealDiffDetailTreeNode> InItem)
+{
+	if (MyDetailTree)
+	{
+		MyDetailTree->RefreshWidgetFromItem(InItem);
 	}
 }
 

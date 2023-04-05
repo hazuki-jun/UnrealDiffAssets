@@ -70,6 +70,8 @@ public:
 
 	bool IsCellEnable(const FName& InColumnId, const FName& RowName) const;
 	//~ Cell
+
+	TArray<FUnrealDiffDataTableRowListViewDataPtr>& GetVisibleRows();
 	
 protected:
 	/** Struct holding information about the current column widths */

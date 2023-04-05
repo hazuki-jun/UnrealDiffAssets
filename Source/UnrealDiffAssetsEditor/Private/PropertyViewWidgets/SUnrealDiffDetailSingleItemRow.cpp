@@ -23,10 +23,34 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 	OwnerTreeNode = InOwnerTreeNode;
 	check(OwnerTreeNode.Pin()->Property.Get());
 	
-	SUnrealDiffDetailView* DetailsView =  InOwnerTreeNode->GetDetailsView();
+	this->ChildSlot
+	[
+		BuildRowContent()
+	];
+
+	STableRow< TSharedPtr< FUnrealDiffDetailTreeNode > >::ConstructInternal(
+		STableRow::FArguments()
+			.Style(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.TreeView.TableRow")
+			.ShowSelection(false),
+			InOwnerTableView);
+}
+
+void SUnrealDiffDetailSingleItemRow::Refresh()
+{
+	auto AttachedWidget = this->ChildSlot.DetachWidget();
+	if (AttachedWidget)
+	{
+		AttachedWidget.Reset();
+	}
+	this->ChildSlot.AttachWidget(BuildRowContent());
+}
+
+TSharedRef<SWidget> SUnrealDiffDetailSingleItemRow::BuildRowContent()
+{
+	SUnrealDiffDetailView* DetailsView =  OwnerTreeNode.Pin()->GetDetailsView();
 	FUnrealDiffDetailColumnSizeData& ColumnSizeData = DetailsView->GetColumnSizeData();
 	
-	TSharedRef<SWidget> Widget = SNew(SBorder)
+	TSharedRef<SWidget> BroderWidget = SNew(SBorder)
 		.BorderImage(FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryMiddle"))
 		.BorderBackgroundColor(this, &SUnrealDiffDetailSingleItemRow::GetInnerBackgroundColor)
 		.Padding(0)
@@ -46,13 +70,12 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 			.Value(ColumnSizeData.GetWholeRowColumnWidth())
 			.OnSlotResized(ColumnSizeData.GetOnWholeRowColumnResized())
 			[
-				SNew(SUnrealDiffPropertyValueWidget, OwnerTreeNode)
+				SAssignNew(ValueWidget, SUnrealDiffPropertyValueWidget, OwnerTreeNode)
 			]
 		];
-	
-	this->ChildSlot
-	[
-		SNew( SBorder )
+
+
+	return SNew( SBorder )
 		.BorderImage(FUnrealDiffWindowStyle::GetAppStyle().GetBrush("DetailsView.GridLine"))
 		.Padding(FMargin(0,0,0,1))
 		.Clipping(EWidgetClipping::ClipToBounds)
@@ -97,19 +120,12 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 						.HAlign(HAlign_Fill)
 						.VAlign(VAlign_Fill)
 						[
-							Widget
+							BroderWidget
 						]
 					]
 				]
 			]
-		]
-	];
-
-	STableRow< TSharedPtr< FUnrealDiffDetailTreeNode > >::ConstructInternal(
-		STableRow::FArguments()
-			.Style(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.TreeView.TableRow")
-			.ShowSelection(false),
-			InOwnerTableView);
+		];
 }
 
 FReply SUnrealDiffDetailSingleItemRow::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
@@ -139,8 +155,8 @@ TSharedRef<SWidget> SUnrealDiffDetailSingleItemRow::MakeRowActionsMenu()
 				FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDetailSingleItemRow::OnMenuActionCopy)));
 	
 	if (!OwnerTreeNode.Pin()->GetDetailsView()->IsLocalAsset()
-		&& !OwnerTreeNode.Pin()->IsContainerNode()
 		&& OwnerTreeNode.Pin()->bHasAnyDifference)
+		// && !OwnerTreeNode.Pin()->IsContainerNode()
 	{
 		MenuBuilder.AddMenuEntry(
 			LOCTEXT("DetailSingleItemRowActions_MergeRow", "Use This Change"),
@@ -160,11 +176,35 @@ void SUnrealDiffDetailSingleItemRow::OnMenuActionMerge()
 	{
 		return;
 	}
-
-	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString());
+	// if (OwnerTreeNode.Pin()->IsContainerNode())
+	// {
+		FString PropertyString = CopyProperty();
+		DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), PropertyString, true);
+	// }
+	// else
+	// {
+	// 	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString(), true);
+	// }
+	
+	// if (OwnerTreeNode.Pin()->IsContainerNode())
+	// {
+	// 	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString(), true);
+	// }
+	// else
+	// {
+	// 	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString(), false);
+	// 	OwnerTreeNode.Pin()->bHasAnyDifference = false;
+	// 	Refresh();
+	// }
 }
 
 void SUnrealDiffDetailSingleItemRow::OnMenuActionCopy()
+{
+	FString FormattedString = CopyProperty();
+	FPlatformApplicationMisc::ClipboardCopy(*FormattedString);
+}
+
+FString SUnrealDiffDetailSingleItemRow::CopyProperty()
 {
 	const void* ValueAddr = nullptr;
 	if (OwnerTreeNode.Pin()->bIsInContainer)
@@ -173,12 +213,20 @@ void SUnrealDiffDetailSingleItemRow::OnMenuActionCopy()
 	}
 	else
 	{
-		ValueAddr = OwnerTreeNode.Pin()->GetStructData();
+		if (OwnerTreeNode.Pin()->IsContainerNode())
+		{
+			ValueAddr = OwnerTreeNode.Pin()->GetStructData();
+		}
+		else
+		{
+			void* StructData = OwnerTreeNode.Pin()->GetStructData();
+			ValueAddr = OwnerTreeNode.Pin()->Property->ContainerPtrToValuePtr<void>(StructData); 
+		}
 	}
 	
 	FString FormattedString;
 	OwnerTreeNode.Pin()->Property.Get()->ExportText_Direct(FormattedString, ValueAddr, ValueAddr, nullptr, PPF_Copy);
-	FPlatformApplicationMisc::ClipboardCopy(*FormattedString);
+	return FormattedString;
 }
 
 void SUnrealDiffDetailSingleItemRow::OnExpanderClicked(bool bIsExpanded)

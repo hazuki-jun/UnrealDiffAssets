@@ -84,12 +84,18 @@ public:
 
 	//~ Begin Row Detail View
 	const uint8* GetPropertyData(const FProperty* InProperty);
+
 	// DetailView -- 同步左右侧 展开/收起
 	void SyncDetailViewAction_Expanded(bool bIsLocal, bool bIsExpanded, int32 NodeIndex);
+
 	// DetailView -- 同步左右侧滚动
 	void SyncDetailViewAction_VerticalScrollOffset(bool bIsLocal, float ScrollOffset);
+
 	// DetailView -- 粘贴选中Property到左侧
-	void DetailViewAction_MergeProperty(int32 NodeIndex, const FString& PropertyValueString);
+	void DetailViewAction_MergeProperty(int32 NodeIndex, const FString& PropertyValueString, bool bRegenerate = false);
+
+	void CloseDetailView();
+	
 	//~ End Row Detail View
 	
 public:
@@ -101,8 +107,11 @@ public:
 	//~ End DataTable Row
 
 	UObject* GetLocalAsset() const { return LocalAsset; }
+	UDataTable* GetLocalDataTable() const { return Cast<UDataTable>(LocalAsset); }
+	
 	UObject* GetRemoteAsset() const { return RemoteAsset; }
-
+	UDataTable* GetRemoteDataTable() const { return Cast<UDataTable>(RemoteAsset); }
+	
 	UObject* GetAssetObject(bool bIsLocal) const { return bIsLocal ? LocalAsset : RemoteAsset; }
 	
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutLocal;

@@ -18,6 +18,10 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TSharedRef<class FUnrealDiffDetailTreeNode> InOwnerTreeNode);
 
+	void Refresh();
+	
+	TSharedRef<SWidget> BuildRowContent();
+	
 	//~ Begin SWidget Interface
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	//~ End SWidget Interface
@@ -33,6 +37,8 @@ public:
 	 * @brief 拷贝选中Property的原始数据
 	 */
 	void OnMenuActionCopy();
+
+	FString CopyProperty();
 	
 	//~ Begin SUnrealDiffDetailTableRowBase Interface
 	virtual void OnExpanderClicked(bool bIsExpanded) override;
@@ -42,7 +48,8 @@ public:
 	
 public:
 	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
-	
+
+	TSharedPtr<class SUnrealDiffPropertyValueWidget> ValueWidget;
 protected:
 	FSlateColor GetOuterBackgroundColor() const;
 	FSlateColor GetInnerBackgroundColor() const;

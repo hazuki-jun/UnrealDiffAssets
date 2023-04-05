@@ -365,7 +365,7 @@ void SDataTableVisualDiff::SyncDetailViewAction_VerticalScrollOffset(bool bIsLoc
 	}
 }
 
-void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const FString& PropertyValueString)
+void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const FString& PropertyValueString, bool bRegenerate)
 {
 	if (!RowDetailViewLocal)
 	{
@@ -379,12 +379,22 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 	FDataTableEditorUtils::BroadcastPreChange(DestDataTable, FDataTableEditorUtils::EDataTableChangeInfo::RowData);
 	const auto& AllNodes = RowDetailViewLocal->GetCachedNodes();
 	
-	if (AllNodes.IsValidIndex(NodeIndex))
+	if (!AllNodes.IsValidIndex(NodeIndex))
 	{
-		auto PropertyToModify = AllNodes[NodeIndex]->Property.Get();
-		if (AllNodes[NodeIndex]->bIsInContainer)
+		return;
+	}
+
+	auto PropertyToModify = AllNodes[NodeIndex]->Property.Get();
+	if (AllNodes[NodeIndex]->bIsInContainer)
+	{
+		void* ValueAddr = AllNodes[NodeIndex]->RowDataInContainer;
+		PropertyToModify->ImportText_Direct(*PropertyValueString, ValueAddr, nullptr, PPF_Copy);
+	}
+	else
+	{
+		if (AllNodes[NodeIndex]->IsContainerNode())
 		{
-			void* ValueAddr = AllNodes[NodeIndex]->RowDataInContainer;
+			void* ValueAddr = AllNodes[NodeIndex]->GetStructData(0);
 			PropertyToModify->ImportText_Direct(*PropertyValueString, ValueAddr, nullptr, PPF_Copy);
 		}
 		else
@@ -393,10 +403,63 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 			void* ValueAddr = PropertyToModify->ContainerPtrToValuePtr<void>(StructData);
 			PropertyToModify->ImportText_Direct(*PropertyValueString, ValueAddr, nullptr, PPF_Copy);
 		}
+	}
 
-		DestDataTable->HandleDataTableChanged(SelectedRowId);
-		DestDataTable->MarkPackageDirty();
-		FDataTableEditorUtils::BroadcastPostChange(DestDataTable, FDataTableEditorUtils::EDataTableChangeInfo::RowData);
+	DestDataTable->HandleDataTableChanged(SelectedRowId);
+	DestDataTable->MarkPackageDirty();
+	FDataTableEditorUtils::BroadcastPostChange(DestDataTable, FDataTableEditorUtils::EDataTableChangeInfo::RowData);
+
+	if (bRegenerate)
+	{
+		ShowDifference_RowToRow(SelectedRowId);
+		if (RowDetailViewLocal && RowDetailViewRemote)
+		{
+			RowDetailViewLocal->SetItemExpansion(true, 0);
+			RowDetailViewRemote->SetItemExpansion(true, 0);
+		}
+	}
+	else
+	{
+		if (RowDetailViewLocal)
+		{
+			AllNodes[NodeIndex]->bHasAnyDifference = false;
+			RowDetailViewLocal->RefreshWidgetFromItem(AllNodes[NodeIndex]);
+		}
+	}
+
+	if (!FUnrealDiffDataTableUtil::HasAnyDifferenceRowToRow(GetLocalDataTable(), GetRemoteDataTable(), SelectedRowId))
+	{
+		if (!DataTableLayoutLocal || !DataTableLayoutRemote)
+		{
+			return;
+		}
+
+		auto& VisibleRowLocal = DataTableLayoutLocal->GetVisibleRows();
+		auto& VisibleRowRemote = DataTableLayoutRemote->GetVisibleRows();
+		for (const auto& RowData : VisibleRowLocal)
+		{
+			if (RowData->RowId.IsEqual(SelectedRowId))
+			{
+				RowData->bHasAnyDifference = false;
+			}
+		}
+
+		for (const auto& RowData : VisibleRowRemote)
+		{
+			if (RowData->RowId.IsEqual(SelectedRowId))
+			{
+				RowData->bHasAnyDifference = false;
+			}
+		}
+	}
+}
+
+void SDataTableVisualDiff::CloseDetailView()
+{
+	if (RowDetailViewLocal && RowDetailViewRemote)
+	{
+		RowDetailViewLocal->SetVisibility(EVisibility::Collapsed);
+		RowDetailViewRemote->SetVisibility(EVisibility::Collapsed);
 	}
 }
 

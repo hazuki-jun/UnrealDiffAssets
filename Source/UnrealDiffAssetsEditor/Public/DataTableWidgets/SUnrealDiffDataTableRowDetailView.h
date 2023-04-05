@@ -40,14 +40,20 @@ public:
 	virtual bool IsLocalAsset() override { return bIsLocal; }
 	//~ Begin SUnrealDiffDetailView Interface
 
+	const FSlateBrush* GetCloseImage() const;
+	FReply CloseButton_OnClicked();
+	
 	void SetItemExpansion(bool bIsExpand, int32 NodeIndex);
 	void SetVerticalScrollOffset(float ScrollOffset);
+	void RefreshWidgetFromItem(TSharedPtr<class FUnrealDiffDetailTreeNode> InItem);
 	
 protected:
 	FUnrealDiffDetailColumnSizeData DetailColumnSizeData;
 	
 	bool bIsLocal = true;
 
+	TSharedPtr<SButton> CloseButton;
+	
 	TSharedPtr<class SUnrealDiffDataTableDetailRowSelector> RowSelector;
 	
 	TSharedPtr<class SDataTableVisualDiff> DataTableVisualDiff;
@@ -55,4 +61,8 @@ protected:
 	TSharedPtr<class SUnrealDiffDataTableDetailTree> MyDetailTree;
 	
 	FName RowName;
+	
+	FButtonStyle CloseButtonStyle;
 };
+
+

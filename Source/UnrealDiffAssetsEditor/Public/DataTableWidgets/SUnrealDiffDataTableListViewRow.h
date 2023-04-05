@@ -57,6 +57,8 @@ public:
 	virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& InColumnId) override;
 	//~ End SMultiColumnTableRow Interface
 
+	FSlateColor HandleTextColorAndOpacity() const;
+	
 	TSharedRef<SWidget> MakeCellWidget(const FName& InColumnId);
 
 	TSharedRef<SWidget> MakeRowActionsMenu();
@@ -77,6 +79,7 @@ public:
 	FUnrealDiffDataTableRowListViewDataPtr RowDataPtr;
 	TSharedPtr<class SDataTableVisualDiff> DataTableVisual = nullptr;
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayout;
+	FName ColumnId;
 };
 
 
