@@ -25,7 +25,9 @@ public:
 	/** @return The details view that this node is in */
 	virtual class SUnrealDiffDetailView* GetDetailsView() const = 0;
 
-	virtual const void* GetStructData(int32 ArrayIndex = 0) { return nullptr; }
+	virtual void* GetStructData(int32 ArrayIndex = 0) { return nullptr; }
+
+	bool IsContainerNode() const { return Children.Num() > 0; }
 	
 	TWeakFieldPtr<const class FProperty> Property;
 	

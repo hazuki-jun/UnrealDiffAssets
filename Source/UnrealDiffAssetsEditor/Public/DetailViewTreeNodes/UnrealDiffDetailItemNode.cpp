@@ -135,7 +135,7 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 	}
 }
 
-const void* FUnrealDiffDetailItemNode::GetStructData(int32 ArrayIndex)
+void* FUnrealDiffDetailItemNode::GetStructData(int32 ArrayIndex)
 {
 	if (ParentNode.IsValid())
 	{

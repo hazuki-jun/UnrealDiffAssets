@@ -118,12 +118,6 @@ bool FUnrealDiffAssetsEditorModule::IsSupported()
 
 	if (!GDiffClassCollectionSubsystem.IsSupported(SelectedAssets[0]))
 	{
-		// FText NotSupportWarning = LOCTEXT("NotSupportWarningMessage", "This asset not supported now");
-		// FSuppressableWarningDialog::FSetupInfo Info( NotSupportWarning, LOCTEXT("NotSupport_Message", "Not Support"), "NotSupport_Warning" );
-		// Info.ConfirmText = LOCTEXT( "NotSupport_Yes", "Ok");
-		// Info.CancelText = LOCTEXT( "NotSupport_No", "Cancel");	
-		// FSuppressableWarningDialog RemoveLevelWarning( Info );
-		// auto Result = RemoveLevelWarning.ShowModal();
 		return false;
 	}
 
@@ -198,6 +192,12 @@ void FUnrealDiffAssetsEditorModule::ExecuteDiffAssets(UObject* LocalAsset, UObje
 	}
 	else
 	{
+		FText NotSupportWarning = LOCTEXT("NotSupportWarningMessage", "类型不一致");
+		FSuppressableWarningDialog::FSetupInfo Info( NotSupportWarning, LOCTEXT("NotSupport_Message", "Not Support"), "NotSupport_Warning" );
+		Info.ConfirmText = LOCTEXT( "NotSupport_Yes", "Ok");
+		Info.CancelText = LOCTEXT( "NotSupport_No", "Cancel");	
+		FSuppressableWarningDialog RemoveLevelWarning( Info );
+		auto Result = RemoveLevelWarning.ShowModal();
 		return;
 	}
 

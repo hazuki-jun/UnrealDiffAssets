@@ -89,21 +89,23 @@ FText SUnrealDiffPropertyValueWidget::GetValueTextInContainer(const FProperty* I
 	const FProperty* ContainerProperty = OwnerTreeNode.Pin()->ContainerProperty.Get();
 	if (const FArrayProperty* ArrayProp = CastField<const FArrayProperty>(ContainerProperty))
 	{
-		FScriptArrayHelper ArrayHelper(ArrayProp, StructData);
-		if (ArrayHelper.IsValidIndex(OwnerTreeNode.Pin()->PropertyIndex))
-		{
-			const uint8* ArrayEntryData = ArrayHelper.GetRawPtr(OwnerTreeNode.Pin()->PropertyIndex);
-			return GetValueTextFromStructData(ArrayEntryData, InProperty);
-		}	
+		return GetValueTextFromStructData(OwnerTreeNode.Pin()->RowDataInContainer, InProperty);
+		// FScriptArrayHelper ArrayHelper(ArrayProp, StructData);
+		// if (ArrayHelper.IsValidIndex(OwnerTreeNode.Pin()->PropertyIndex))
+		// {
+		// 	const uint8* ArrayEntryData = ArrayHelper.GetRawPtr(OwnerTreeNode.Pin()->PropertyIndex);
+		// 	return GetValueTextFromStructData(ArrayEntryData, InProperty);
+		// }	
 	}
 	else if (const FSetProperty* SetProp = CastField<const FSetProperty>(ContainerProperty))
 	{
-		FScriptSetHelper SetHelper(SetProp, StructData);
-		if (SetHelper.IsValidIndex(OwnerTreeNode.Pin()->PropertyIndex))
-		{
-			const uint8* SetEntryData = SetHelper.GetElementPtr(OwnerTreeNode.Pin()->PropertyIndex);
-			return GetValueTextFromStructData(SetEntryData, InProperty);
-		}	
+		return GetValueTextFromStructData(OwnerTreeNode.Pin()->RowDataInContainer, InProperty);
+		// FScriptSetHelper SetHelper(SetProp, StructData);
+		// if (SetHelper.IsValidIndex(OwnerTreeNode.Pin()->PropertyIndex))
+		// {
+		// 	const uint8* SetEntryData = SetHelper.GetElementPtr(OwnerTreeNode.Pin()->PropertyIndex);
+		// 	return GetValueTextFromStructData(SetEntryData, InProperty);
+		// }	
 	}
 	else if (const FMapProperty* MapProp = CastField<const FMapProperty>(ContainerProperty))
 	{

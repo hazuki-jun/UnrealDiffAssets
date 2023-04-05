@@ -44,7 +44,7 @@ void FUnrealDiffCategoryItemNode::GenerateChildren()
 	}
 }
 
-const void* FUnrealDiffCategoryItemNode::GetStructData(int32 ArrayIndex)
+void* FUnrealDiffCategoryItemNode::GetStructData(int32 ArrayIndex)
 {
 	if (!DetailView)
 	{

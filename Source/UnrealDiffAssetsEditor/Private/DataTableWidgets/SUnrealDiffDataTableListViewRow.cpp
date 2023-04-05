@@ -187,8 +187,8 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 	if (!bIsLocal)
 	{
 		MenuBuilder.AddMenuEntry(
-			LOCTEXT("DataTableRowMenuActions_MergeRow", "Paste To Left"),
-			LOCTEXT("DataTableRowMenuActions_MergeRowTooltip", "Paste this row to left"),
+			LOCTEXT("DataTableRowMenuActions_MergeRow", "Use This Change"),
+			LOCTEXT("DataTableRowMenuActions_MergeRowTooltip", "Use This Change"),
 			FUnrealDiffWindowStyle::GetAppSlateIcon("ContentReference.UseSelectionFromContentBrowser"),
 			FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDataTableListViewRow::OnMenuActionMerge))
 		);

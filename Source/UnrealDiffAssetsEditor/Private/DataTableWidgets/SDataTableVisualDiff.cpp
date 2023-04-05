@@ -365,6 +365,41 @@ void SDataTableVisualDiff::SyncDetailViewAction_VerticalScrollOffset(bool bIsLoc
 	}
 }
 
+void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const FString& PropertyValueString)
+{
+	if (!RowDetailViewLocal)
+	{
+		return;
+	}
+
+	const FScopedTransaction Transaction(LOCTEXT("PasteDataTableRow", "Paste Data Table Row"));
+	
+	auto DestDataTable = Cast<UDataTable>(GetLocalAsset());
+	DestDataTable->Modify();
+	FDataTableEditorUtils::BroadcastPreChange(DestDataTable, FDataTableEditorUtils::EDataTableChangeInfo::RowData);
+	const auto& AllNodes = RowDetailViewLocal->GetCachedNodes();
+	
+	if (AllNodes.IsValidIndex(NodeIndex))
+	{
+		auto PropertyToModify = AllNodes[NodeIndex]->Property.Get();
+		if (AllNodes[NodeIndex]->bIsInContainer)
+		{
+			void* ValueAddr = AllNodes[NodeIndex]->RowDataInContainer;
+			PropertyToModify->ImportText_Direct(*PropertyValueString, ValueAddr, nullptr, PPF_Copy);
+		}
+		else
+		{
+			void* StructData = AllNodes[NodeIndex]->GetStructData(0);
+			void* ValueAddr = PropertyToModify->ContainerPtrToValuePtr<void>(StructData);
+			PropertyToModify->ImportText_Direct(*PropertyValueString, ValueAddr, nullptr, PPF_Copy);
+		}
+
+		DestDataTable->HandleDataTableChanged(SelectedRowId);
+		DestDataTable->MarkPackageDirty();
+		FDataTableEditorUtils::BroadcastPostChange(DestDataTable, FDataTableEditorUtils::EDataTableChangeInfo::RowData);
+	}
+}
+
 int32 SDataTableVisualDiff::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
                                     const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
                                     const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const

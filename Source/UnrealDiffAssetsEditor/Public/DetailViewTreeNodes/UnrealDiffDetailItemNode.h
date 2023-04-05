@@ -17,14 +17,14 @@ public:
 
 	virtual void GenerateChildren();
 
-	virtual const void* GetStructData(int32 ArrayIndex = 0) override;
+	virtual void* GetStructData(int32 ArrayIndex = 0) override;
 
 	TWeakPtr<FUnrealDiffDetailTreeNode> ParentNode;
 	
 	class SUnrealDiffDetailView* DetailView;
 
 	bool bIsExpanded = false;
-	
+
 protected:
 	const void* GetContainerData(const void* InStructData);
 };

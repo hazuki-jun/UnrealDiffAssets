@@ -5,6 +5,7 @@
 
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
+#include "HAL/PlatformApplicationMisc.h"
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
@@ -21,8 +22,6 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 {
 	OwnerTreeNode = InOwnerTreeNode;
 	check(OwnerTreeNode.Pin()->Property.Get());
-	
-	// const FProperty* Property = OwnerTreeNode.Pin()->Property.Get(); 
 	
 	SUnrealDiffDetailView* DetailsView =  InOwnerTreeNode->GetDetailsView();
 	FUnrealDiffDetailColumnSizeData& ColumnSizeData = DetailsView->GetColumnSizeData();
@@ -111,6 +110,75 @@ void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const T
 			.Style(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.TreeView.TableRow")
 			.ShowSelection(false),
 			InOwnerTableView);
+}
+
+FReply SUnrealDiffDetailSingleItemRow::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+    if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+    {
+    	TSharedRef<SWidget> MenuWidget = MakeRowActionsMenu();
+    	FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
+    	FSlateApplication::Get().PushMenu(AsShared(), WidgetPath, MenuWidget, MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
+    }
+    
+    return STableRow::OnMouseButtonUp(MyGeometry, MouseEvent);
+}
+
+TSharedRef<SWidget> SUnrealDiffDetailSingleItemRow::MakeRowActionsMenu()
+{
+	if (!OwnerTreeNode.IsValid() || !OwnerTreeNode.Pin()->GetDetailsView())
+	{
+		return SNullWidget::NullWidget;
+	}
+
+	FMenuBuilder MenuBuilder(true, NULL);
+	MenuBuilder.AddMenuEntry(
+				LOCTEXT("DetailSingleItemRowActions_Copy", "Copy"),
+				LOCTEXT("DetailSingleItemRowActions_CopyTooltip", "Copy this property value"),
+				FUnrealDiffWindowStyle::GetAppSlateIcon("GenericCommands.Copy"),
+				FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDetailSingleItemRow::OnMenuActionCopy)));
+	
+	if (!OwnerTreeNode.Pin()->GetDetailsView()->IsLocalAsset()
+		&& !OwnerTreeNode.Pin()->IsContainerNode()
+		&& OwnerTreeNode.Pin()->bHasAnyDifference)
+	{
+		MenuBuilder.AddMenuEntry(
+			LOCTEXT("DetailSingleItemRowActions_MergeRow", "Use This Change"),
+			LOCTEXT("DetailSingleItemRowActions_MergeRowTooltip", "Use This Change"),
+			FUnrealDiffWindowStyle::GetAppSlateIcon("ContentReference.UseSelectionFromContentBrowser"),
+			FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDetailSingleItemRow::OnMenuActionMerge))
+		);
+	}
+	
+	return MenuBuilder.MakeWidget();
+}
+
+void SUnrealDiffDetailSingleItemRow::OnMenuActionMerge()
+{
+	auto DataTableVisual = OwnerTreeNode.Pin()->GetDetailsView()->GetDataTableVisualDiff();
+	if (!DataTableVisual)
+	{
+		return;
+	}
+
+	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString());
+}
+
+void SUnrealDiffDetailSingleItemRow::OnMenuActionCopy()
+{
+	const void* ValueAddr = nullptr;
+	if (OwnerTreeNode.Pin()->bIsInContainer)
+	{
+		ValueAddr = OwnerTreeNode.Pin()->RowDataInContainer; 
+	}
+	else
+	{
+		ValueAddr = OwnerTreeNode.Pin()->GetStructData();
+	}
+	
+	FString FormattedString;
+	OwnerTreeNode.Pin()->Property.Get()->ExportText_Direct(FormattedString, ValueAddr, ValueAddr, nullptr, PPF_Copy);
+	FPlatformApplicationMisc::ClipboardCopy(*FormattedString);
 }
 
 void SUnrealDiffDetailSingleItemRow::OnExpanderClicked(bool bIsExpanded)

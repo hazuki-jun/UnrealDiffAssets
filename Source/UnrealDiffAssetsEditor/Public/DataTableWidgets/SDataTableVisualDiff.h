@@ -84,17 +84,21 @@ public:
 
 	//~ Begin Row Detail View
 	const uint8* GetPropertyData(const FProperty* InProperty);
+	// DetailView -- 同步左右侧 展开/收起
 	void SyncDetailViewAction_Expanded(bool bIsLocal, bool bIsExpanded, int32 NodeIndex);
+	// DetailView -- 同步左右侧滚动
 	void SyncDetailViewAction_VerticalScrollOffset(bool bIsLocal, float ScrollOffset);
+	// DetailView -- 粘贴选中Property到左侧
+	void DetailViewAction_MergeProperty(int32 NodeIndex, const FString& PropertyValueString);
 	//~ End Row Detail View
 	
 public:
-	//~ Cell
-	void GetDataTableData(bool bIsLocal, TArray<FDataTableEditorColumnHeaderDataPtr> &OutAvailableColumns, TArray<FDataTableEditorRowListViewDataPtr> &OutAvailableRows);
-	//~ Cell
-
+	//~ Begin DataTable Row
 	// 同步左右侧滚动
 	void SyncVerticalScrollOffset(bool bIsLocal, float NewOffset);
+	// 获取行
+	void GetDataTableData(bool bIsLocal, TArray<FDataTableEditorColumnHeaderDataPtr> &OutAvailableColumns, TArray<FDataTableEditorRowListViewDataPtr> &OutAvailableRows);
+	//~ End DataTable Row
 
 	UObject* GetLocalAsset() const { return LocalAsset; }
 	UObject* GetRemoteAsset() const { return RemoteAsset; }

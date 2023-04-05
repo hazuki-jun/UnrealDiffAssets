@@ -18,11 +18,31 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TSharedRef<class FUnrealDiffDetailTreeNode> InOwnerTreeNode);
 
-	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
+	//~ Begin SWidget Interface
+	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	//~ End SWidget Interface
 
+	TSharedRef<SWidget> MakeRowActionsMenu();
+
+	/**
+	 * @brief 粘贴选中Property到左侧
+	 */
+	void OnMenuActionMerge();
+
+	/**
+	 * @brief 拷贝选中Property的原始数据
+	 */
+	void OnMenuActionCopy();
+	
+	//~ Begin SUnrealDiffDetailTableRowBase Interface
 	virtual void OnExpanderClicked(bool bIsExpanded) override;
 
 	virtual int32 GetIndentLevelForBackgroundColor() override;
+	//~ End SUnrealDiffDetailTableRowBase Interface
+	
+public:
+	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
+	
 protected:
 	FSlateColor GetOuterBackgroundColor() const;
 	FSlateColor GetInnerBackgroundColor() const;

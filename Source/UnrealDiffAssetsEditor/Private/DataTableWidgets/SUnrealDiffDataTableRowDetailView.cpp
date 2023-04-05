@@ -4,7 +4,6 @@
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "SlateOptMacros.h"
-#include "UnrealDiffWindowStyle.h"
 #include "DataTableWidgets/SUnrealDiffDataTableDetailRowSelector.h"
 #include "DataTableWidgets/SUnrealDiffDataTableDetailTree.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
