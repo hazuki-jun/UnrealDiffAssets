@@ -7,7 +7,9 @@
 #include "HAL/PlatformApplicationMisc.h"
 #include "SlateOptMacros.h"
 #include "UnrealDiffAssetDelegate.h"
-#include "WeakFieldPtr.h"
+#if ENGINE_MAJOR_VERSION == 4
+	#include "WeakFieldPtr.h"
+#endif
 #include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"

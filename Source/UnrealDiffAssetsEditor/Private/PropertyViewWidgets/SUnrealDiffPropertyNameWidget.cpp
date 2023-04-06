@@ -4,7 +4,9 @@
 #include "PropertyViewWidgets/SUnrealDiffPropertyNameWidget.h"
 
 #include "SlateOptMacros.h"
-#include "WeakFieldPtr.h"
+#if ENGINE_MAJOR_VERSION == 4
+	#include "WeakFieldPtr.h"
+#endif
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
 
 #define LOCTEXT_NAMESPACE "SUnrealDiffPropertyNameWidget"

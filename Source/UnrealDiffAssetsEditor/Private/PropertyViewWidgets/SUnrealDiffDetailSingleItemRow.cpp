@@ -5,7 +5,9 @@
 
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
-#include "WeakFieldPtr.h"
+#if ENGINE_MAJOR_VERSION == 4
+	#include "WeakFieldPtr.h"
+#endif
 #include "HAL/PlatformApplicationMisc.h"
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
@@ -275,7 +277,7 @@ const FSlateBrush* SUnrealDiffDetailSingleItemRow::GetBorderImage() const
 		return FEditorStyle::GetBrush("DetailsView.CategoryMiddle");
 	}
 #else
-	return FUnrealDiffWindowStyle::GetAppStyle().GetBrush("DetailsView.GridLine")
+	return FUnrealDiffWindowStyle::GetAppStyle().GetBrush("DetailsView.GridLine");
 #endif
 }
 
