@@ -4,6 +4,7 @@
 #include "PropertyViewWidgets/SUnrealDiffPropertyNameWidget.h"
 
 #include "SlateOptMacros.h"
+#include "WeakFieldPtr.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
 
 #define LOCTEXT_NAMESPACE "SUnrealDiffPropertyNameWidget"
@@ -19,7 +20,7 @@ void SUnrealDiffPropertyNameWidget::Construct(const FArguments& InArgs, TWeakPtr
 	}
 	else
 	{
-		DisplayNameText = OwnerNode.Pin()->Property->GetDisplayNameText(); 
+		DisplayNameText = OwnerNode.Pin()->Property.Get()->GetDisplayNameText(); 
 	}
 
 	FSlateColor SlateColor;

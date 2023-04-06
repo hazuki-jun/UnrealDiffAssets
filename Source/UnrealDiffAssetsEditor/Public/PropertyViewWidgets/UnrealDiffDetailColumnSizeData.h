@@ -17,7 +17,7 @@ public:
 		HoveredSplitterIndex.BindRaw(this, &FUnrealDiffDetailColumnSizeData::GetHoveredSplitterIndexValue);
 		OnValueColumnResized.BindRaw(this, &FUnrealDiffDetailColumnSizeData::SetValueColumnWidth);
 		OnRightColumnResized.BindRaw(this, &FUnrealDiffDetailColumnSizeData::OnSetRightColumnWidth);
-		OnSplitterHandleHovered.BindRaw(this, &FUnrealDiffDetailColumnSizeData::OnSetHoveredSplitterIndex);
+		// OnSplitterHandleHovered.BindRaw(this, &FUnrealDiffDetailColumnSizeData::OnSetHoveredSplitterIndex);
 
 		// these are intentionally left no-op, since the widths are derived from the other column width
 		OnWholeRowColumnResized.BindLambda([](float) {});
@@ -35,7 +35,7 @@ public:
 	const SSplitter::FOnSlotResized& GetOnValueColumnResized() const	{ return OnValueColumnResized; }
 	const SSplitter::FOnSlotResized& GetOnWholeRowColumnResized() const { return OnWholeRowColumnResized; }
 	const SSplitter::FOnSlotResized& GetOnRightColumnResized() const	{ return OnRightColumnResized; }
-	const SSplitter::FOnHandleHovered& GetOnSplitterHandleHovered()	const { return OnSplitterHandleHovered; }
+	// const SSplitter::FOnHandleHovered& GetOnSplitterHandleHovered()	const { return OnSplitterHandleHovered; }
 
 	void SetValueColumnWidth(float NewWidth)
 	{
@@ -63,7 +63,7 @@ private:
 	SSplitter::FOnSlotResized OnValueColumnResized;
 	SSplitter::FOnSlotResized OnWholeRowColumnResized;
 	SSplitter::FOnSlotResized OnRightColumnResized;
-	SSplitter::FOnHandleHovered OnSplitterHandleHovered;
+	// SSplitter::FOnHandleHovered OnSplitterHandleHovered;
 
 	float GetNameColumnWidthValue() const { return 1.0f - (ValueColumnWidthValue + RightColumnWidthValue); }
 	float GetValueColumnWidthValue() const { return ValueColumnWidthValue; }

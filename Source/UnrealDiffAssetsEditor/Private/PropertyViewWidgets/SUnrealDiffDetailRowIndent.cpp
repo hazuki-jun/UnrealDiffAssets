@@ -23,6 +23,10 @@ int32 SUnrealDiffDetailRowIndent::OnPaint(const FPaintArgs& Args, const FGeometr
 	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
 	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
+#if ENGINE_MAJOR_VERSION == 4
+	return SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+#endif
+	
 	TSharedPtr<SUnrealDiffDetailTableRowBase> RowPtr = Row.Pin();
 	if (!RowPtr.IsValid())
 	{

@@ -4,6 +4,7 @@
 #include "PropertyViewWidgets/SUnrealDiffPropertyValueWidget.h"
 
 #include "SlateOptMacros.h"
+#include "WeakFieldPtr.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
 
 #define LOCTEXT_NAMESPACE "SUnrealDiffPropertyValueWidget"
@@ -139,7 +140,14 @@ FText SUnrealDiffPropertyValueWidget::GetValueTextFromStructData(const void* InS
 	
 	if (const FEnumProperty* EnumProp = CastField<const FEnumProperty>(InProperty))
 	{
-		OutText = DataTableUtils::GetPropertyValueAsText(EnumProp, (uint8*)InStructData);
+		if (!OwnerTreeNode.Pin()->ValueText.IsEmpty())
+		{
+			OutText	=  OwnerTreeNode.Pin()->ValueText;
+		}
+		else
+		{
+			OutText = DataTableUtils::GetPropertyValueAsText(EnumProp, (uint8*)InStructData);
+		}
 	}
 	else if (const FNumericProperty *NumProp = CastField<const FNumericProperty>(InProperty))
 	{
@@ -180,8 +188,15 @@ FText SUnrealDiffPropertyValueWidget::GetValueTextFromStructData(const void* InS
 	}
 	else if (const FBoolProperty* BoolProp = CastField<const FBoolProperty>(InProperty))
 	{
-		const bool PropertyValue = BoolProp->GetPropertyValue(InStructData);
-		OutText = FText::FromString(PropertyValue ? TEXT("true") : TEXT("false"));
+		if (!OwnerTreeNode.Pin()->ValueText.IsEmpty())
+		{
+			OutText	=  OwnerTreeNode.Pin()->ValueText;
+		}
+		else
+		{
+			const bool PropertyValue = BoolProp->GetPropertyValue(InStructData);
+			OutText = FText::FromString(PropertyValue ? TEXT("true") : TEXT("false"));	
+		}
 	}
 	else if (const FArrayProperty* ArrayProp = CastField<const FArrayProperty>(InProperty))
 	{

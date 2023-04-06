@@ -7,6 +7,7 @@
 #include "HAL/PlatformApplicationMisc.h"
 #include "SlateOptMacros.h"
 #include "UnrealDiffAssetDelegate.h"
+#include "WeakFieldPtr.h"
 #include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
@@ -388,20 +389,32 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 	if (AllNodes[NodeIndex]->bIsInContainer)
 	{
 		void* ValueAddr = AllNodes[NodeIndex]->RowDataInContainer;
+#if ENGINE_MAJOR_VERSION == 4
+		PropertyToModify->ImportText(*PropertyValueString, ValueAddr, PPF_Copy, nullptr);
+#else
 		PropertyToModify->ImportText_Direct(*PropertyValueString, ValueAddr, nullptr, PPF_Copy);
+#endif
 	}
 	else
 	{
 		if (AllNodes[NodeIndex]->IsContainerNode())
 		{
 			void* ValueAddr = AllNodes[NodeIndex]->GetStructData(0);
+#if ENGINE_MAJOR_VERSION == 4
+			PropertyToModify->ImportText(*PropertyValueString, ValueAddr, PPF_Copy, nullptr);
+#else
 			PropertyToModify->ImportText_Direct(*PropertyValueString, ValueAddr, nullptr, PPF_Copy);
+#endif
 		}
 		else
 		{
 			void* StructData = AllNodes[NodeIndex]->GetStructData(0);
 			void* ValueAddr = PropertyToModify->ContainerPtrToValuePtr<void>(StructData);
+#if ENGINE_MAJOR_VERSION == 4
+			PropertyToModify->ImportText(*PropertyValueString, ValueAddr, PPF_Copy, nullptr);
+#else
 			PropertyToModify->ImportText_Direct(*PropertyValueString, ValueAddr, nullptr, PPF_Copy);
+#endif
 		}
 	}
 

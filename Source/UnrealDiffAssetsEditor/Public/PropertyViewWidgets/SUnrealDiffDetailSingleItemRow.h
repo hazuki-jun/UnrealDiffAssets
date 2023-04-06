@@ -50,7 +50,10 @@ public:
 	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
 
 	TSharedPtr<class SUnrealDiffPropertyValueWidget> ValueWidget;
+	
 protected:
+	const FSlateBrush* GetBorderImage() const;
+	
 	FSlateColor GetOuterBackgroundColor() const;
 	FSlateColor GetInnerBackgroundColor() const;
 	bool IsHighlighted() const;

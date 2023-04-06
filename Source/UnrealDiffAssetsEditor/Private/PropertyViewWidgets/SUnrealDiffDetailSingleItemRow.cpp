@@ -5,6 +5,7 @@
 
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
+#include "WeakFieldPtr.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
@@ -76,7 +77,7 @@ TSharedRef<SWidget> SUnrealDiffDetailSingleItemRow::BuildRowContent()
 
 
 	return SNew( SBorder )
-		.BorderImage(FUnrealDiffWindowStyle::GetAppStyle().GetBrush("DetailsView.GridLine"))
+		.BorderImage(this, &SUnrealDiffDetailSingleItemRow::GetBorderImage)
 		.Padding(FMargin(0,0,0,1))
 		.Clipping(EWidgetClipping::ClipToBounds)
 		[
@@ -258,18 +259,42 @@ int32 SUnrealDiffDetailSingleItemRow::GetIndentLevelForBackgroundColor()
 	return IndentLevel;
 }
 
+const FSlateBrush* SUnrealDiffDetailSingleItemRow::GetBorderImage() const
+{
+#if ENGINE_MAJOR_VERSION == 4
+	if( IsHighlighted() )
+	{
+		return FEditorStyle::GetBrush("DetailsView.CategoryMiddle_Highlighted");
+	}
+	else if (IsHovered())
+	{
+		return FEditorStyle::GetBrush("DetailsView.CategoryMiddle_Hovered");
+	}
+	else
+	{
+		return FEditorStyle::GetBrush("DetailsView.CategoryMiddle");
+	}
+#else
+	return FUnrealDiffWindowStyle::GetAppStyle().GetBrush("DetailsView.GridLine")
+#endif
+}
+
 FSlateColor SUnrealDiffDetailSingleItemRow::GetOuterBackgroundColor() const
 {
-	return FSlateColor();
+	return FSlateColor(FLinearColor(0.1f, 0.1f, 0.1f));
 }
 
 FSlateColor SUnrealDiffDetailSingleItemRow::GetInnerBackgroundColor() const
 {
+#if ENGINE_MAJOR_VERSION == 4
+	return FSlateColor(FLinearColor(0.5f, 0.5f, 0.5f));
+#endif
+	
 	FSlateColor Color;
-
+	
 	if (IsHighlighted())
 	{
-		Color = FAppStyle::Get().GetSlateColor("Colors.Hover");
+		Color = FUnrealDiffWindowStyle::GetAppStyle().GetSlateColor("Colors.Hover");
 	}
 	else
 	{
@@ -278,21 +303,21 @@ FSlateColor SUnrealDiffDetailSingleItemRow::GetInnerBackgroundColor() const
 		{
 			0, 4, (4 + 2), (6 + 4), (10 + 6)
 		};
-
+	
 		const FSlateColor BaseSlateColor = IsHovered() ? 
 			FUnrealDiffWindowStyle::GetAppStyle().GetSlateColor("Colors.Header") : 
 			FUnrealDiffWindowStyle::GetAppStyle().GetSlateColor("Colors.Panel");
-
+	
 		const FColor BaseColor = BaseSlateColor.GetSpecifiedColor().ToFColor(true);
-
+	
 		const FColor ColorWithOffset(
 			BaseColor.R + ColorOffsets[ColorIndex], 
 			BaseColor.G + ColorOffsets[ColorIndex], 
 			BaseColor.B + ColorOffsets[ColorIndex]);
-
+	
 		return FSlateColor(FLinearColor::FromSRGBColor(ColorWithOffset));
 	}
-
+	
 	return Color;
 }
 
