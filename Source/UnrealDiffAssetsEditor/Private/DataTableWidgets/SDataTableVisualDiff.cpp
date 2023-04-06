@@ -10,11 +10,13 @@
 #if ENGINE_MAJOR_VERSION == 4
 	#include "WeakFieldPtr.h"
 #endif
+#include "UnrealDiffWindowStyle.h"
 #include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "Utils/FUnrealDiffDataTableUtil.h"
+#include "Widgets/Images/SLayeredImage.h"
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 
@@ -42,11 +44,13 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 		.VAlign(VAlign_Fill)
 		[
 			SNew(SVerticalBox)
-			// + SVerticalBox::Slot()
-			// [
-			// 	// Todo
-			// 	// Toolbar
-			// ]
+			+ SVerticalBox::Slot()
+			.HAlign(HAlign_Fill)
+			.AutoHeight()
+			[
+				// Toolbar
+				MakeToolbar()
+			]
 			
 			+ SVerticalBox::Slot()
 			.HAlign(HAlign_Fill)
@@ -126,6 +130,68 @@ float SDataTableVisualDiff::GetRowDetailViewSplitterValue() const
 	}
 	
 	return 0.f;
+}
+
+TSharedRef<SWidget> SDataTableVisualDiff::MakeToolbar()
+{
+	TSharedPtr<SLayeredImage> FilterImage = SNew(SLayeredImage)
+		 .Image(FAppStyle::Get().GetBrush("DetailsView.ViewOptions"))
+		 .ColorAndOpacity(FSlateColor::UseForeground());
+
+	// Badge the filter icon if there are filters active
+	// FilterImage->AddLayer(FUnrealDiffWindowStyle::GetAppSlateBrush("Icons.BadgeModified"));
+
+	FMenuBuilder DetailViewOptions( true, nullptr);
+	DetailViewOptions.AddMenuEntry( 
+	LOCTEXT("ShowOnlyModified", "Show Only Modified Properties"),
+	LOCTEXT("ShowOnlyModified_ToolTip", "Displays only properties which have been changed from their default"),
+		FSlateIcon(),
+		FUIAction(),
+		NAME_None,
+		EUserInterfaceActionType::Check);
+	
+	return SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		.Padding(0)
+		.HAlign(HAlign_Center)
+		.VAlign(VAlign_Center)
+		.AutoWidth()
+		[
+			SNew( SComboButton )
+			.HasDownArrow(false)
+			.ContentPadding(0)
+			.ForegroundColor( FSlateColor::UseForeground() )
+			.ButtonStyle( FAppStyle::Get(), "SimpleButton" )
+			.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("ViewOptions")))
+			.MenuContent()
+			[
+				DetailViewOptions.MakeWidget()
+			]
+			.ButtonContent()
+			[
+				FilterImage.ToSharedRef()
+			]
+		];
+	
+	// return SNew(SHorizontalBox)
+	// + SHorizontalBox::Slot()
+	// .AutoWidth()
+	// [
+	// 	SNew(SButton)
+	// 	[
+	// 		SNew(SHorizontalBox)
+	// 		+ SHorizontalBox::Slot()
+	// 		[
+	// 			SNew(SImage)
+	// 			.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("BlueprintMerge.NextDiff"))
+	// 		]
+	// 		+ SHorizontalBox::Slot()
+	// 		[
+	// 			SNew(STextBlock)
+	// 			.Text(FText::FromString(TEXT("Next ")))
+	// 		]
+	// 	]
+	// ];
 }
 
 TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(FText InTitle, bool bIsLocal)

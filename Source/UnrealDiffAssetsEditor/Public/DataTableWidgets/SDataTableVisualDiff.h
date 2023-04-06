@@ -27,6 +27,8 @@ public:
 	TSharedRef<SWidget> BuildWidgetContent();
 
 	float GetRowDetailViewSplitterValue() const;
+
+	TSharedRef<SWidget> MakeToolbar();
 	
 	TSharedRef<SWidget> BuildLayoutWidget(FText InTitle, bool bIsLocal);
 
