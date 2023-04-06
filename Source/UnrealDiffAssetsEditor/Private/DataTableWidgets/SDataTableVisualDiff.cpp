@@ -48,8 +48,15 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 			.HAlign(HAlign_Fill)
 			.AutoHeight()
 			[
+				SNew(SOverlay)
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Center)
+				[
+					MakeToolbar()
+				]
 				// Toolbar
-				MakeToolbar()
+				
+				// 
 			]
 			
 			+ SVerticalBox::Slot()
@@ -134,6 +141,15 @@ float SDataTableVisualDiff::GetRowDetailViewSplitterValue() const
 
 TSharedRef<SWidget> SDataTableVisualDiff::MakeToolbar()
 {
+	// FToolBarBuilder GraphToolbarBuilder(TSharedPtr< const FUICommandList >(), FMultiBoxCustomization::None);
+	// GraphToolbarBuilder.AddToolBarButton(
+	// 	FUIAction(FExecuteAction::CreateSP(this, &SBlueprintVisualDiff::OnActionMerge))
+	// 	, NAME_None
+	// 	, LOCTEXT("UseSelectedLabel", "Merge")
+	// 	, LOCTEXT("UseSelectedTooltip", "Use Selected Difference")
+	// 	, FUnrealDiffWindowStyle::GetAppSlateIcon("ContentReference.UseSelectionFromContentBrowser")
+	// );
+	
 	TSharedPtr<SLayeredImage> FilterImage = SNew(SLayeredImage)
 		 .Image(FAppStyle::Get().GetBrush("DetailsView.ViewOptions"))
 		 .ColorAndOpacity(FSlateColor::UseForeground());
@@ -151,27 +167,51 @@ TSharedRef<SWidget> SDataTableVisualDiff::MakeToolbar()
 		EUserInterfaceActionType::Check);
 	
 	return SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
-		.Padding(0)
-		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
-		.AutoWidth()
+
+	+ SHorizontalBox::Slot()
+	.AutoWidth()
+	.Padding(0.f)
+	[
+		SNew(SButton)
 		[
-			SNew( SComboButton )
-			.HasDownArrow(false)
-			.ContentPadding(0)
-			.ForegroundColor( FSlateColor::UseForeground() )
-			.ButtonStyle( FAppStyle::Get(), "SimpleButton" )
-			.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("ViewOptions")))
-			.MenuContent()
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.Padding(0.f)
 			[
-				DetailViewOptions.MakeWidget()
+				SNew(SImage)
+				.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("BlueprintMerge.NextDiff"))
 			]
-			.ButtonContent()
+			+ SHorizontalBox::Slot()
+			.Padding(0.f)
 			[
-				FilterImage.ToSharedRef()
+				SNew(STextBlock)
+				.Text(FText::FromString(TEXT("Next ")))
 			]
-		];
+		]
+	]
+
+	+ SHorizontalBox::Slot()
+	.Padding(0)
+	.HAlign(HAlign_Center)
+	.VAlign(VAlign_Center)
+	.AutoWidth()
+	[
+		SNew( SComboButton )
+		.HasDownArrow(false)
+		.ContentPadding(0)
+		.ForegroundColor( FSlateColor::UseForeground() )
+		.ButtonStyle( FAppStyle::Get(), "SimpleButton" )
+		.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("ViewOptions")))
+		.MenuContent()
+		[
+			DetailViewOptions.MakeWidget()
+		]
+		.ButtonContent()
+		[
+			FilterImage.ToSharedRef()
+		]
+	]
+	;
 	
 	// return SNew(SHorizontalBox)
 	// + SHorizontalBox::Slot()
@@ -638,6 +678,48 @@ void SDataTableVisualDiff::GetDataTableData(bool bIsLocal, TArray<FDataTableEdit
 			}
 		}
 	}
+}
+
+FSlateColor SDataTableVisualDiff::GetHeaderColumnColorAndOpacity(bool InIsLocal, int32 Index) const
+{
+	if (!DataTableLayoutLocal || ! DataTableLayoutRemote)
+	{
+		return FLinearColor(1.f, 1.f, 1.f);
+	}
+
+	auto& AvailableColumnsLocal = DataTableLayoutLocal->GetAvailableColumns();
+	auto& AvailableColumnsRemote = DataTableLayoutRemote->GetAvailableColumns();
+
+	auto ExistColumn = [Index](TArray<FDataTableEditorColumnHeaderDataPtr>& Dest, TArray<FDataTableEditorColumnHeaderDataPtr>& Src)
+	{
+		if (!Dest.IsValidIndex(Index))
+		{
+			return true;
+		}
+
+		FName Column =  Dest[Index]->ColumnId;
+		for (const auto& ColumnHeaderData : Src)
+		{
+			if (ColumnHeaderData->ColumnId.IsEqual(Column))
+			{
+				return true;
+			}
+		}
+		
+		return false;	
+	};
+
+	bool bFound = false;
+	if (InIsLocal)
+	{
+		bFound = ExistColumn(AvailableColumnsLocal, AvailableColumnsRemote);
+	}
+	else
+	{
+		bFound = ExistColumn(AvailableColumnsRemote, AvailableColumnsLocal);
+	}
+	
+	return bFound ? FLinearColor(1.f, 1.f, 1.f) : FLinearColor(0.0, 0.8, 0.1, 1.0);
 }
 
 void SDataTableVisualDiff::SyncVerticalScrollOffset(bool bIsLocal, float NewOffset)

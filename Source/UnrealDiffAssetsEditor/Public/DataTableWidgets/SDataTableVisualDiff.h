@@ -106,6 +106,7 @@ public:
 	void SyncVerticalScrollOffset(bool bIsLocal, float NewOffset);
 	// 获取行
 	void GetDataTableData(bool bIsLocal, TArray<FDataTableEditorColumnHeaderDataPtr> &OutAvailableColumns, TArray<FDataTableEditorRowListViewDataPtr> &OutAvailableRows);
+	FSlateColor GetHeaderColumnColorAndOpacity(bool InIsLocal, int32 Index) const;
 	//~ End DataTable Row
 
 	UObject* GetLocalAsset() const { return LocalAsset; }

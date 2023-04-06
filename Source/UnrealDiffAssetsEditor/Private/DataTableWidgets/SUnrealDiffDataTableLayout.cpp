@@ -85,6 +85,11 @@ void SUnrealDiffDataTableLayout::SetupRowsData()
 	VisibleRows.Empty();
 	
 	DataTableVisual->GetDataTableData(bIsLocal, AvailableColumns, AvailableRows);
+
+	AvailableColumns.StableSort([](const FDataTableEditorColumnHeaderDataPtr& A, const FDataTableEditorColumnHeaderDataPtr& B)
+	{
+		return (A->ColumnId).ToString() > (B->ColumnId).ToString();
+	});
 	
 	for (auto RowData : AvailableRows)
 	{
@@ -230,12 +235,23 @@ TSharedPtr<SHeaderRow> SUnrealDiffDataTableLayout::GenerateHeaderWidgets()
 					SNew(STextBlock)
 					.Justification(ETextJustify::Center)
 					.Text(ColumnData->DisplayName)
+					.ColorAndOpacity(this, &SUnrealDiffDataTableLayout::GetHeaderColumnColorAndOpacity, ColumnIndex)
 				]
 			]
 		);
 	}
 	
 	return ColumnNamesHeaderRow;
+}
+
+FSlateColor SUnrealDiffDataTableLayout::GetHeaderColumnColorAndOpacity(int32 ColumnIndex) const
+{
+	if (DataTableVisual)
+	{
+		return DataTableVisual->GetHeaderColumnColorAndOpacity(bIsLocal, ColumnIndex);
+	}
+	
+	return FLinearColor(1.f, 1.f, 1.f);
 }
 
 void SUnrealDiffDataTableLayout::SetupColumnWidth()
@@ -445,6 +461,11 @@ bool SUnrealDiffDataTableLayout::IsCellEnable(const FName& InColumnId, const FNa
 TArray<FUnrealDiffDataTableRowListViewDataPtr>& SUnrealDiffDataTableLayout::GetVisibleRows()
 {
 	return VisibleRows;
+}
+
+TArray<FDataTableEditorColumnHeaderDataPtr>& SUnrealDiffDataTableLayout::GetAvailableColumns()
+{
+	return AvailableColumns;
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

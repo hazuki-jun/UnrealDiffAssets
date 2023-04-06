@@ -30,6 +30,8 @@ public:
 	
 	TSharedPtr<SHeaderRow> GenerateHeaderWidgets();
 
+	FSlateColor GetHeaderColumnColorAndOpacity(int32 Index) const;
+	
 	// 初始列宽
 	void SetupColumnWidth();
 
@@ -72,6 +74,8 @@ public:
 	//~ Cell
 
 	TArray<FUnrealDiffDataTableRowListViewDataPtr>& GetVisibleRows();
+
+	TArray<FDataTableEditorColumnHeaderDataPtr>& GetAvailableColumns();
 	
 protected:
 	/** Struct holding information about the current column widths */
