@@ -44,6 +44,8 @@ public:
 	void SetNodeIndex(int32 InNodeIndex) { NodeIndex = InNodeIndex; }
 
 	FText ValueText;
+
+	// FText PropertyText;
 	
 	bool bHasAnyDifference = false;
 

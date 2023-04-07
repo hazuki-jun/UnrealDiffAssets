@@ -18,16 +18,12 @@ struct FUnrealDiffDataTableRowListViewData
 	float DesiredRowHeight;
 
 	/** Insertion number of the row */
-	uint32 RowNum;
+	uint32 RowNum = 0;
 
 	/** Array corresponding to each cell in this row */
 	TArray<FText> CellData;
 
-	bool bIsRemoved = false;
-
-	bool bIsAdded = false;
-
-	bool bHasAnyDifference = false;
+	uint32 RowState = 1;
 };
 
 typedef TSharedPtr<FUnrealDiffDataTableRowListViewData> FUnrealDiffDataTableRowListViewDataPtr;

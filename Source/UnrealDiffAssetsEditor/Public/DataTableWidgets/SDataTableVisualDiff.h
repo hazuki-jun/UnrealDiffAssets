@@ -7,6 +7,21 @@
 #include "Widgets/SCompoundWidget.h"
 #include "DataTableWidgets/SUnrealDiffDataTableListViewRow.h"
 
+namespace EDataTableVisualDiff
+{
+	enum RowViewOption
+	{
+		Normal = 0x00000001,
+		Modify = 0x00000002,
+		Added = 0x00000004,
+		Removed = 0x00000008,
+		
+		Max = Normal + Modify + Added + Removed
+	};
+}
+
+ENUM_CLASS_FLAGS(EDataTableVisualDiff::RowViewOption);
+
 /**
  * 
  */
@@ -22,6 +37,8 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+	void InitSettings();
+	
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 	
 	TSharedRef<SWidget> BuildWidgetContent();
@@ -37,13 +54,45 @@ public:
 	TSharedPtr<SWindow> GetParentWindow() const { return ParentWindow; }
 
 	TSharedPtr<FStructOnScope> GetStructure();
+
+	//~ Begin Toolbar
+	
+	// Toolbar Action
+	// Next
+	void ToolbarAction_HighlightNextDifference();
+	// Prev
+	void ToolbarAction_HighlightPrevDifference();
+	// Diff
+	void ToolbarAction_Diff();
+	bool ToolbarAction_CanDiff();
+	// Merge
+	void ToolbarAction_Merge();
+	//~ Toolbar Action
+
+	// ViewOption Content
+	TSharedRef<SWidget> GetShowViewOptionContent();
+
+	/** Called when show only view option is clicked */
+	void OnShowOnlyViewOptionClicked(EDataTableVisualDiff::RowViewOption InViewOption);
+	
+	bool HasRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption) const;
+	void ClearRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption);
+	void SetRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption);
+	void SetRowViewOptionTo(EDataTableVisualDiff::RowViewOption InViewOption);
+	void ReverseRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption);
+	void ModifyConfig();
+	
+	// Modified Check State
+	bool IsShowOnlyRowViewOptionChecked(EDataTableVisualDiff::RowViewOption InViewOption) const;
+	//~ End Toolbar
 	
 	/**
 	 * @brief 选中行/鼠标点击了行
 	 * @param bIsLocal 
-	 * @param RowId 
+	 * @param RowId
+	 * @param RowNumber 
 	 */
-	void OnRowSelectionChanged(bool bIsLocal, FName RowId);
+	void OnRowSelectionChanged(bool bIsLocal, FName RowId, int32 RowNumber);
 
 	/**
 	 * @brief 拷贝指定行到粘贴板
@@ -74,8 +123,8 @@ public:
 	 * @param RowName 
 	 */
 	void MergeAction_DeleteRow(FName RowName);
-
-	void ShowDifference_RowToRow(const FName& RowName);
+	
+	void ShowDifference_RowToRow(const FName& RowName, int32 InSelectedRowNumber);
 	
 	void RefreshLayout();
 	
@@ -83,7 +132,7 @@ public:
 	virtual FReply OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual FReply OnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
 	//~ End Ctrl + C
-
+	
 	//~ Begin Row Detail View
 	const uint8* GetPropertyData(const FProperty* InProperty);
 
@@ -137,7 +186,11 @@ protected:
 	// 当前选中的行
 	FName SelectedRowId;
 
+	uint32 SelectedRowNumber = 0;
+
 	// Parent Window Window Size
 	mutable FVector2D WindowSize;
+
+	EDataTableVisualDiff::RowViewOption RowViewOption = EDataTableVisualDiff::Max;
 };
 

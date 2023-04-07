@@ -2,6 +2,7 @@
 
 #include "Engine/DataTable.h"
 #include "DataTableEditorUtils.h"
+#include "DetailViewTreeNodes/UnrealDiffDetailTreeNode.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
@@ -131,6 +132,37 @@ bool FUnrealDiffDataTableUtil::HasAnyDifferenceRowToRow(UDataTable* InLocalDataT
 	}
 
 	return false;
+}
+
+FString FUnrealDiffDataTableUtil::CopyProperty(TSharedPtr<class FUnrealDiffDetailTreeNode> InNode)
+{
+	FString FormattedString;
+	if (!InNode)
+	{
+		return FormattedString;
+	}
+	
+	const void* ValueAddr = nullptr;
+	if (InNode->bIsInContainer)
+	{
+		ValueAddr = InNode->RowDataInContainer; 
+	}
+	else
+	{
+		if (InNode->IsContainerNode())
+		{
+			ValueAddr = InNode->GetStructData();
+		}
+		else
+		{
+			void* StructData = InNode->GetStructData();
+			ValueAddr = InNode->Property->ContainerPtrToValuePtr<void>(StructData); 
+		}
+	}
+	
+	
+	InNode->Property.Get()->ExportText_Direct(FormattedString, ValueAddr, ValueAddr, nullptr, PPF_Copy);
+	return FormattedString;
 }
 
 #undef LOCTEXT_NAMESPACE 

@@ -24,6 +24,8 @@ public:
 	
 	void SetupRowsData();
 
+	void ArrangeRows();
+	
 	void Refresh();
 
 	TSharedRef<SWidget> BuildContent();

@@ -111,19 +111,58 @@ void SUnrealDiffDataTableLayout::SetupRowsData()
 	{
 		if (VisibleRows[i]->RowNum == -2)
 		{
-			VisibleRows[i]->bIsRemoved = true;
+			// VisibleRows[i]->bIsRemoved = true;
+			VisibleRows[i]->RowState = EDataTableVisualDiff::Removed;
 		}
 		else if (VisibleRows[i]->RowNum == 0)
 		{
-			VisibleRows[i]->bIsAdded = true;
+			// VisibleRows[i]->bIsAdded = true;
+			VisibleRows[i]->RowState = EDataTableVisualDiff::Added;
 		}
 		else if (VisibleRows[i]->RowNum == -1)
 		{
-			VisibleRows[i]->bHasAnyDifference = true;
+			// VisibleRows[i]->bHasAnyDifference = true;
+			VisibleRows[i]->RowState = EDataTableVisualDiff::Modify;
 		}
 		
 		VisibleRows[i]->RowNum = i + 1;
 	}
+
+	ArrangeRows();
+}
+
+void SUnrealDiffDataTableLayout::ArrangeRows()
+{
+	if (!DataTableVisual)
+	{
+		return;
+	}
+
+	VisibleRows.RemoveAll([this](const FUnrealDiffDataTableRowListViewDataPtr& RowData)
+	{
+		if (DataTableVisual->HasRowViewOption(static_cast<EDataTableVisualDiff::RowViewOption>(RowData->RowState)))
+		{
+			return false;
+		}
+
+		// if (DataTableVisual->HasRowViewOption(EDataTableVisualDiff::Added))
+		// {
+		// 	if (RowData->bIsAdded)
+		// 	{
+		// 		return false;
+		// 	}
+		// }
+		//
+		// if (DataTableVisual->HasRowViewOption(EDataTableVisualDiff::Removed))
+		// {
+		// 	if (RowData->bIsRemoved)
+		// 	{
+		// 		return false;
+		// 	}
+		// }
+		
+		return true;
+	});
 }
 
 void SUnrealDiffDataTableLayout::Refresh()
@@ -394,6 +433,7 @@ void SUnrealDiffDataTableLayout::SelectRow(FName RowId)
 		if (!ListView->IsItemSelected(RowData))
 		{
 			ListView->SetItemSelection(RowData, true);
+			ListView->RequestScrollIntoView(RowData);
 			break;
 		}
 	}
@@ -434,16 +474,16 @@ FSlateColor SUnrealDiffDataTableLayout::GetCellTextColor(const FName& InColumnId
 	{
 		if (RowName == RowData->RowId)
 		{
-			if (RowData->bIsRemoved)
+			if (RowData->RowState == EDataTableVisualDiff::Removed)
 			{
 				return FSlateColor(FLinearColor(0.8, 0.0, 0.1, 1.0));
 				
 			}
-			else if (RowData->bIsAdded)
+			else if (RowData->RowState == EDataTableVisualDiff::Added)
 			{
 				return FSlateColor(FLinearColor(0.0, 0.8, 0.1, 1.0));
 			}
-			else if (RowData->bHasAnyDifference)
+			else if (RowData->RowState == EDataTableVisualDiff::Modify)
 			{
 				return FSlateColor(FLinearColor(1.0, 1.0, 0.1, 1.0));
 			}

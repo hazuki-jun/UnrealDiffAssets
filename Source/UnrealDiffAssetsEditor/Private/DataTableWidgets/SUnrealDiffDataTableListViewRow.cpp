@@ -26,25 +26,21 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 	
 	SMultiColumnTableRow<FUnrealDiffDataTableRowListViewDataPtr>::Construct(
 		FSuperRowType::FArguments()
-#if ENGINE_MAJOR_VERSION == 4
-			.Style(FEditorStyle::Get(), "DataTableEditor.CellListViewRow"),
-#else
-			.Style(FAppStyle::Get(), "DataTableEditor.CellListViewRow"),
-#endif
-		InOwnerTableView
+		.Style(FUnrealDiffWindowStyle::GetAppStyle(), "DataTableEditor.CellListViewRow")
+		,InOwnerTableView
 	);
 
 	FText Tooltip;
 	
-	if (RowDataPtr->bIsRemoved)
+	if (RowDataPtr->RowState == EDataTableVisualDiff::Removed)
 	{
 		Tooltip =  FText::FromString(FString::Format(TEXT("Removed row {0}"), { *RowDataPtr->RowId.ToString() }));
 	}
-	else if (RowDataPtr->bIsAdded)
+	else if (RowDataPtr->RowState == EDataTableVisualDiff::Added)
 	{
 		Tooltip =  FText::FromString(FString::Format(TEXT("Added row {0}"), { *RowDataPtr->RowId.ToString() }));
 	}
-	else if (RowDataPtr->bHasAnyDifference)
+	else if (RowDataPtr->RowState == EDataTableVisualDiff::Modify)
 	{
 		Tooltip =  FText::FromString(FString::Format(TEXT("Row {0} changed"), { *RowDataPtr->RowId.ToString() }));
 	}
@@ -55,9 +51,6 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 	}
 	
 	SetToolTipText(Tooltip);
-	
-	// IDocumentation::Get()->CreateToolTip(Tooltip, nullptr, ExcerptLink, ExcerptName)
-	
 	SetBorderImage(TAttribute<const FSlateBrush*>(this, &SUnrealDiffDataTableListViewRow::GetBorder));
 }
 
@@ -144,7 +137,7 @@ FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDown(const FGeometry& MyGeo
 	
 	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		UUnrealDiffAssetDelegate::OnDataTableRowSelected.Execute(bIsLocal, RowDataPtr->RowId);	
+		UUnrealDiffAssetDelegate::OnDataTableRowSelected.Execute(bIsLocal, RowDataPtr->RowId, RowDataPtr->RowNum);	
 	}
 	
 	return FReply::Handled();
@@ -156,7 +149,7 @@ FReply SUnrealDiffDataTableListViewRow::OnMouseButtonUp(const FGeometry& MyGeome
 
 	if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 	{
-		UUnrealDiffAssetDelegate::OnDataTableRowSelected.Execute(bIsLocal, RowDataPtr->RowId);	
+		UUnrealDiffAssetDelegate::OnDataTableRowSelected.Execute(bIsLocal, RowDataPtr->RowId, RowDataPtr->RowNum);	
 
 		TSharedRef<SWidget> MenuWidget = MakeRowActionsMenu();
 
@@ -194,7 +187,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 		);
 	}
 
-	if (RowDataPtr->bHasAnyDifference)
+	if (RowDataPtr->RowState == EDataTableVisualDiff::Modify)
 	{
 		MenuBuilder.AddMenuEntry(
 		LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
@@ -224,7 +217,7 @@ void SUnrealDiffDataTableListViewRow::OnMenuActionCopyValue()
 
 	if (DataTableVisual)
 	{
-		if (!RowDataPtr->bIsRemoved)
+		if (RowDataPtr->RowState != EDataTableVisualDiff::Removed)
 		{
 			DataTableVisual->CopyRow(bIsLocal, RowDataPtr->RowId);
 		}
@@ -239,7 +232,7 @@ void SUnrealDiffDataTableListViewRow::OnMenuActionShowDifference()
 {
 	if (DataTableVisual)
 	{
-		DataTableVisual->ShowDifference_RowToRow(RowDataPtr->RowId);
+		DataTableVisual->ShowDifference_RowToRow(RowDataPtr->RowId, RowDataPtr->RowNum);
 	}
 }
 
@@ -247,7 +240,7 @@ void SUnrealDiffDataTableListViewRow::OnMenuActionMerge()
 {
 	if (DataTableVisual)
 	{
-		if (RowDataPtr->bIsRemoved)
+		if (RowDataPtr->RowState == EDataTableVisualDiff::Removed)
 		{
 			DataTableVisual->MergeAction_DeleteRow(RowDataPtr->RowId);	
 		}

@@ -50,4 +50,6 @@ struct FUnrealDiffDataTableUtil
 	 * @return 
 	 */
 	static bool HasAnyDifferenceRowToRow(UDataTable* InLocalDataTable, UDataTable* InRemoteDataTable, FName& RowName, bool bIgnorePropertyName = true);
+
+	static FString CopyProperty(TSharedPtr<class FUnrealDiffDetailTreeNode> InNode);
 };

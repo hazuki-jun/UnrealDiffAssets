@@ -145,6 +145,7 @@ void* FUnrealDiffDetailItemNode::GetStructData(int32 ArrayIndex)
 		}
 		
 		auto ParentStructData = ParentNode.Pin()->GetStructData();
+		check(ParentStructData)
 		if (const FStructProperty* StructProp = CastField<FStructProperty>(Property.Get()))
 		{
 			return StructProp->ContainerPtrToValuePtr<void>(ParentStructData, ArrayIndex);

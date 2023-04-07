@@ -15,7 +15,7 @@ public:
 	DECLARE_DELEGATE(FOnBlueprintDiffWidgetClosed)
 	static FOnBlueprintDiffWidgetClosed OnBlueprintDiffWidgetClosed;
 	
-	DECLARE_DELEGATE_TwoParams(FOnDataTableRowSelected, bool, FName)
+	DECLARE_DELEGATE_ThreeParams(FOnDataTableRowSelected, bool, FName, int32)
 	static FOnDataTableRowSelected OnDataTableRowSelected;
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWindowResized, FVector2D)

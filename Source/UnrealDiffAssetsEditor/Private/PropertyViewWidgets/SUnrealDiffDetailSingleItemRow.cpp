@@ -16,6 +16,7 @@
 #include "PropertyViewWidgets/SUnrealDiffDetailRowIndent.h"
 #include "PropertyViewWidgets/SUnrealDiffPropertyNameWidget.h"
 #include "PropertyViewWidgets/SUnrealDiffPropertyValueWidget.h"
+#include "Utils/FUnrealDiffDataTableUtil.h"
 
 #define LOCTEXT_NAMESPACE "SUnrealDiffDetailSingleItemRow"
 
@@ -209,27 +210,7 @@ void SUnrealDiffDetailSingleItemRow::OnMenuActionCopy()
 
 FString SUnrealDiffDetailSingleItemRow::CopyProperty()
 {
-	const void* ValueAddr = nullptr;
-	if (OwnerTreeNode.Pin()->bIsInContainer)
-	{
-		ValueAddr = OwnerTreeNode.Pin()->RowDataInContainer; 
-	}
-	else
-	{
-		if (OwnerTreeNode.Pin()->IsContainerNode())
-		{
-			ValueAddr = OwnerTreeNode.Pin()->GetStructData();
-		}
-		else
-		{
-			void* StructData = OwnerTreeNode.Pin()->GetStructData();
-			ValueAddr = OwnerTreeNode.Pin()->Property->ContainerPtrToValuePtr<void>(StructData); 
-		}
-	}
-	
-	FString FormattedString;
-	OwnerTreeNode.Pin()->Property.Get()->ExportText_Direct(FormattedString, ValueAddr, ValueAddr, nullptr, PPF_Copy);
-	return FormattedString;
+	return FUnrealDiffDataTableUtil::CopyProperty(OwnerTreeNode.Pin());
 }
 
 void SUnrealDiffDetailSingleItemRow::OnExpanderClicked(bool bIsExpanded)

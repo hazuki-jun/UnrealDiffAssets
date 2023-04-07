@@ -35,6 +35,8 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 	{
 		return;
 	}
+
+	InitSettings();
 	
 	this->ChildSlot
 	[
@@ -48,15 +50,7 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 			.HAlign(HAlign_Fill)
 			.AutoHeight()
 			[
-				SNew(SOverlay)
-				+ SOverlay::Slot()
-				.HAlign(HAlign_Center)
-				[
-					MakeToolbar()
-				]
-				// Toolbar
-				
-				// 
+				MakeToolbar()
 			]
 			
 			+ SVerticalBox::Slot()
@@ -69,6 +63,24 @@ void SDataTableVisualDiff::Construct(const FArguments& InArgs)
 	];
 
 	UUnrealDiffAssetDelegate::OnDataTableRowSelected.BindRaw(this, &SDataTableVisualDiff::OnRowSelectionChanged);
+}
+
+void SDataTableVisualDiff::InitSettings()
+{
+	const FString FileName = FPaths::ProjectConfigDir() / FString(TEXT("DefaultUnrealDiffAssetSettings.ini"));
+	const FString SectionName = TEXT("/Script/UnrealDiffAssetsEditor.UnrealDiffAssetSettings");
+	
+	bool Checked = GConfig->GetBoolOrDefault(*SectionName, TEXT("DataTableVisualDiffShowOnlyNormal"), true, FileName);
+	Checked ? SetRowViewOption(EDataTableVisualDiff::Normal) : ClearRowViewOption(EDataTableVisualDiff::Normal);
+	
+	Checked = GConfig->GetBoolOrDefault(*SectionName, TEXT("DataTableVisualDiffShowOnlyModify"), true, FileName);
+	Checked ? SetRowViewOption(EDataTableVisualDiff::Modify) : ClearRowViewOption(EDataTableVisualDiff::Modify);
+	
+	Checked = GConfig->GetBoolOrDefault(*SectionName, TEXT("DataTableVisualDiffShowOnlyAdded"), true, FileName);
+	Checked ? SetRowViewOption(EDataTableVisualDiff::Added) : ClearRowViewOption(EDataTableVisualDiff::Added);
+	
+	Checked = GConfig->GetBoolOrDefault(*SectionName, TEXT("DataTableVisualDiffShowOnlyRemoved"), true, FileName);
+	Checked ? SetRowViewOption(EDataTableVisualDiff::Removed) : ClearRowViewOption(EDataTableVisualDiff::Removed);
 }
 
 TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
@@ -141,97 +153,202 @@ float SDataTableVisualDiff::GetRowDetailViewSplitterValue() const
 
 TSharedRef<SWidget> SDataTableVisualDiff::MakeToolbar()
 {
-	// FToolBarBuilder GraphToolbarBuilder(TSharedPtr< const FUICommandList >(), FMultiBoxCustomization::None);
-	// GraphToolbarBuilder.AddToolBarButton(
-	// 	FUIAction(FExecuteAction::CreateSP(this, &SBlueprintVisualDiff::OnActionMerge))
-	// 	, NAME_None
-	// 	, LOCTEXT("UseSelectedLabel", "Merge")
-	// 	, LOCTEXT("UseSelectedTooltip", "Use Selected Difference")
-	// 	, FUnrealDiffWindowStyle::GetAppSlateIcon("ContentReference.UseSelectionFromContentBrowser")
-	// );
+	TSharedRef<SOverlay> Overlay = SNew(SOverlay);
 	
-	TSharedPtr<SLayeredImage> FilterImage = SNew(SLayeredImage)
-		 .Image(FAppStyle::Get().GetBrush("DetailsView.ViewOptions"))
-		 .ColorAndOpacity(FSlateColor::UseForeground());
+	FToolBarBuilder DataTableVisualToolbarBuilder(TSharedPtr< const FUICommandList >(), FMultiBoxCustomization::None);
+	DataTableVisualToolbarBuilder.AddToolBarButton(
+		FUIAction(FExecuteAction::CreateSP(this, &SDataTableVisualDiff::ToolbarAction_HighlightPrevDifference))
+		, NAME_None
+		, LOCTEXT("PrevLabel", "Prev")
+		, LOCTEXT("PrevTooltip", "Prev Difference")
+		, FUnrealDiffWindowStyle::GetAppSlateIcon("BlueprintMerge.PrevDiff")
+	);
 
-	// Badge the filter icon if there are filters active
-	// FilterImage->AddLayer(FUnrealDiffWindowStyle::GetAppSlateBrush("Icons.BadgeModified"));
+	DataTableVisualToolbarBuilder.AddToolBarButton(
+	FUIAction(FExecuteAction::CreateSP(this, &SDataTableVisualDiff::ToolbarAction_HighlightNextDifference))
+		, NAME_None
+		, LOCTEXT("Nextabel", "Next")
+		, LOCTEXT("NextTooltip", "Next Difference")
+		, FUnrealDiffWindowStyle::GetAppSlateIcon("BlueprintMerge.NextDiff")
+	);
 
-	FMenuBuilder DetailViewOptions( true, nullptr);
-	DetailViewOptions.AddMenuEntry( 
-	LOCTEXT("ShowOnlyModified", "Show Only Modified Properties"),
-	LOCTEXT("ShowOnlyModified_ToolTip", "Displays only properties which have been changed from their default"),
-		FSlateIcon(),
-		FUIAction(),
-		NAME_None,
-		EUserInterfaceActionType::Check);
+	DataTableVisualToolbarBuilder.AddToolBarButton(
+	FUIAction(FExecuteAction::CreateSP(this, &SDataTableVisualDiff::ToolbarAction_Diff))
+		, NAME_None
+		, LOCTEXT("DiffLabel", "Diff")
+		, LOCTEXT("DiffTooltip", "Diff")
+		, FUnrealDiffWindowStyle::GetAppSlateIcon("SourceControl.Actions.Diff")
+	);
 	
-	return SNew(SHorizontalBox)
-
-	+ SHorizontalBox::Slot()
-	.AutoWidth()
-	.Padding(0.f)
+	DataTableVisualToolbarBuilder.AddToolBarButton(
+	FUIAction(FExecuteAction::CreateSP(this, &SDataTableVisualDiff::ToolbarAction_Merge))
+		, NAME_None
+		, LOCTEXT("MergeLabel", "Merge")
+		, LOCTEXT("MergeTooltip", "Merge")
+		, FUnrealDiffWindowStyle::GetAppSlateIcon("ContentReference.UseSelectionFromContentBrowser")
+	);
+	
+	Overlay->AddSlot()
+	.HAlign(HAlign_Left)
+	.Padding(FMargin(10.f, 0.f, 0.f, 0.f))
 	[
-		SNew(SButton)
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.Padding(0.f)
-			[
-				SNew(SImage)
-				.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("BlueprintMerge.NextDiff"))
-			]
-			+ SHorizontalBox::Slot()
-			.Padding(0.f)
-			[
-				SNew(STextBlock)
-				.Text(FText::FromString(TEXT("Next ")))
-			]
-		]
-	]
+		DataTableVisualToolbarBuilder.MakeWidget()
+	];
 
-	+ SHorizontalBox::Slot()
-	.Padding(0)
-	.HAlign(HAlign_Center)
-	.VAlign(VAlign_Center)
-	.AutoWidth()
-	[
-		SNew( SComboButton )
+	// View option
+	TSharedPtr<SLayeredImage> FilterImage =
+		SNew(SLayeredImage)
+		.Image(FAppStyle::Get().GetBrush("DetailsView.ViewOptions"))
+		.ColorAndOpacity(FSlateColor::UseForeground());
+
+	TSharedRef<SComboButton> ComboButton =
+		SNew(SComboButton)
 		.HasDownArrow(false)
 		.ContentPadding(0)
-		.ForegroundColor( FSlateColor::UseForeground() )
-		.ButtonStyle( FAppStyle::Get(), "SimpleButton" )
+		.ForegroundColor(FSlateColor::UseForeground())
+		.ButtonStyle(FUnrealDiffWindowStyle::GetAppStyle(), "SimpleButton")
 		.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("ViewOptions")))
 		.MenuContent()
 		[
-			DetailViewOptions.MakeWidget()
+			GetShowViewOptionContent()
 		]
 		.ButtonContent()
 		[
 			FilterImage.ToSharedRef()
-		]
-	]
-	;
+		];
 	
-	// return SNew(SHorizontalBox)
-	// + SHorizontalBox::Slot()
-	// .AutoWidth()
-	// [
-	// 	SNew(SButton)
-	// 	[
-	// 		SNew(SHorizontalBox)
-	// 		+ SHorizontalBox::Slot()
-	// 		[
-	// 			SNew(SImage)
-	// 			.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("BlueprintMerge.NextDiff"))
-	// 		]
-	// 		+ SHorizontalBox::Slot()
-	// 		[
-	// 			SNew(STextBlock)
-	// 			.Text(FText::FromString(TEXT("Next ")))
-	// 		]
-	// 	]
-	// ];
+	Overlay->AddSlot()
+	.HAlign(HAlign_Center)
+	.Padding(FMargin(0.f, 0.f, 20.f, 0.f))
+	[
+		ComboButton
+	];
+	
+	return Overlay;
+}
+
+TSharedRef<SWidget> SDataTableVisualDiff::GetShowViewOptionContent()
+{
+	FMenuBuilder DetailViewOptions( true, nullptr);
+
+	DetailViewOptions.AddMenuEntry( 
+	LOCTEXT("ShowOnlyNormal", "Show Only Normal Rows"),
+	LOCTEXT("ShowOnlyNormal_ToolTip", "Displays only row"),
+		FSlateIcon(),
+		FUIAction(
+		FExecuteAction::CreateSP(this, &SDataTableVisualDiff::OnShowOnlyViewOptionClicked, EDataTableVisualDiff::Normal),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateSP( this, &SDataTableVisualDiff::IsShowOnlyRowViewOptionChecked, EDataTableVisualDiff::Normal )
+			),
+		NAME_None,
+		EUserInterfaceActionType::Check);
+	
+	DetailViewOptions.AddMenuEntry( 
+	LOCTEXT("ShowOnlyModified", "Show Only Modified Rows"),
+	LOCTEXT("ShowOnlyModified_ToolTip", "Displays only row which have been changed"),
+		FSlateIcon(),
+		FUIAction(
+		FExecuteAction::CreateSP(this, &SDataTableVisualDiff::OnShowOnlyViewOptionClicked, EDataTableVisualDiff::Modify),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateSP( this, &SDataTableVisualDiff::IsShowOnlyRowViewOptionChecked, EDataTableVisualDiff::Modify )
+			),
+		NAME_None,
+		EUserInterfaceActionType::Check);
+
+	DetailViewOptions.AddMenuEntry( 
+	LOCTEXT("ShowOnlyAdded", "Show Only Added Rows"),
+	LOCTEXT("ShowOnlyAdded_ToolTip", "Displays only row which added"),
+		FSlateIcon(),
+		FUIAction(
+		FExecuteAction::CreateSP(this, &SDataTableVisualDiff::OnShowOnlyViewOptionClicked, EDataTableVisualDiff::Added),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateSP( this, &SDataTableVisualDiff::IsShowOnlyRowViewOptionChecked, EDataTableVisualDiff::Added )
+			),
+		NAME_None,
+		EUserInterfaceActionType::Check);
+	
+	// DetailViewOptions.AddMenuEntry( 
+	// LOCTEXT("ShowOnlyRemoved", "Show Only Removed Rows"),
+	// LOCTEXT("ShowOnlyRemoved_ToolTip", "Displays only row which have been removed"),
+	// 	FSlateIcon(),
+	// 	FUIAction(
+	// 	FExecuteAction::CreateSP(this, &SDataTableVisualDiff::OnShowOnlyViewOptionClicked, EDataTableVisualDiff::Removed),
+	// 	FCanExecuteAction(),
+	// 	FIsActionChecked::CreateSP( this, &SDataTableVisualDiff::IsShowOnlyRowViewOptionChecked, EDataTableVisualDiff::Removed )
+	// 		),
+	// 	NAME_None,
+	// 	EUserInterfaceActionType::Check);
+	
+	
+	return DetailViewOptions.MakeWidget();
+}
+
+void SDataTableVisualDiff::OnShowOnlyViewOptionClicked(EDataTableVisualDiff::RowViewOption InViewOption)
+{
+	if (InViewOption == EDataTableVisualDiff::Added)
+	{
+		ReverseRowViewOption(EDataTableVisualDiff::Added);
+		ReverseRowViewOption(EDataTableVisualDiff::Removed);
+	}
+	else
+	{
+		ReverseRowViewOption(InViewOption);
+	}
+	
+	RefreshLayout();
+	ModifyConfig();
+}
+
+bool SDataTableVisualDiff::HasRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption) const
+{
+	return (RowViewOption & InViewOption) != 0;
+}
+
+void SDataTableVisualDiff::ClearRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption)
+{
+	RowViewOption = RowViewOption & ~InViewOption;
+	SetRowViewOptionTo(RowViewOption);
+}
+
+void SDataTableVisualDiff::SetRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption)
+{
+	RowViewOption = RowViewOption | InViewOption;
+	SetRowViewOptionTo(RowViewOption);
+}
+
+void SDataTableVisualDiff::SetRowViewOptionTo(EDataTableVisualDiff::RowViewOption InViewOption)
+{
+	RowViewOption = InViewOption;
+}
+
+void SDataTableVisualDiff::ReverseRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption)
+{
+	HasRowViewOption(InViewOption) ? ClearRowViewOption(InViewOption) : SetRowViewOption(InViewOption);
+}
+
+void SDataTableVisualDiff::ModifyConfig()
+{
+	const FString FileName = FPaths::ProjectConfigDir() / FString(TEXT("DefaultUnrealDiffAssetSettings.ini"));
+	const FString SectionName = TEXT("/Script/UnrealDiffAssetsEditor.UnrealDiffAssetSettings");
+	
+	bool Checked = HasRowViewOption(EDataTableVisualDiff::Normal);
+	GConfig->SetBool(*SectionName, TEXT("DataTableVisualDiffShowOnlyNormal"), Checked, FileName);
+	
+	Checked = HasRowViewOption(EDataTableVisualDiff::Modify);
+	GConfig->SetBool(*SectionName, TEXT("DataTableVisualDiffShowOnlyModify"), Checked, FileName);
+	
+	Checked = HasRowViewOption(EDataTableVisualDiff::Added);
+	GConfig->SetBool(*SectionName, TEXT("DataTableVisualDiffShowOnlyAdded"), Checked, FileName);
+	
+	Checked = HasRowViewOption(EDataTableVisualDiff::Removed);
+	GConfig->SetBool(*SectionName, TEXT("DataTableVisualDiffShowOnlyRemoved"), Checked, FileName);
+	
+	GConfig->Flush(false, FileName);
+}
+
+bool SDataTableVisualDiff::IsShowOnlyRowViewOptionChecked(EDataTableVisualDiff::RowViewOption InViewOption) const
+{
+	return HasRowViewOption(InViewOption);
 }
 
 TSharedRef<SWidget> SDataTableVisualDiff::BuildLayoutWidget(FText InTitle, bool bIsLocal)
@@ -265,10 +382,114 @@ TSharedPtr<FStructOnScope> SDataTableVisualDiff::GetStructure()
 	return MakeShareable(new FStructOnScope(DataTable->RowStruct));
 }
 
-void SDataTableVisualDiff::OnRowSelectionChanged(bool bIsLocal, FName RowId)
+void SDataTableVisualDiff::ToolbarAction_HighlightNextDifference()
+{
+	if (!DataTableLayoutLocal)
+	{
+		return;
+	}
+
+	CloseDetailView();
+	
+	auto& VisibleRows = DataTableLayoutLocal->GetVisibleRows();
+	for (int32 i = 0; i < VisibleRows.Num(); ++i)
+	{
+		if (VisibleRows[i]->RowNum > SelectedRowNumber)
+		{
+			if (VisibleRows[i]->RowState > EDataTableVisualDiff::Normal)
+			{
+				DataTableLayoutLocal->SelectRow(VisibleRows[i]->RowId);
+				OnRowSelectionChanged(true, VisibleRows[i]->RowId, VisibleRows[i]->RowNum);
+				break;
+			}
+		}
+	}
+}
+
+void SDataTableVisualDiff::ToolbarAction_HighlightPrevDifference()
+{
+	if (!DataTableLayoutLocal)
+	{
+		return;
+	}
+	
+	CloseDetailView();
+	
+	auto& VisibleRows = DataTableLayoutLocal->GetVisibleRows();
+	for (int32 i = VisibleRows.Num() - 1; i >= 0; --i)
+	{
+		if (VisibleRows[i]->RowNum < SelectedRowNumber)
+		{
+			if (VisibleRows[i]->RowState > EDataTableVisualDiff::Normal)
+			{
+				DataTableLayoutLocal->SelectRow(VisibleRows[i]->RowId);
+				OnRowSelectionChanged(true, VisibleRows[i]->RowId, VisibleRows[i]->RowNum);
+				break;
+			}
+		}
+	}
+}
+
+void SDataTableVisualDiff::ToolbarAction_Diff()
+{
+	if (!ToolbarAction_CanDiff())
+	{
+		return;
+	}
+	
+	ShowDifference_RowToRow(SelectedRowId, SelectedRowNumber);
+}
+
+bool SDataTableVisualDiff::ToolbarAction_CanDiff()
+{
+	if (!DataTableLayoutLocal)
+	{
+		return false;
+	}
+	
+	auto& VisibleRowsLocal = DataTableLayoutLocal->GetVisibleRows();
+	for (int32 i = VisibleRowsLocal.Num() - 1; i >= 0; --i)
+	{
+		if (VisibleRowsLocal[i]->RowId.IsEqual(SelectedRowId))
+		{
+			if (VisibleRowsLocal[i]->RowState == EDataTableVisualDiff::Modify)
+			{
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+void SDataTableVisualDiff::ToolbarAction_Merge()
+{
+	auto& VisibleRows = DataTableLayoutRemote->GetVisibleRows();
+	for (int32 i = VisibleRows.Num() - 1; i >= 0; --i)
+	{
+		if (VisibleRows[i]->RowId.IsEqual(SelectedRowId))
+		{
+			if (VisibleRows[i]->RowState == EDataTableVisualDiff::Removed)
+			{
+				MergeAction_DeleteRow(SelectedRowId);
+				ToolbarAction_HighlightNextDifference();
+				break;
+			}
+			else
+			{
+				MergeAction_MergeRow(SelectedRowId);
+				ToolbarAction_HighlightNextDifference();
+				break;
+			}
+		}
+	}
+}
+
+void SDataTableVisualDiff::OnRowSelectionChanged(bool bIsLocal, FName RowId, int32 RowNumber)
 {
 	bIsLocalDataTableSelected = bIsLocal;
 	SelectedRowId = RowId;
+	SelectedRowNumber = RowNumber;
 
 	if (bIsLocal)
 	{
@@ -344,13 +565,16 @@ void SDataTableVisualDiff::MergeAction_DeleteRow(FName RowName)
 	RefreshLayout();
 }
 
-void SDataTableVisualDiff::ShowDifference_RowToRow(const FName& RowName)
+void SDataTableVisualDiff::ShowDifference_RowToRow(const FName& RowName, int32 InSelectedRowNumber)
 {
 	if (!RowDetailViewLocal || !RowDetailViewRemote)
 	{
 		return;
 	}
 
+	SelectedRowId = RowName;
+	SelectedRowNumber = InSelectedRowNumber;
+	
 	RowDetailViewLocal->Refresh(RowName);
 	RowDetailViewRemote->Refresh(RowName);
 
@@ -360,7 +584,16 @@ void SDataTableVisualDiff::ShowDifference_RowToRow(const FName& RowName)
 	{
 		if (CacheNodesRemote.IsValidIndex(i))
 		{
-			if (!CacheNodesRemote[i]->ValueText.ToString().Equals(CacheNodesLocal[i]->ValueText.ToString()))
+			FString A = CacheNodesLocal[i]->ValueText.ToString();
+			FString B = CacheNodesRemote[i]->ValueText.ToString();
+			
+			if (auto TextProp = CastField<FTextProperty>(CacheNodesRemote[i]->Property.Get()))
+			{
+				A = FUnrealDiffDataTableUtil::CopyProperty(CacheNodesLocal[i]);
+				B = FUnrealDiffDataTableUtil::CopyProperty(CacheNodesRemote[i]);
+			}
+			
+			if (!A.Equals(B))
 			{
 				CacheNodesRemote[i]->bHasAnyDifference = true;
 				CacheNodesLocal[i]->bHasAnyDifference = true;
@@ -532,7 +765,7 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 
 	if (bRegenerate)
 	{
-		ShowDifference_RowToRow(SelectedRowId);
+		ShowDifference_RowToRow(SelectedRowId, SelectedRowNumber);
 		if (RowDetailViewLocal && RowDetailViewRemote)
 		{
 			RowDetailViewLocal->SetItemExpansion(true, 0);
@@ -561,7 +794,7 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 		{
 			if (RowData->RowId.IsEqual(SelectedRowId))
 			{
-				RowData->bHasAnyDifference = false;
+				RowData->RowState = 1;
 			}
 		}
 
@@ -569,7 +802,7 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 		{
 			if (RowData->RowId.IsEqual(SelectedRowId))
 			{
-				RowData->bHasAnyDifference = false;
+				RowData->RowState = 1;
 			}
 		}
 	}
@@ -579,8 +812,11 @@ void SDataTableVisualDiff::CloseDetailView()
 {
 	if (RowDetailViewLocal && RowDetailViewRemote)
 	{
-		RowDetailViewLocal->SetVisibility(EVisibility::Collapsed);
-		RowDetailViewRemote->SetVisibility(EVisibility::Collapsed);
+		if (RowDetailViewLocal->GetVisibility() != EVisibility::Collapsed)
+		{
+			RowDetailViewLocal->SetVisibility(EVisibility::Collapsed);
+			RowDetailViewRemote->SetVisibility(EVisibility::Collapsed);	
+		}
 	}
 }
 
