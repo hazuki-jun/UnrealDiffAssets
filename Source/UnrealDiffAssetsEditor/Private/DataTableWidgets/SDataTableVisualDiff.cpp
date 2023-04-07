@@ -108,7 +108,7 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 		.HitDetectionSplitterHandleSize(5.0f)
 		+ SSplitter::Slot()
 		[
-			SNew(SSplitter)
+			SAssignNew(DetailViewSplitterLocal, SSplitter)
 			.Orientation(EOrientation::Orient_Vertical)
 			+ SSplitter::Slot()
 			[
@@ -116,6 +116,7 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 			]
 
 			+ SSplitter::Slot()
+			// .OnSlotResized(this, &SDataTableVisualDiff::OnLocalDetailViewSplitterResized)
 			.Value(RowDetailViewSplitterValue)
 			[
 				BuildRowDetailView(true)
@@ -124,7 +125,7 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 
 		+ SSplitter::Slot()
 		[
-			SNew(SSplitter)
+			SAssignNew(DetailViewSplitterRemote, SSplitter)
 			.Orientation(EOrientation::Orient_Vertical)
 			+ SSplitter::Slot()
 			[
@@ -133,11 +134,44 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 
 			+ SSplitter::Slot()
 			.Value(RowDetailViewSplitterValue)
+			// .OnSlotResized(this, &SDataTableVisualDiff::OnRemoteDetailViewSplitterResized)
 			[
 				BuildRowDetailView(false)
 			]
 		]
 	];
+}
+
+void SDataTableVisualDiff::OnLocalDetailViewSplitterResized(float NewValue)
+{
+	// if (!DetailViewSplitterRemote)
+	// {
+	// 	return;
+	// }
+	//
+	// if (DetailViewSplitterRemote->GetChildren()->Num() <= 0)
+	// {
+	// 	return;
+	// }
+	//
+	// auto& SplitterSlot = DetailViewSplitterRemote->SlotAt(1);
+	// SplitterSlot.SetSizeValue(NewValue);
+}
+
+void SDataTableVisualDiff::OnRemoteDetailViewSplitterResized(float NewValue)
+{
+	// if (!DetailViewSplitterLocal)
+	// {
+	// 	return;
+	// }
+	//
+	// if (DetailViewSplitterLocal->GetChildren()->Num() <= 0)
+	// {
+	// 	return;
+	// }
+	//
+	// auto& SplitterSlot = DetailViewSplitterLocal->SlotAt(1);
+	// SplitterSlot.SetSizeValue(NewValue);
 }
 
 float SDataTableVisualDiff::GetRowDetailViewSplitterValue() const
@@ -857,7 +891,21 @@ int32 SDataTableVisualDiff::OnPaint(const FPaintArgs& Args, const FGeometry& All
 			UUnrealDiffAssetDelegate::OnWindowResized.Broadcast(WindowSize);
 		}
 	}
-	
+
+	// if (!DetailViewSplitterRemote || !DetailViewSplitterLocal)
+	// {
+	// 	return Ret;
+	// }
+	//
+	// if (DetailViewSplitterRemote->GetChildren()->Num() <= 0 || DetailViewSplitterLocal->GetChildren()->Num() <= 0)
+	// {
+	// 	return Ret;
+	// }
+	//
+	// auto& SplitterSlotRemote = DetailViewSplitterRemote->SlotAt(1);
+	// auto& SplitterSlotLocal = DetailViewSplitterLocal->SlotAt(1);
+	// SplitterSlotRemote.SetSizeValue(SplitterSlotLocal.GetSizeValue());
+
 	return Ret;
 }
 

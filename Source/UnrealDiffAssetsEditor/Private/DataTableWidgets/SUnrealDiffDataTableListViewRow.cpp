@@ -253,8 +253,15 @@ void SUnrealDiffDataTableListViewRow::OnMenuActionMerge()
 
 FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)
 {
-	STableRow::OnMouseButtonDoubleClick(InMyGeometry, InMouseEvent);
-	return FReply::Handled();
+	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		if (RowDataPtr->RowState == EDataTableVisualDiff::Modify)
+		{
+			OnMenuActionShowDifference();
+		}
+	}
+	
+	return STableRow::OnMouseButtonDoubleClick(InMyGeometry, InMouseEvent);
 }
 
 FReply SUnrealDiffDataTableListViewRow::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)

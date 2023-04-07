@@ -43,6 +43,9 @@ public:
 	
 	TSharedRef<SWidget> BuildWidgetContent();
 
+	void OnLocalDetailViewSplitterResized(float NewValue);
+	void OnRemoteDetailViewSplitterResized(float NewValue);
+	
 	float GetRowDetailViewSplitterValue() const;
 
 	TSharedRef<SWidget> MakeToolbar();
@@ -54,7 +57,7 @@ public:
 	TSharedPtr<SWindow> GetParentWindow() const { return ParentWindow; }
 
 	TSharedPtr<FStructOnScope> GetStructure();
-
+	
 	//~ Begin Toolbar
 	
 	// Toolbar Action
@@ -172,6 +175,8 @@ public:
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutRemote;
 	TSharedPtr<class SUnrealDiffDataTableRowDetailView> RowDetailViewLocal;
 	TSharedPtr<class SUnrealDiffDataTableRowDetailView> RowDetailViewRemote;
+	TSharedPtr<class SSplitter> DetailViewSplitterLocal;
+	TSharedPtr<class SSplitter> DetailViewSplitterRemote;
 	
 protected:
 	TSharedPtr<SWindow> ParentWindow;
@@ -192,7 +197,7 @@ protected:
 
 	// Parent Window Window Size
 	mutable FVector2D WindowSize;
-
+	
 	EDataTableVisualDiff::RowViewOption RowViewOption = EDataTableVisualDiff::Max;
 };
 

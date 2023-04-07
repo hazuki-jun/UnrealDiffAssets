@@ -7,8 +7,8 @@
 
 namespace 
 {
-	FString SlotName = TEXT("UnrealDiff");
-	int32 SlotIndex = 0;
+	const FString SlotName = TEXT("UnrealDiff");
+	constexpr int32 SlotIndex = 0;
 }
 
 UUnrealDiffSaveGame::UUnrealDiffSaveGame()
