@@ -20,7 +20,6 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 	CloseButtonStyle = WindowStyle.CloseButtonStyle;
 	
 	SAssignNew(MyDetailTree, SUnrealDiffDataTableDetailTree, this);
-	// DetailTree->DetailView = AsWeak();
 	this->ChildSlot
 	[
 		SNew(SVerticalBox)

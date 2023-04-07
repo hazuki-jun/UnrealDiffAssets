@@ -10,6 +10,7 @@
 #if ENGINE_MAJOR_VERSION == 4
 	#include "WeakFieldPtr.h"
 #endif
+#include "UnrealDiffSaveGame.h"
 #include "UnrealDiffWindowStyle.h"
 #include "DataTableWidgets/SUnrealDiffDataTableLayout.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
@@ -102,11 +103,7 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 	+ SOverlay::Slot()
 	[
 		SNew(SSplitter)
-#if ENGINE_MAJOR_VERSION == 4
-		.Style(FEditorStyle::Get(), "DetailsView.Splitter")
-#else
-		.Style(FAppStyle::Get(), "DetailsView.Splitter")
-#endif
+		.Style(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.Splitter")
 		.PhysicalSplitterHandleSize(5.0f)
 		.HitDetectionSplitterHandleSize(5.0f)
 		+ SSplitter::Slot()
@@ -610,6 +607,8 @@ void SDataTableVisualDiff::ShowDifference_RowToRow(const FName& RowName, int32 I
 			return;
 		}
 	}
+
+	ExpandCategories();
 }
 
 void SDataTableVisualDiff::RefreshLayout()
@@ -626,6 +625,27 @@ void SDataTableVisualDiff::RefreshLayout()
 	{
 		RowDetailViewLocal->SetVisibility(EVisibility::Collapsed);
 		RowDetailViewRemote->SetVisibility(EVisibility::Collapsed);
+	}
+}
+
+void SDataTableVisualDiff::ExpandCategories()
+{
+	if (!RowDetailViewLocal || !RowDetailViewRemote)
+	{
+		return;
+	}
+
+	auto& AllNodes = RowDetailViewLocal->GetCachedNodes();
+	for (const auto& TreeNode : AllNodes)
+	{
+		if (TreeNode->IsContainerNode())
+		{
+			if (UUnrealDiffSaveGame::IsRowCategoryExpanded(SelectedRowId, TreeNode->GetCategoryName()))
+			{
+				RowDetailViewLocal->SetItemExpansion(true, TreeNode->GetNodeIndex());
+				RowDetailViewRemote->SetItemExpansion(true, TreeNode->GetNodeIndex());
+			}
+		}
 	}
 }
 
@@ -772,11 +792,7 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 	if (bRegenerate)
 	{
 		ShowDifference_RowToRow(SelectedRowId, SelectedRowNumber);
-		if (RowDetailViewLocal && RowDetailViewRemote)
-		{
-			RowDetailViewLocal->SetItemExpansion(true, 0);
-			RowDetailViewRemote->SetItemExpansion(true, 0);
-		}
+		ExpandCategories();
 	}
 	else
 	{

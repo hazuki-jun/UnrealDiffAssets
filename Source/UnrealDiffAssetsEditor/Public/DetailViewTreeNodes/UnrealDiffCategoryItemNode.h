@@ -19,6 +19,8 @@ public:
 	virtual void GenerateChildren();
 
 	virtual void* GetStructData(int32 ArrayIndex = 0) override;
+
+	virtual FName GetCategoryName() override;
 	
 	FName CategoryName;
 

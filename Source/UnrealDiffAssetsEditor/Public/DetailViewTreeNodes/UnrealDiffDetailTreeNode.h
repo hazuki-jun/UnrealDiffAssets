@@ -43,6 +43,8 @@ public:
 	
 	void SetNodeIndex(int32 InNodeIndex) { NodeIndex = InNodeIndex; }
 
+	virtual FName GetCategoryName();
+	
 	FText ValueText;
 
 	// FText PropertyText;

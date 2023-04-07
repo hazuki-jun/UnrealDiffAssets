@@ -125,8 +125,10 @@ public:
 	void MergeAction_DeleteRow(FName RowName);
 	
 	void ShowDifference_RowToRow(const FName& RowName, int32 InSelectedRowNumber);
-	
+
 	void RefreshLayout();
+
+	void ExpandCategories();
 	
 	//~ Begin Ctrl + C 
 	virtual FReply OnPreviewKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;

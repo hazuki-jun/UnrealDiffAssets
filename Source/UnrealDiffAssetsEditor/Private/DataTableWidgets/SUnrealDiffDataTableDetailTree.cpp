@@ -5,6 +5,7 @@
 
 #include "ObjectEditorUtils.h"
 #include "SlateOptMacros.h"
+#include "UnrealDiffSaveGame.h"
 #include "DataTableWidgets/SDataTableVisualDiff.h"
 #include "DataTableWidgets/SUnrealDiffDataTableRowDetailView.h"
 #include "DetailViewTreeNodes/UnrealDiffCategoryItemNode.h"
@@ -42,13 +43,10 @@ void SUnrealDiffDataTableDetailTree::OnGetChildrenForDetailTree(TSharedPtr<FUnre
 
 void SUnrealDiffDataTableDetailTree::OnItemExpansionChanged(TSharedPtr<FUnrealDiffDetailTreeNode> TreeItem, bool bIsExpanded) const
 {
-	// TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> Children;
-	// TreeItem->GetChildren(Children);
-	//
-	// for (auto WeakChild : Children)
-	// {
-	// 	MyTreeView->SetItemExpansion(WeakChild, true);
-	// }
+	if (const auto DataTableVisualDiff = DetailView->GetDataTableVisualDiff())
+	{
+		DataTableVisualDiff->SyncDetailViewAction_Expanded(DetailView->IsLocalAsset(), bIsExpanded, TreeItem->GetNodeIndex());
+	}
 }
 
 void SUnrealDiffDataTableDetailTree::HandleTableViewScrolled(double InScrollOffset)
@@ -142,6 +140,15 @@ void SUnrealDiffDataTableDetailTree::SetItemExpansion(bool bIsExpand, TSharedPtr
 	if (MyTreeView)
 	{
 		MyTreeView->SetItemExpansion(TreeItem, bIsExpand);
+
+		if (bIsExpand)
+		{
+			UUnrealDiffSaveGame::AddExpandedCategory(DetailView->GetCurrentRowName(), TreeItem->GetCategoryName());
+		}
+		else
+		{
+			UUnrealDiffSaveGame::RemoveExpandedCategory(DetailView->GetCurrentRowName(), TreeItem->GetCategoryName());
+		}
 	}
 }
 

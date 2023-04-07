@@ -182,24 +182,25 @@ void SUnrealDiffDetailSingleItemRow::OnMenuActionMerge()
 	}
 	// if (OwnerTreeNode.Pin()->IsContainerNode())
 	// {
-		FString PropertyString = CopyProperty();
+		// FString PropertyString = CopyProperty();
+		// DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), PropertyString, true);
+	// }
+	// else
+	// {
+	// 	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString(), true);
+	// }
+
+	FString PropertyString = CopyProperty();
+	if (OwnerTreeNode.Pin()->IsContainerNode())
+	{
 		DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), PropertyString, true);
-	// }
-	// else
-	// {
-	// 	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString(), true);
-	// }
-	
-	// if (OwnerTreeNode.Pin()->IsContainerNode())
-	// {
-	// 	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString(), true);
-	// }
-	// else
-	// {
-	// 	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString(), false);
-	// 	OwnerTreeNode.Pin()->bHasAnyDifference = false;
-	// 	Refresh();
-	// }
+	}
+	else
+	{
+		DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), PropertyString, false);
+		OwnerTreeNode.Pin()->bHasAnyDifference = false;
+		Refresh();
+	}
 }
 
 void SUnrealDiffDetailSingleItemRow::OnMenuActionCopy()

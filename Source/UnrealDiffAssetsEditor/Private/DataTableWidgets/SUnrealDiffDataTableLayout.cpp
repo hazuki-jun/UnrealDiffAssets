@@ -86,10 +86,10 @@ void SUnrealDiffDataTableLayout::SetupRowsData()
 	
 	DataTableVisual->GetDataTableData(bIsLocal, AvailableColumns, AvailableRows);
 
-	AvailableColumns.StableSort([](const FDataTableEditorColumnHeaderDataPtr& A, const FDataTableEditorColumnHeaderDataPtr& B)
-	{
-		return (A->ColumnId).ToString() > (B->ColumnId).ToString();
-	});
+	// AvailableColumns.StableSort([](const FDataTableEditorColumnHeaderDataPtr& A, const FDataTableEditorColumnHeaderDataPtr& B)
+	// {
+	// 	return (A->ColumnId).ToString() > (B->ColumnId).ToString();
+	// });
 	
 	for (auto RowData : AvailableRows)
 	{

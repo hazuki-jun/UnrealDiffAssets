@@ -64,3 +64,8 @@ void* FUnrealDiffCategoryItemNode::GetStructData(int32 ArrayIndex)
 
 	return nullptr;
 }
+
+FName FUnrealDiffCategoryItemNode::GetCategoryName()
+{
+	return CategoryName;
+}

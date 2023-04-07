@@ -34,4 +34,5 @@ public:
 	// UPROPERTY(EditAnywhere, Config, Category = DataTableDiff, DisplayName = "ShowOnlyRemoved")
 	// bool DataTableVisualDiffShowOnlyRemoved = true;
 	//~ End DataTableDiff Config
+
 };
