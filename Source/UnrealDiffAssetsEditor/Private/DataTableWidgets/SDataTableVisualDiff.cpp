@@ -69,17 +69,19 @@ void SDataTableVisualDiff::InitSettings()
 {
 	const FString FileName = FPaths::ProjectConfigDir() / FString(TEXT("DefaultUnrealDiffAssetSettings.ini"));
 	const FString SectionName = TEXT("/Script/UnrealDiffAssetsEditor.UnrealDiffAssetSettings");
-	
-	bool Checked = GConfig->GetBoolOrDefault(*SectionName, TEXT("DataTableVisualDiffShowOnlyNormal"), true, FileName);
+
+
+	bool Checked = true;
+	GConfig->GetBool(*SectionName, TEXT("DataTableVisualDiffShowOnlyNormal"), Checked, FileName);
 	Checked ? SetRowViewOption(EDataTableVisualDiff::Normal) : ClearRowViewOption(EDataTableVisualDiff::Normal);
 	
-	Checked = GConfig->GetBoolOrDefault(*SectionName, TEXT("DataTableVisualDiffShowOnlyModify"), true, FileName);
+	GConfig->GetBool(*SectionName, TEXT("DataTableVisualDiffShowOnlyModify"), Checked, FileName);
 	Checked ? SetRowViewOption(EDataTableVisualDiff::Modify) : ClearRowViewOption(EDataTableVisualDiff::Modify);
 	
-	Checked = GConfig->GetBoolOrDefault(*SectionName, TEXT("DataTableVisualDiffShowOnlyAdded"), true, FileName);
+	GConfig->GetBool(*SectionName, TEXT("DataTableVisualDiffShowOnlyAdded"), Checked, FileName);
 	Checked ? SetRowViewOption(EDataTableVisualDiff::Added) : ClearRowViewOption(EDataTableVisualDiff::Added);
 	
-	Checked = GConfig->GetBoolOrDefault(*SectionName, TEXT("DataTableVisualDiffShowOnlyRemoved"), true, FileName);
+	GConfig->GetBool(*SectionName, TEXT("DataTableVisualDiffShowOnlyRemoved"), Checked, FileName);
 	Checked ? SetRowViewOption(EDataTableVisualDiff::Removed) : ClearRowViewOption(EDataTableVisualDiff::Removed);
 }
 
@@ -198,7 +200,11 @@ TSharedRef<SWidget> SDataTableVisualDiff::MakeToolbar()
 	// View option
 	TSharedPtr<SLayeredImage> FilterImage =
 		SNew(SLayeredImage)
-		.Image(FAppStyle::Get().GetBrush("DetailsView.ViewOptions"))
+#if ENGINE_MAJOR_VERSION == 4
+		.Image(FUnrealDiffWindowStyle::GetAppStyle().GetBrush("GenericViewButton"))
+#else
+		.Image(FUnrealDiffWindowStyle::GetAppStyle().GetBrush("DetailsView.ViewOptions"))
+#endif
 		.ColorAndOpacity(FSlateColor::UseForeground());
 
 	TSharedRef<SComboButton> ComboButton =
