@@ -21,6 +21,8 @@ public:
 	virtual void* GetStructData(int32 ArrayIndex = 0) override;
 
 	virtual FName GetCategoryName() override;
+
+	virtual FString GetParentUniqueNodeId() const override;
 	
 	FName CategoryName;
 

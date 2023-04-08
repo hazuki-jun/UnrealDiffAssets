@@ -15,18 +15,18 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode_)
 {
 	OwnerTreeNode = OwnerTreeNode_;
-	bool bHasAnyDifference = false;
-	
 	const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& ChildNodes = OwnerTreeNode.Pin()->GetChildNodes();
-	for (int32 i = 0; i < ChildNodes.Num(); ++i)
-	{
-		if (ChildNodes[i] && ChildNodes[i]->bHasAnyDifference)
-		{
-			OwnerTreeNode.Pin()->bHasAnyDifference = true;
-			bHasAnyDifference = true;
-			break;
-		}
-	}
+	bool bHasAnyDifference = false;
+	bHasAnyDifference = OwnerTreeNode.Pin()->HasAnyDifferenceRecurse();
+	// for (int32 i = 0; i < ChildNodes.Num(); ++i)
+	// {
+	// 	if (ChildNodes[i] && ChildNodes[i]->bHasAnyDifference)
+	// 	{
+	// 		OwnerTreeNode.Pin()->bHasAnyDifference = true;
+	// 		bHasAnyDifference = true;
+	// 		break;
+	// 	}
+	// }
 	
 	FSlateColor SlateColor;
 	if (bHasAnyDifference)

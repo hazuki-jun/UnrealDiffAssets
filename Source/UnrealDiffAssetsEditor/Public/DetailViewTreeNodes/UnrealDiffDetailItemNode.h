@@ -17,8 +17,14 @@ public:
 
 	virtual void GenerateChildren();
 
+	void GenerateMapKeyValueChildren();
+	
 	virtual void* GetStructData(int32 ArrayIndex = 0) override;
 
+	FText GetValueTextEntry(class FProperty* InProperty, void* Data);
+	
+	virtual FString GetParentUniqueNodeId() const override;
+	
 	TWeakPtr<FUnrealDiffDetailTreeNode> ParentNode;
 	
 	class SUnrealDiffDetailView* DetailView;

@@ -43,8 +43,7 @@ public:
 	
 	TSharedRef<SWidget> BuildWidgetContent();
 
-	void OnLocalDetailViewSplitterResized(float NewValue);
-	void OnRemoteDetailViewSplitterResized(float NewValue);
+	EVisibility OnGetRowDetailViewVisibility() const;
 	
 	float GetRowDetailViewSplitterValue() const;
 
@@ -151,6 +150,8 @@ public:
 	void DetailViewAction_MergeProperty(int32 NodeIndex, const FString& PropertyValueString, bool bRegenerate = false);
 
 	void CloseDetailView();
+
+	int32 GetRealLocalDetailTreeNodeIndex(int32 RemoteNodeIndex);
 	
 	//~ End Row Detail View
 	

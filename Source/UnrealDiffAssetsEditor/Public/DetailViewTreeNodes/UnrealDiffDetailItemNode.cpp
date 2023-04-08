@@ -24,6 +24,12 @@ SUnrealDiffDetailView* FUnrealDiffDetailItemNode::GetDetailsView() const
 
 void FUnrealDiffDetailItemNode::GenerateChildren()
 {
+	if (bIsMapCategory)
+	{
+		GenerateMapKeyValueChildren();
+		return;
+	}
+	
 	if (const FStructProperty* StructProp = CastField<FStructProperty>(Property.Get()))
 	{
 		for (TFieldIterator<FProperty> It(StructProp->Struct); It; ++It)
@@ -36,6 +42,7 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 			}
 			DetailItemNode->ParentNode = AsShared();
 			DetailItemNode->Property = *It;
+			DetailItemNode->SetNodeId(*It->GetName());
 			DetailItemNode->GenerateChildren();
 			if (const auto StructData = GetStructData(0))
 			{
@@ -49,22 +56,25 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 		auto StructData = GetStructData(0);
 		if (StructData)
 		{
-			FScriptMapHelper MapHelper(MapProp, StructData);
+			void* RowData = MapProp->ContainerPtrToValuePtr<void>(StructData);
+			FScriptMapHelper MapHelper(MapProp, RowData);
 			for (int32 MapSparseIndex = 0; MapSparseIndex < MapHelper.GetMaxIndex(); ++MapSparseIndex)
 			{
 				if (MapHelper.IsValidIndex(MapSparseIndex))
 				{
-					// TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+					TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
 					// if (DetailView)
 					// {
 					// 	DetailItemNode->SetNodeIndex(DetailView->GetCachedNodeNum());
 					// 	DetailView->AddCacheNode(DetailItemNode);
 					// }
-					// DetailItemNode->Property = MapProp;
-					// DetailItemNode->PropertyIndex = MapSparseIndex;
-					// DetailItemNode->ParentNode = AsShared();
-					// DetailItemNode->GenerateChildren();
-					// Children.Add(DetailItemNode);
+					DetailItemNode->bIsMapCategory = true;
+					DetailItemNode->Property = MapProp;
+					DetailItemNode->RowDataInContainer = (uint8*)RowData;
+					DetailItemNode->PropertyIndex = MapSparseIndex;
+					DetailItemNode->ParentNode = AsShared();
+					DetailItemNode->GenerateChildren();
+					Children.Add(DetailItemNode);
 				}
 			}
 		}
@@ -92,6 +102,7 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 				DetailItemNode->ContainerProperty = SetProp;
 				DetailItemNode->PropertyIndex = SetSparseIndex;
 				DetailItemNode->Property = SetHelper.GetElementProperty();
+				DetailItemNode->SetNodeId(DetailItemNode->Property->GetName() + FString::FromInt(SetSparseIndex));
 				DetailItemNode->ParentNode = AsShared();
 				DetailItemNode->RowDataInContainer = SetHelper.GetElementPtr(SetSparseIndex);
 				if (DetailItemNode->RowDataInContainer)
@@ -123,6 +134,7 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 			DetailItemNode->ContainerProperty = ArrayProp;
 			DetailItemNode->PropertyIndex = ArrayEntryIndex;
 			DetailItemNode->Property = ArrayProp->Inner;
+			DetailItemNode->SetNodeId(DetailItemNode->Property->GetName() + FString::FromInt(ArrayEntryIndex));
 			DetailItemNode->RowDataInContainer = ArrayHelper.GetRawPtr(ArrayEntryIndex);
 			if (DetailItemNode->RowDataInContainer)
 			{
@@ -132,6 +144,59 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 			DetailItemNode->GenerateChildren();
 			Children.Add(DetailItemNode);
 		}
+	}
+}
+
+void FUnrealDiffDetailItemNode::GenerateMapKeyValueChildren()
+{
+	if (!RowDataInContainer)
+	{
+		return;
+	}
+
+	if (auto MapProp = CastField<FMapProperty>(Property.Get()))
+	{
+		FScriptMapHelper MapHelper(MapProp, RowDataInContainer);
+		if (!MapHelper.IsValidIndex(PropertyIndex))
+		{
+			return;
+		}
+		
+		TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeKey = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+		if (DetailView)
+		{
+			DetailItemNodeKey->SetNodeIndex(DetailView->GetCachedNodeNum());
+			DetailView->AddCacheNode(DetailItemNodeKey);
+		}
+		DetailItemNodeKey->Property = MapProp->GetKeyProperty();
+		DetailItemNodeKey->RowDataInContainer = MapHelper.GetKeyPtr(PropertyIndex);
+		DetailItemNodeKey->ParentNode = AsShared();
+		DetailItemNodeKey->bIsInContainer = true;
+		DetailItemNodeKey->bIsMapKey = true;
+		if (DetailItemNodeKey->RowDataInContainer)
+		{
+			DetailItemNodeKey->ValueText = DataTableUtils::GetPropertyValueAsTextDirect(MapHelper.GetKeyProperty(), DetailItemNodeKey->RowDataInContainer);
+		}
+		DetailItemNodeKey->GenerateChildren();
+		Children.Add(DetailItemNodeKey);
+
+		TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeValue = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+		if (DetailView)
+		{
+			DetailItemNodeValue->SetNodeIndex(DetailView->GetCachedNodeNum());
+			DetailView->AddCacheNode(DetailItemNodeValue);
+		}
+		DetailItemNodeValue->Property = MapProp->GetValueProperty();
+		DetailItemNodeValue->RowDataInContainer = MapHelper.GetValuePtr(PropertyIndex);
+		DetailItemNodeValue->ParentNode = AsShared();
+		DetailItemNodeValue->bIsMapValue = true;
+		DetailItemNodeValue->bIsInContainer = true;
+		if (DetailItemNodeValue->RowDataInContainer)
+		{
+			DetailItemNodeValue->ValueText = GetValueTextEntry(MapHelper.GetValueProperty(), DetailItemNodeValue->RowDataInContainer);
+		}
+		DetailItemNodeValue->GenerateChildren();
+		Children.Add(DetailItemNodeValue);
 	}
 }
 
@@ -168,6 +233,26 @@ void* FUnrealDiffDetailItemNode::GetStructData(int32 ArrayIndex)
 	}
 	
 	return nullptr;
+}
+
+FText FUnrealDiffDetailItemNode::GetValueTextEntry(FProperty* InProperty, void* Data)
+{
+	if (const FStructProperty* StructProp = CastField<const FStructProperty>(InProperty))
+	{
+		auto ValueAddress = InProperty->ContainerPtrToValuePtr<void>(Data);
+	}
+
+	return FText();
+}
+
+FString FUnrealDiffDetailItemNode::GetParentUniqueNodeId() const
+{
+	if (ParentNode.IsValid())
+	{
+		return ParentNode.Pin()->GetUniqueNodeId();
+	}
+
+	return FString();
 }
 
 const void* FUnrealDiffDetailItemNode::GetContainerData(const void* InStructData)

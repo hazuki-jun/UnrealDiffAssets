@@ -35,6 +35,7 @@ void FUnrealDiffCategoryItemNode::GenerateChildren()
 		}
 		DetailItemNode->ParentNode = AsShared();
 		DetailItemNode->Property = ChildPropertyData;
+		DetailItemNode->SetNodeId(DetailItemNode->Property->GetName());
 		if (const auto StructData = GetStructData(0))
 		{
 			DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(DetailItemNode->Property.Get(), (const uint8*)StructData);
@@ -68,4 +69,14 @@ void* FUnrealDiffCategoryItemNode::GetStructData(int32 ArrayIndex)
 FName FUnrealDiffCategoryItemNode::GetCategoryName()
 {
 	return CategoryName;
+}
+
+FString FUnrealDiffCategoryItemNode::GetParentUniqueNodeId() const
+{
+	if (CategoryName.IsNone())
+	{
+		return FString();
+	}
+	
+	return CategoryName.ToString();
 }

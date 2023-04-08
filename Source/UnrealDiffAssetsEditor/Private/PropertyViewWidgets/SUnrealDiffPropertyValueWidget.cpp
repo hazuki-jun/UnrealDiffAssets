@@ -15,9 +15,12 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SUnrealDiffPropertyValueWidget::Construct(const FArguments& InArgs, TWeakPtr<FUnrealDiffDetailTreeNode> InOwnerTreeNode)
 {
-	auto Font = FCoreStyle::GetDefaultFontStyle("Regular", 8);
-	
 	OwnerTreeNode = InOwnerTreeNode;
+	if (!OwnerTreeNode.IsValid())
+	{
+		return;
+	}
+	auto Font = FCoreStyle::GetDefaultFontStyle("Regular", 8);
 	const FProperty* Property = OwnerTreeNode.Pin().Get()->Property.Get();
 	ValueText = GetValueText(Property);
 	ChildSlot
@@ -60,6 +63,14 @@ FText SUnrealDiffPropertyValueWidget::GetValueText(const FProperty* InProperty)
 		return OutText;
 	}
 
+	if (OwnerTreeNode.Pin()->bIsMapValue || OwnerTreeNode.Pin()->bIsMapKey)
+	{
+		if (!OwnerTreeNode.Pin()->IsContainerNode())
+		{
+			return OwnerTreeNode.Pin()->ValueText;
+		}
+	}
+	
 	if (OwnerTreeNode.Pin()->bIsInContainer)
 	{
 		return GetValueTextInContainer(InProperty);

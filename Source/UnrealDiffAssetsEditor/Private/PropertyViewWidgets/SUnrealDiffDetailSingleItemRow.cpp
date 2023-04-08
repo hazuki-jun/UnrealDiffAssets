@@ -25,7 +25,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SUnrealDiffDetailSingleItemRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TSharedRef<FUnrealDiffDetailTreeNode> InOwnerTreeNode)
 {
 	OwnerTreeNode = InOwnerTreeNode;
-	check(OwnerTreeNode.Pin()->Property.Get());
+	check(OwnerTreeNode.Pin());
 	
 	this->ChildSlot
 	[

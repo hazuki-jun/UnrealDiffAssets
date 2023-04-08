@@ -32,22 +32,31 @@ public:
 	TWeakFieldPtr<const class FProperty> Property;
 	
 	bool bIsInContainer = false;
-
+	bool bIsMapValue = false;
+	bool bIsMapKey = false;
+	bool bIsMapCategory = false;
+	
 	TWeakFieldPtr<const class FProperty> ContainerProperty;
 
 	uint8* RowDataInContainer = nullptr;
 	
 	int32 PropertyIndex = -1;
-	
+
 	int32 GetNodeIndex() const { return NodeIndex; }
 	
 	void SetNodeIndex(int32 InNodeIndex) { NodeIndex = InNodeIndex; }
+	
+	FString GetUniqueNodeId() const;
 
+	virtual FString GetParentUniqueNodeId() const;
+	
+	void SetNodeId(const FString& InUniqueNodeId) { NodeId = InUniqueNodeId; }
+	
 	virtual FName GetCategoryName();
 	
 	FText ValueText;
 
-	// FText PropertyText;
+	bool HasAnyDifferenceRecurse();
 	
 	bool bHasAnyDifference = false;
 
@@ -57,4 +66,6 @@ protected:
 	TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> Children;
 
 	int32 NodeIndex = -1;
+
+	FString NodeId;
 };
