@@ -43,6 +43,8 @@ public:
 	int32 PropertyIndex = -1;
 
 	int32 GetNodeIndex() const { return NodeIndex; }
+
+	virtual FText GetValueText();
 	
 	void SetNodeIndex(int32 InNodeIndex) { NodeIndex = InNodeIndex; }
 	

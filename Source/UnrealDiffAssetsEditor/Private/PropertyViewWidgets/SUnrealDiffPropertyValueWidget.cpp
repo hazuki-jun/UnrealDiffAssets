@@ -21,8 +21,12 @@ void SUnrealDiffPropertyValueWidget::Construct(const FArguments& InArgs, TWeakPt
 		return;
 	}
 	auto Font = FCoreStyle::GetDefaultFontStyle("Regular", 8);
-	const FProperty* Property = OwnerTreeNode.Pin().Get()->Property.Get();
-	ValueText = GetValueText(Property);
+	ValueText = OwnerTreeNode.Pin()->GetValueText();
+	if (ValueText.IsEmpty())
+	{
+		return;
+	}
+	
 	ChildSlot
 	[
 		SNew(SOverlay)

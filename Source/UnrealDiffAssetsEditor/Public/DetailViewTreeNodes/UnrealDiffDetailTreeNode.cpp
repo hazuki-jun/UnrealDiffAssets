@@ -8,6 +8,12 @@ FUnrealDiffDetailTreeNode::~FUnrealDiffDetailTreeNode()
 {
 }
 
+FText FUnrealDiffDetailTreeNode::GetValueText()
+{
+	
+	return FText();
+}
+
 FString FUnrealDiffDetailTreeNode::GetUniqueNodeId() const
 {
 	return NodeId + GetParentUniqueNodeId();
