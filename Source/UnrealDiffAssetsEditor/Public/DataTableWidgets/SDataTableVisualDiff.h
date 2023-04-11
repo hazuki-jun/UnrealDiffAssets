@@ -147,11 +147,12 @@ public:
 	void SyncDetailViewAction_VerticalScrollOffset(bool bIsLocal, float ScrollOffset);
 
 	// DetailView -- 粘贴选中Property到左侧
-	void DetailViewAction_MergeProperty(int32 NodeIndex, const FString& PropertyValueString, bool bRegenerate = false);
+	void DetailViewAction_MergeProperty(int32 InNodeIndexRemote, const FString& PropertyValueString, bool bRegenerate = false);
 
 	void CloseDetailView();
 
 	int32 GetRealLocalDetailTreeNodeIndex(int32 RemoteNodeIndex);
+	int32 GetRealRemoteDetailTreeNodeIndex(int32 LocalNodeIndex);
 	
 	//~ End Row Detail View
 	
@@ -171,7 +172,11 @@ public:
 	UDataTable* GetRemoteDataTable() const { return Cast<UDataTable>(RemoteAsset); }
 	
 	UObject* GetAssetObject(bool bIsLocal) const { return bIsLocal ? LocalAsset : RemoteAsset; }
+
+protected:
+	void DiffAndSetRow();
 	
+public:
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutLocal;
 	TSharedPtr<class SUnrealDiffDataTableLayout> DataTableLayoutRemote;
 	TSharedPtr<class SUnrealDiffDataTableRowDetailView> RowDetailViewLocal;

@@ -45,7 +45,8 @@ public:
 	
 	void SetItemExpansion(bool bIsExpand, int32 NodeIndex);
 	void SetVerticalScrollOffset(float ScrollOffset);
-	void RefreshWidgetFromItem(TSharedPtr<class FUnrealDiffDetailTreeNode> InItem);
+	void RefreshWidgetFromItem(const TSharedPtr<class FUnrealDiffDetailTreeNode> InItem);
+	void RefreshForEachWidget(const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& InItems);
 	
 protected:
 	FUnrealDiffDetailColumnSizeData DetailColumnSizeData;

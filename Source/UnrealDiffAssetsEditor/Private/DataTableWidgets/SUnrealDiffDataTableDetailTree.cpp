@@ -57,7 +57,7 @@ void SUnrealDiffDataTableDetailTree::HandleTableViewScrolled(double InScrollOffs
 	}
 }
 
-void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOnScope> Structure)
+void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOnScope>& Structure)
 {
 	if (!Structure.IsValid())
 	{
@@ -84,7 +84,7 @@ void SUnrealDiffDataTableDetailTree::SetStructure(TSharedPtr<FUnrealDiffStructOn
 	MyTreeView->RequestTreeRefresh();
 }
 
-TMap<FName, TArray<FProperty*>> SUnrealDiffDataTableDetailTree::GetStructMembers(TSharedPtr<FUnrealDiffStructOnScope> Structure)
+TMap<FName, TArray<FProperty*>> SUnrealDiffDataTableDetailTree::GetStructMembers(TSharedPtr<FUnrealDiffStructOnScope>& Structure)
 {
 	TMap<FName, TArray<FProperty*>> StructMembers;
 	
@@ -160,15 +160,27 @@ void SUnrealDiffDataTableDetailTree::SetVerticalScrollOffset(float ScrollOffset)
 	}
 }
 
-void SUnrealDiffDataTableDetailTree::RefreshWidgetFromItem(TSharedPtr<FUnrealDiffDetailTreeNode> InItem)
+void SUnrealDiffDataTableDetailTree::RefreshForEachWidget(const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& InItems)
+{
+	if (!MyTreeView)
+	{
+		return;
+	}
+
+	for (auto& Item : InItems)
+	{
+		RefreshWidgetFromItem(Item);
+	}
+}
+
+void SUnrealDiffDataTableDetailTree::RefreshWidgetFromItem(const TSharedPtr<FUnrealDiffDetailTreeNode>& InItem)
 {
 	if (MyTreeView)
 	{
 		auto TableRow = MyTreeView->WidgetFromItem(InItem);
 		if (TableRow)
 		{
-			SUnrealDiffDetailSingleItemRow* SingleItemRow = static_cast<SUnrealDiffDetailSingleItemRow*>(TableRow.Get());
-			if (SingleItemRow)
+			if (SUnrealDiffDetailTableRowBase* SingleItemRow = static_cast<SUnrealDiffDetailTableRowBase*>(TableRow.Get()))
 			{
 				SingleItemRow->Refresh();
 			}

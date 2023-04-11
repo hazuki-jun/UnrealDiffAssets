@@ -15,13 +15,17 @@ public:
 
 	virtual class SUnrealDiffDetailView* GetDetailsView() const override;
 
+	virtual FText GetDisplayNameText() override;
+
+	virtual FString GetPropertyValueAsString() override;
+	
+	virtual FText GetValueText() override;
+	
 	virtual void GenerateChildren();
 
 	void GenerateMapKeyValueChildren();
 	
 	virtual void* GetStructData(int32 ArrayIndex = 0) override;
-
-	FText GetValueTextEntry(class FProperty* InProperty, void* Data);
 	
 	virtual FString GetParentUniqueNodeId() const override;
 	
@@ -30,7 +34,6 @@ public:
 	class SUnrealDiffDetailView* DetailView;
 
 	bool bIsExpanded = false;
-
-protected:
-	const void* GetContainerData(const void* InStructData);
 };
+
+

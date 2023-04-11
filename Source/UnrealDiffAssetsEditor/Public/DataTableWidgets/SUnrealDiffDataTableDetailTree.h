@@ -25,9 +25,9 @@ public:
 	
 	TArray<TSharedPtr<class FUnrealDiffDetailTreeNode>> RootTreeNodes;
 
-	void SetStructure(TSharedPtr<class FUnrealDiffStructOnScope> Structure);
+	void SetStructure(TSharedPtr<class FUnrealDiffStructOnScope>& Structure);
 
-	TMap<FName, TArray<FProperty*>> GetStructMembers(TSharedPtr<class FUnrealDiffStructOnScope> Structure);
+	TMap<FName, TArray<FProperty*>> GetStructMembers(TSharedPtr<class FUnrealDiffStructOnScope>& Structure);
 	
 	class SUnrealDiffDetailView* DetailView = nullptr;
 
@@ -37,7 +37,9 @@ public:
 
 	void SetVerticalScrollOffset(float ScrollOffset);
 
-	void RefreshWidgetFromItem(TSharedPtr<class FUnrealDiffDetailTreeNode> InItem);
+	void RefreshForEachWidget(const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& InItems);
+	
+	void RefreshWidgetFromItem(const TSharedPtr<class FUnrealDiffDetailTreeNode>& InItem);
 	
 protected:
 	TSharedPtr<STreeView<TSharedPtr<class FUnrealDiffDetailTreeNode>>> MyTreeView;

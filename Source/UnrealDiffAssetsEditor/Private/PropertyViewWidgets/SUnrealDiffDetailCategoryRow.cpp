@@ -28,14 +28,13 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSh
 	// 	}
 	// }
 	
-	FSlateColor SlateColor;
 	if (bHasAnyDifference)
 	{
-		SlateColor = FLinearColor(1.0, 1.0, 0.1, 1.0);
+		DisplayNameColor = FLinearColor(1.0, 1.0, 0.1, 1.0);
 	}
 	else
 	{
-		SlateColor = FLinearColor(1.f, 1.f, 1.f, 1.f);	
+		DisplayNameColor = FLinearColor(1.f, 1.f, 1.f, 1.f);	
 	}
 	
 	TSharedRef<SHorizontalBox> HeaderBox = SNew(SHorizontalBox)
@@ -65,7 +64,7 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSh
 			// .Text(InArgs._DisplayName)
 			// .Font(FAppStyle::Get().GetFontStyle(bIsInnerCategory ? PropertyEditorConstants::PropertyFontStyle : PropertyEditorConstants::CategoryFontStyle))
 			.TextStyle(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.CategoryTextStyle")
-			.ColorAndOpacity(SlateColor)
+			.ColorAndOpacity(this, &SUnrealDiffDetailCategoryRow::GetDisplayNameColor)
 		];
 	
 	this->ChildSlot
@@ -131,6 +130,30 @@ void SUnrealDiffDetailCategoryRow::OnExpanderClicked(bool bIsExpanded)
 	DataTableVisual->SyncDetailViewAction_Expanded(DetailView->IsLocalAsset(), bIsExpanded, OwnerTreeNode.Pin()->GetNodeIndex());
 }
 
+void SUnrealDiffDetailCategoryRow::Refresh()
+{
+	bool bHasAnyDifference = false;
+	bHasAnyDifference = OwnerTreeNode.Pin()->HasAnyDifferenceRecurse();
+	// for (int32 i = 0; i < ChildNodes.Num(); ++i)
+	// {
+	// 	if (ChildNodes[i] && ChildNodes[i]->bHasAnyDifference)
+	// 	{
+	// 		OwnerTreeNode.Pin()->bHasAnyDifference = true;
+	// 		bHasAnyDifference = true;
+	// 		break;
+	// 	}
+	// }
+	
+	if (bHasAnyDifference)
+	{
+		DisplayNameColor = FLinearColor(1.0, 1.0, 0.1, 1.0);
+	}
+	else
+	{
+		DisplayNameColor = FLinearColor(1.f, 1.f, 1.f, 1.f);	
+	}
+}
+
 const FSlateBrush* SUnrealDiffDetailCategoryRow::GetBackgroundImage() const
 {
 	return FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryTop");
@@ -162,6 +185,11 @@ FSlateColor SUnrealDiffDetailCategoryRow::GetOuterBackgroundColor() const
 	}
 
 	return FUnrealDiffWindowStyle::GetAppSlateColor("Colors.Panel");
+}
+
+FSlateColor SUnrealDiffDetailCategoryRow::GetDisplayNameColor() const
+{
+	return DisplayNameColor;
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

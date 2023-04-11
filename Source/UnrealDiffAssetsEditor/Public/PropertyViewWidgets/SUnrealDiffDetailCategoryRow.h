@@ -17,11 +17,15 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView, TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode_);
 	virtual void OnExpanderClicked(bool bIsExpanded) override;
+
+	virtual void Refresh() override;
 	
 protected:
 	const FSlateBrush* GetBackgroundImage() const;
 	FSlateColor GetInnerBackgroundColor() const;
 	FSlateColor GetOuterBackgroundColor() const;
-
+	FSlateColor GetDisplayNameColor() const;
+	
+	FSlateColor DisplayNameColor;
 	TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerTreeNode;
 };

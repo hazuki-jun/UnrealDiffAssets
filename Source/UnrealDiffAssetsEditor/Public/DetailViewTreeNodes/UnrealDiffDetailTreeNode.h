@@ -24,27 +24,26 @@ public:
 
 	/** @return The details view that this node is in */
 	virtual class SUnrealDiffDetailView* GetDetailsView() const = 0;
-
+	
 	virtual void* GetStructData(int32 ArrayIndex = 0) { return nullptr; }
 
-	bool IsContainerNode() const { return Children.Num() > 0; }
+	bool IsContainerNode() const;
+
+	bool IsInContainer() const { return ContainerIndex >= 0; }
 	
 	TWeakFieldPtr<const class FProperty> Property;
 	
-	bool bIsInContainer = false;
-	bool bIsMapValue = false;
-	bool bIsMapKey = false;
-	bool bIsMapCategory = false;
+	uint8* RawPtr = nullptr;
 	
-	TWeakFieldPtr<const class FProperty> ContainerProperty;
-
-	uint8* RowDataInContainer = nullptr;
-	
-	int32 PropertyIndex = -1;
+	int32 ContainerIndex = -1;
 
 	int32 GetNodeIndex() const { return NodeIndex; }
 
+	virtual FString GetPropertyValueAsString();
+	
 	virtual FText GetValueText();
+
+	virtual FText GetDisplayNameText();
 	
 	void SetNodeIndex(int32 InNodeIndex) { NodeIndex = InNodeIndex; }
 	
@@ -56,13 +55,23 @@ public:
 	
 	virtual FName GetCategoryName();
 	
-	FText ValueText;
-
 	bool HasAnyDifferenceRecurse();
 	
-	bool bHasAnyDifference = false;
-
 	const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& GetChildNodes();
+
+protected:
+	virtual FText GetValueTextStructInternal(const FProperty* InProperty);
+	virtual FText GetValueTextContainerInternal(void* PropertyData, const FProperty* InProperty);
+	virtual FText GetValueTextInternal(void* ValueAddress, const FProperty* InProperty);
+
+public:
+	FText DisplayNameText;
+	
+	bool bHasAnyDifference = false;
+	
+	FText ValueText;
+	
+	bool bIsExpanded = false;
 	
 protected:
 	TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> Children;

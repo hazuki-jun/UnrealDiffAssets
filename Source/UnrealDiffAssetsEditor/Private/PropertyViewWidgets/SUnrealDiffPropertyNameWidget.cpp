@@ -15,26 +15,9 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SUnrealDiffPropertyNameWidget::Construct(const FArguments& InArgs, TWeakPtr<class FUnrealDiffDetailTreeNode> OwnerNode)
 {
-	FText DisplayNameText;
-	if (OwnerNode.Pin()->bIsMapKey)
-	{
-		DisplayNameText = FText::FromString( TEXT("Key ") );
-	}
-	else if (OwnerNode.Pin()->bIsMapValue)
-	{
-		DisplayNameText = FText::FromString( TEXT("Value ") );
-	}
-	else if (OwnerNode.Pin()->bIsInContainer || OwnerNode.Pin()->bIsMapCategory)
-	{
-		DisplayNameText = FText::FromString( FString::Format(TEXT("[{0}]"), { OwnerNode.Pin()->PropertyIndex }) );
-	}
-	else
-	{
-		DisplayNameText = OwnerNode.Pin()->Property.Get()->GetDisplayNameText(); 
-	}
-
+	FText DisplayNameText = OwnerNode.Pin()->GetDisplayNameText();
 	FSlateColor SlateColor;
-	if (OwnerNode.Pin()->bHasAnyDifference)
+	if (OwnerNode.Pin()->HasAnyDifferenceRecurse())
 	{
 		SlateColor = FLinearColor(1.0, 1.0, 0.1, 1.0);
 	}

@@ -105,16 +105,8 @@ bool FUnrealDiffDataTableUtil::HasAnyDifferenceRowToRow(UDataTable* InLocalDataT
 {
 	FString LocalStructDataText;
 	FString RemoteStructDataText;
-	// if (bIgnorePropertyName)
-	// {
-	// 	ExportRowValueText(LocalStructDataText, InLocalDataTable, RowName);
-	// 	ExportRowValueText(RemoteStructDataText, InRemoteDataTable, RowName);
-	// }
-	// else
-	{
-		ExportRowText(LocalStructDataText, InLocalDataTable, RowName);
-		ExportRowText(RemoteStructDataText, InRemoteDataTable, RowName);
-	}
+	ExportRowText(LocalStructDataText, InLocalDataTable, RowName);
+	ExportRowText(RemoteStructDataText, InRemoteDataTable, RowName);
 	
 	if (LocalStructDataText.IsEmpty() || RemoteStructDataText.IsEmpty())
 	{
@@ -143,9 +135,9 @@ FString FUnrealDiffDataTableUtil::CopyProperty(TSharedPtr<class FUnrealDiffDetai
 	}
 	
 	const void* ValueAddr = nullptr;
-	if (InNode->bIsInContainer)
+	if (InNode->IsInContainer())
 	{
-		ValueAddr = InNode->RowDataInContainer; 
+		ValueAddr = InNode->RawPtr; 
 	}
 	else
 	{
@@ -159,7 +151,6 @@ FString FUnrealDiffDataTableUtil::CopyProperty(TSharedPtr<class FUnrealDiffDetai
 			ValueAddr = InNode->Property->ContainerPtrToValuePtr<void>(StructData); 
 		}
 	}
-	
 	
 	InNode->Property.Get()->ExportText_Direct(FormattedString, ValueAddr, ValueAddr, nullptr, PPF_Copy);
 	return FormattedString;

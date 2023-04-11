@@ -159,7 +159,11 @@ void SUnrealDiffDataTableRowDetailView::SetItemExpansion(bool bIsExpand, int32 N
 	{
 		if (AllNodes[i]->GetNodeIndex() == NodeIndex)
 		{
-			MyDetailTree->SetItemExpansion(bIsExpand, AllNodes[i]);
+			if (AllNodes[i]->bIsExpanded != bIsExpand)
+			{
+				AllNodes[i]->bIsExpanded =  bIsExpand;
+				MyDetailTree->SetItemExpansion(bIsExpand, AllNodes[i]);
+			}
 			return;
 		}
 	}
@@ -173,11 +177,19 @@ void SUnrealDiffDataTableRowDetailView::SetVerticalScrollOffset(float ScrollOffs
 	}
 }
 
-void SUnrealDiffDataTableRowDetailView::RefreshWidgetFromItem(TSharedPtr<FUnrealDiffDetailTreeNode> InItem)
+void SUnrealDiffDataTableRowDetailView::RefreshWidgetFromItem(const TSharedPtr<FUnrealDiffDetailTreeNode> InItem)
 {
 	if (MyDetailTree)
 	{
 		MyDetailTree->RefreshWidgetFromItem(InItem);
+	}
+}
+
+void SUnrealDiffDataTableRowDetailView::RefreshForEachWidget(const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& InItems)
+{
+	if (MyDetailTree)
+	{
+		MyDetailTree->RefreshForEachWidget(InItems);
 	}
 }
 

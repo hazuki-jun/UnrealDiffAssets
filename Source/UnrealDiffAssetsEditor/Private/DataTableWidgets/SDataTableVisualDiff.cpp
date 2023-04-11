@@ -609,6 +609,13 @@ void SDataTableVisualDiff::ShowDifference_RowToRow(const FName& RowName, int32 I
 	RowDetailViewLocal->Refresh(RowName);
 	RowDetailViewRemote->Refresh(RowName);
 
+	DiffAndSetRow();
+	
+	ExpandCategories();
+}
+
+void SDataTableVisualDiff::DiffAndSetRow()
+{
 	const auto& CacheNodesLocal = RowDetailViewLocal->GetCachedNodes();
 	const auto& CacheNodesRemote = RowDetailViewRemote->GetCachedNodes();
 	
@@ -620,8 +627,8 @@ void SDataTableVisualDiff::ShowDifference_RowToRow(const FName& RowName, int32 I
 			continue;
 		}
 
-		FString A = CacheNodesLocal[NodeIndexLocal]->ValueText.ToString();
-		FString B = CacheNodesRemote[i]->ValueText.ToString();
+		FString A = CacheNodesLocal[NodeIndexLocal]->GetValueText().ToString();
+		FString B = CacheNodesRemote[i]->GetValueText().ToString();
 		
 		if (auto TextProp = CastField<FTextProperty>(CacheNodesRemote[i]->Property.Get()))
 		{
@@ -629,39 +636,10 @@ void SDataTableVisualDiff::ShowDifference_RowToRow(const FName& RowName, int32 I
 			B = FUnrealDiffDataTableUtil::CopyProperty(CacheNodesRemote[i]);
 		}
 
-		if (!A.Equals(B))
-		{
-			CacheNodesLocal[NodeIndexLocal]->bHasAnyDifference = true;
-			CacheNodesRemote[i]->bHasAnyDifference = true;
-		}
+		const bool bHasAnyDifference = !A.Equals(B);
+		CacheNodesLocal[NodeIndexLocal]->bHasAnyDifference = bHasAnyDifference;
+		CacheNodesRemote[i]->bHasAnyDifference = bHasAnyDifference;
 	}
-	
-	// for (int32 i = 0; i < CacheNodesLocal.Num(); ++i)
-	// {
-	// 	if (CacheNodesRemote.IsValidIndex(i))
-	// 	{
-	// 		FString A = CacheNodesLocal[i]->ValueText.ToString();
-	// 		FString B = CacheNodesRemote[i]->ValueText.ToString();
-	// 		
-	// 		if (auto TextProp = CastField<FTextProperty>(CacheNodesRemote[i]->Property.Get()))
-	// 		{
-	// 			A = FUnrealDiffDataTableUtil::CopyProperty(CacheNodesLocal[i]);
-	// 			B = FUnrealDiffDataTableUtil::CopyProperty(CacheNodesRemote[i]);
-	// 		}
-	// 		
-	// 		if (!A.Equals(B))
-	// 		{
-	// 			CacheNodesRemote[i]->bHasAnyDifference = true;
-	// 			CacheNodesLocal[i]->bHasAnyDifference = true;
-	// 		}
-	// 	}
-	// 	else
-	// 	{
-	// 		return;
-	// 	}
-	// }
-
-	ExpandCategories();
 }
 
 void SDataTableVisualDiff::RefreshLayout()
@@ -756,14 +734,16 @@ void SDataTableVisualDiff::SyncDetailViewAction_Expanded(bool bIsLocal, bool bIs
 	{
 		if (RowDetailViewRemote)
 		{
-			RowDetailViewRemote->SetItemExpansion(bIsExpanded, NodeIndex);
+			int32 NodeIndexRemote = GetRealRemoteDetailTreeNodeIndex (NodeIndex);
+			RowDetailViewRemote->SetItemExpansion(bIsExpanded, NodeIndexRemote);
 		}
 	}
 	else
 	{
 		if (RowDetailViewLocal)
 		{
-			RowDetailViewLocal->SetItemExpansion(bIsExpanded, NodeIndex);
+			int32 NodeIndexLocal = GetRealLocalDetailTreeNodeIndex(NodeIndex);
+			RowDetailViewLocal->SetItemExpansion(bIsExpanded, NodeIndexLocal);
 		}
 	}
 }
@@ -786,7 +766,7 @@ void SDataTableVisualDiff::SyncDetailViewAction_VerticalScrollOffset(bool bIsLoc
 	// }
 }
 
-void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const FString& PropertyValueString, bool bRegenerate)
+void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 InNodeIndexRemote, const FString& PropertyValueString, bool bRegenerate)
 {
 	if (!RowDetailViewLocal)
 	{
@@ -800,7 +780,9 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 	FDataTableEditorUtils::BroadcastPreChange(DestDataTable, FDataTableEditorUtils::EDataTableChangeInfo::RowData);
 	
 	const auto& AllNodesLocal = RowDetailViewLocal->GetCachedNodes();
-	NodeIndex = GetRealLocalDetailTreeNodeIndex(NodeIndex);
+	const auto& AllNodesRemote = RowDetailViewRemote->GetCachedNodes();
+	
+	int32 NodeIndex = GetRealLocalDetailTreeNodeIndex(InNodeIndexRemote);
 
 	if (NodeIndex < 0)
 	{
@@ -808,9 +790,9 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 	}
 	
 	auto PropertyToModify = AllNodesLocal[NodeIndex]->Property.Get();
-	if (AllNodesLocal[NodeIndex]->bIsInContainer)
+	if (AllNodesLocal[NodeIndex]->IsInContainer())
 	{
-		void* ValueAddr = AllNodesLocal[NodeIndex]->RowDataInContainer;
+		void* ValueAddr = AllNodesLocal[NodeIndex]->RawPtr;
 #if ENGINE_MAJOR_VERSION == 4
 		PropertyToModify->ImportText(*PropertyValueString, ValueAddr, PPF_Copy, nullptr);
 #else
@@ -851,11 +833,10 @@ void SDataTableVisualDiff::DetailViewAction_MergeProperty(int32 NodeIndex, const
 	}
 	else
 	{
-		if (RowDetailViewLocal)
-		{
-			AllNodesLocal[NodeIndex]->bHasAnyDifference = false;
-			RowDetailViewLocal->RefreshWidgetFromItem(AllNodesLocal[NodeIndex]);
-		}
+		AllNodesLocal[NodeIndex]->ValueText = AllNodesRemote[InNodeIndexRemote]->ValueText;
+		DiffAndSetRow();
+		RowDetailViewLocal->RefreshForEachWidget(AllNodesLocal);
+		RowDetailViewRemote->RefreshForEachWidget(AllNodesRemote);
 	}
 
 	if (!FUnrealDiffDataTableUtil::HasAnyDifferenceRowToRow(GetLocalDataTable(), GetRemoteDataTable(), SelectedRowId))
@@ -922,6 +903,31 @@ int32 SDataTableVisualDiff::GetRealLocalDetailTreeNodeIndex(int32 RemoteNodeInde
 	return OutIndex;
 }
 
+int32 SDataTableVisualDiff::GetRealRemoteDetailTreeNodeIndex(int32 LocalNodeIndex)
+{
+	int32 OutIndex = -1;
+	const auto& AllNodesLocal = RowDetailViewLocal->GetCachedNodes();
+	const auto& AllNodesRemote = RowDetailViewRemote->GetCachedNodes();
+
+	if (!AllNodesLocal.IsValidIndex(LocalNodeIndex))
+	{
+		return OutIndex;
+	}
+
+	FString NodeIdLocal = AllNodesLocal[LocalNodeIndex]->GetUniqueNodeId();
+	for (int32 i = 0; i < AllNodesRemote.Num(); ++i)
+	{
+		FString NodeIdRemote = AllNodesRemote[i]->GetUniqueNodeId();
+		if (NodeIdRemote.Equals(NodeIdLocal))
+		{
+			OutIndex = i;
+			break;
+		}
+	}
+
+	return OutIndex;
+}
+
 int32 SDataTableVisualDiff::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
                                     const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
                                     const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
@@ -937,20 +943,6 @@ int32 SDataTableVisualDiff::OnPaint(const FPaintArgs& Args, const FGeometry& All
 			UUnrealDiffAssetDelegate::OnWindowResized.Broadcast(WindowSize);
 		}
 	}
-
-	// if (!DetailViewSplitterRemote || !DetailViewSplitterLocal)
-	// {
-	// 	return Ret;
-	// }
-	//
-	// if (DetailViewSplitterRemote->GetChildren()->Num() <= 0 || DetailViewSplitterLocal->GetChildren()->Num() <= 0)
-	// {
-	// 	return Ret;
-	// }
-	//
-	// auto& SplitterSlotRemote = DetailViewSplitterRemote->SlotAt(1);
-	// auto& SplitterSlotLocal = DetailViewSplitterLocal->SlotAt(1);
-	// SplitterSlotRemote.SetSizeValue(SplitterSlotLocal.GetSizeValue());
 
 	return Ret;
 }
@@ -1073,6 +1065,8 @@ FSlateColor SDataTableVisualDiff::GetHeaderColumnColorAndOpacity(bool InIsLocal,
 	
 	return bFound ? FLinearColor(1.f, 1.f, 1.f) : FLinearColor(0.0, 0.8, 0.1, 1.0);
 }
+
+
 
 void SDataTableVisualDiff::SyncVerticalScrollOffset(bool bIsLocal, float NewOffset)
 {

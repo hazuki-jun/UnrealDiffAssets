@@ -159,7 +159,7 @@ TSharedRef<SWidget> SUnrealDiffDetailSingleItemRow::MakeRowActionsMenu()
 				FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDetailSingleItemRow::OnMenuActionCopy)));
 	
 	if (!OwnerTreeNode.Pin()->GetDetailsView()->IsLocalAsset()
-		&& OwnerTreeNode.Pin()->bHasAnyDifference)
+		&& OwnerTreeNode.Pin()->HasAnyDifferenceRecurse())
 		// && !OwnerTreeNode.Pin()->IsContainerNode()
 	{
 		MenuBuilder.AddMenuEntry(
@@ -180,15 +180,6 @@ void SUnrealDiffDetailSingleItemRow::OnMenuActionMerge()
 	{
 		return;
 	}
-	// if (OwnerTreeNode.Pin()->IsContainerNode())
-	// {
-		// FString PropertyString = CopyProperty();
-		// DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), PropertyString, true);
-	// }
-	// else
-	// {
-	// 	DataTableVisual->DetailViewAction_MergeProperty(OwnerTreeNode.Pin()->GetNodeIndex(), OwnerTreeNode.Pin()->ValueText.ToString(), true);
-	// }
 
 	FString PropertyString = CopyProperty();
 	if (OwnerTreeNode.Pin()->IsContainerNode())

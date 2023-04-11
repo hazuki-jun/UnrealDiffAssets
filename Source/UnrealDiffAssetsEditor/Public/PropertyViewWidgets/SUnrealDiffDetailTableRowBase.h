@@ -18,6 +18,8 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+	virtual void Refresh() {}
+	
 	virtual void OnExpanderClicked(bool bIsExpanded) {}
 
 	virtual int32 GetIndentLevelForBackgroundColor() { return IndentLevel; }

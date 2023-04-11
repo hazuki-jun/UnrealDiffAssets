@@ -20,12 +20,6 @@ public:
 	void Construct(const FArguments& InArgs, TWeakPtr<class FUnrealDiffDetailTreeNode> InOwnerTreeNode);
 
 	FText GetText() const;
-	
-	FText GetValueText(const FProperty* InProperty);
-
-	FText GetValueTextInContainer(const FProperty* InProperty);
-
-	FText GetValueTextFromStructData(const void* InStructData, const FProperty* InProperty);
 
 	void Refresh();
 	

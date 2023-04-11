@@ -25,23 +25,35 @@ SUnrealDiffDetailView* FUnrealDiffCategoryItemNode::GetDetailsView() const
 
 void FUnrealDiffCategoryItemNode::GenerateChildren()
 {
-	for (const auto ChildPropertyData : ChildPropertyArray)
+	for (const auto ChildProperty : ChildPropertyArray)
 	{
 		TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
-		if (DetailView)
 		{
 			DetailItemNode->SetNodeIndex(DetailView->GetCachedNodeNum());
 			DetailView->AddCacheNode(DetailItemNode);
+			DetailItemNode->ParentNode = AsShared();
+			DetailItemNode->Property = ChildProperty;
+			DetailItemNode->SetNodeId(DetailItemNode->Property->GetName());
+			if (CastField<FArrayProperty>(ChildProperty.Get()))
+			{
+				DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(ChildProperty.Get(), (uint8*)GetStructData(0));
+			}
+			else if (CastField<FSetProperty>(ChildProperty.Get()))
+			{
+				DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(ChildProperty.Get(), (uint8*)GetStructData(0));
+			}
+			else if (CastField<FMapProperty>(ChildProperty.Get()))
+			{
+				DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(ChildProperty.Get(), (uint8*)GetStructData(0));
+			}
+			else
+			{
+				DetailItemNode->ValueText = GetValueTextStructInternal(ChildProperty.Get());
+			}
+			DetailItemNode->DisplayNameText = ChildProperty->GetDisplayNameText();
+			DetailItemNode->GenerateChildren();
+			Children.Add(DetailItemNode);
 		}
-		DetailItemNode->ParentNode = AsShared();
-		DetailItemNode->Property = ChildPropertyData;
-		DetailItemNode->SetNodeId(DetailItemNode->Property->GetName());
-		if (const auto StructData = GetStructData(0))
-		{
-			DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(DetailItemNode->Property.Get(), (const uint8*)StructData);
-		}
-		DetailItemNode->GenerateChildren();
-		Children.Add(DetailItemNode);
 	}
 }
 
