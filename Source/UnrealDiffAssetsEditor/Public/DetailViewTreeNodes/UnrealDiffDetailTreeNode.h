@@ -30,6 +30,8 @@ public:
 	bool IsContainerNode() const;
 
 	bool IsInContainer() const { return ContainerIndex >= 0; }
+
+	bool IsMapKeyOrValue();
 	
 	TWeakFieldPtr<const class FProperty> Property;
 	

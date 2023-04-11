@@ -40,6 +40,12 @@ FText FUnrealDiffDetailItemNode::GetValueText()
 
 void FUnrealDiffDetailItemNode::GenerateChildren()
 {
+	if (IsMapKeyOrValue())
+	{
+		GenerateMapKeyValueChildren();
+		return;
+	}
+	
 	auto CreateChildItemNode = [this](TWeakFieldPtr<const class FProperty> InProperty, bool bAddToCache)
 	{
 		TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
@@ -104,128 +110,99 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 			Children.Add(DetailItemNode);
 		}
 	}
-	
-	// else if (const FMapProperty* StructProp = CastField<FStructProperty>(Property.Get()))
-	// {
-	// }
-#pragma region Disable
-	// else if (const FSetProperty* SetProp = CastField<FSetProperty>(Property.Get()))
-	// {
-	// 	auto StructData = GetStructData(0);
-	// 	if (!StructData)
-	// 	{
-	// 		return;
-	// 	}
-	//
-	// 	FScriptSetHelper SetHelper(SetProp, StructData);
-	// 	for (int32 SetSparseIndex = 0; SetSparseIndex < SetHelper.GetMaxIndex(); ++SetSparseIndex)
-	// 	{
-	// 		if (SetHelper.IsValidIndex(SetSparseIndex))
-	// 		{
-	// 			TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
-	// 			if (DetailView)
-	// 			{
-	// 				DetailItemNode->SetNodeIndex(DetailView->GetCachedNodeNum());
-	// 				DetailView->AddCacheNode(DetailItemNode);
-	// 			}
-	// 			DetailItemNode->bIsInContainer = true;
-	// 			DetailItemNode->ContainerProperty = SetProp;
-	// 			DetailItemNode->PropertyIndex = SetSparseIndex;
-	// 			DetailItemNode->Property = SetHelper.GetElementProperty();
-	// 			DetailItemNode->SetNodeId(DetailItemNode->Property->GetName() + FString::FromInt(SetSparseIndex));
-	// 			DetailItemNode->ParentNode = AsShared();
-	// 			DetailItemNode->RowDataInContainer = SetHelper.GetElementPtr(SetSparseIndex);
-	// 			if (DetailItemNode->RowDataInContainer)
-	// 			{
-	// 				DetailItemNode->ValueText = DataTableUtils::GetPropertyValueAsText(DetailItemNode->Property.Get(), DetailItemNode->RowDataInContainer);
-	// 			}
-	// 			DetailItemNode->GenerateChildren();
-	// 			Children.Add(DetailItemNode);
-	// 		}
-	// 	}
-	// }
-	// else if (const FMapProperty* MapProp = CastField<FMapProperty>(Property.Get()))
-	// {
-	// 	auto StructData = GetStructData(0);
-	// 	if (StructData)
-	// 	{
-	// 		void* RowData = MapProp->ContainerPtrToValuePtr<void>(StructData);
-	// 		FScriptMapHelper MapHelper(MapProp, RowData);
-	// 		for (int32 MapSparseIndex = 0; MapSparseIndex < MapHelper.GetMaxIndex(); ++MapSparseIndex)
-	// 		{
-	// 			if (MapHelper.IsValidIndex(MapSparseIndex))
-	// 			{
-	// 				TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
-	// 				// if (DetailView)
-	// 				// {
-	// 				// 	DetailItemNode->SetNodeIndex(DetailView->GetCachedNodeNum());
-	// 				// 	DetailView->AddCacheNode(DetailItemNode);
-	// 				// }
-	// 				DetailItemNode->bIsMapCategory = true;
-	// 				DetailItemNode->Property = MapProp;
-	// 				DetailItemNode->RowDataInContainer = (uint8*)RowData;
-	// 				DetailItemNode->PropertyIndex = MapSparseIndex;
-	// 				DetailItemNode->ParentNode = AsShared();
-	// 				DetailItemNode->GenerateChildren();
-	// 				Children.Add(DetailItemNode);
-	// 			}
-	// 		}
-	// 	}
-	// }
-#pragma endregion 
+	else if (const FMapProperty* MapProp = CastField<FMapProperty>(Property.Get()))
+	{
+		auto StructData = GetStructData(0);
+		void* RowData = MapProp->ContainerPtrToValuePtr<void>(StructData);
+		FScriptMapHelper MapHelper(MapProp, RowData);
+		for (int32 MapSparseIndex = 0; MapSparseIndex < MapHelper.GetMaxIndex(); ++MapSparseIndex)
+		{
+			TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = CreateChildItemNode(MapProp, true);
+			DetailItemNode->ContainerIndex = MapSparseIndex;
+			DetailItemNode->SetNodeId(DetailItemNode->Property->GetName() + FString::FromInt(MapSparseIndex));
+			DetailItemNode->RawPtr = (uint8*)RowData;
+			DetailItemNode->GenerateChildren();
+			Children.Add(DetailItemNode);
+		}
+	}
+
 }
 
 void FUnrealDiffDetailItemNode::GenerateMapKeyValueChildren()
 {
-	// if (!RowDataInContainer)
+	auto MapProp = CastField<FMapProperty>(Property.Get())
+	if (!MapProp)
+	{
+		return;
+	}
+
+	auto CreateChildItemNode = [this](TWeakFieldPtr<const class FProperty> InProperty, bool bAddToCache)
+	{
+		TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNode = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+		if (bAddToCache)
+		{
+			DetailItemNode->SetNodeIndex(DetailView->GetCachedNodeNum());	
+			DetailView->AddCacheNode(DetailItemNode);
+		}
+		
+		DetailItemNode->ParentNode = AsShared();
+		DetailItemNode->Property = InProperty;
+
+		return DetailItemNode;
+	};
+
+	auto StructData = GetStructData(0);
+	void* RowData = MapProp->ContainerPtrToValuePtr<void>(StructData);
+	FScriptMapHelper MapHelper(MapProp, RowData);
+	if (!MapHelper.IsValidIndex(ContainerIndex))
+	{
+		return;
+	}
+	auto RawPtr = MapHelper.GetKeyPtr(ContainerIndex);
+	TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeKey = CreateChildItemNode(MapProp->GetKeyProperty(), true)
+	
+	// FScriptMapHelper MapHelper(MapProp, RowDataInContainer);
+	// if (!MapHelper.IsValidIndex(ContainerIndex))
 	// {
 	// 	return;
 	// }
 	//
-	// if (auto MapProp = CastField<FMapProperty>(Property.Get()))
+	// TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeKey = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+	// if (DetailView)
 	// {
-	// 	FScriptMapHelper MapHelper(MapProp, RowDataInContainer);
-	// 	if (!MapHelper.IsValidIndex(ContainerIndex))
-	// 	{
-	// 		return;
-	// 	}
-	// 	
-	// 	TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeKey = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
-	// 	if (DetailView)
-	// 	{
-	// 		DetailItemNodeKey->SetNodeIndex(DetailView->GetCachedNodeNum());
-	// 		DetailView->AddCacheNode(DetailItemNodeKey);
-	// 	}
-	// 	DetailItemNodeKey->Property = MapProp->GetKeyProperty();
-	// 	DetailItemNodeKey->RowDataInContainer = MapHelper.GetKeyPtr(ContainerIndex);
-	// 	DetailItemNodeKey->ParentNode = AsShared();
-	// 	DetailItemNodeKey->bIsInContainer = true;
-	// 	DetailItemNodeKey->bIsMapKey = true;
-	// 	if (DetailItemNodeKey->RowDataInContainer)
-	// 	{
-	// 		DetailItemNodeKey->ValueText = DataTableUtils::GetPropertyValueAsTextDirect(MapHelper.GetKeyProperty(), DetailItemNodeKey->RowDataInContainer);
-	// 	}
-	// 	DetailItemNodeKey->GenerateChildren();
-	// 	Children.Add(DetailItemNodeKey);
-	//
-	// 	TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeValue = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
-	// 	if (DetailView)
-	// 	{
-	// 		DetailItemNodeValue->SetNodeIndex(DetailView->GetCachedNodeNum());
-	// 		DetailView->AddCacheNode(DetailItemNodeValue);
-	// 	}
-	// 	DetailItemNodeValue->Property = MapProp->GetValueProperty();
-	// 	DetailItemNodeValue->RowDataInContainer = MapHelper.GetValuePtr(ContainerIndex);
-	// 	DetailItemNodeValue->ParentNode = AsShared();
-	// 	DetailItemNodeValue->bIsMapValue = true;
-	// 	DetailItemNodeValue->bIsInContainer = true;
-	// 	if (DetailItemNodeValue->RowDataInContainer)
-	// 	{
-	// 		DetailItemNodeValue->ValueText = GetValueTextEntry(MapHelper.GetValueProperty(), DetailItemNodeValue->RowDataInContainer);
-	// 	}
-	// 	DetailItemNodeValue->GenerateChildren();
-	// 	Children.Add(DetailItemNodeValue);
+	// 	DetailItemNodeKey->SetNodeIndex(DetailView->GetCachedNodeNum());
+	// 	DetailView->AddCacheNode(DetailItemNodeKey);
 	// }
+	// DetailItemNodeKey->Property = MapProp->GetKeyProperty();
+	// DetailItemNodeKey->RowDataInContainer = MapHelper.GetKeyPtr(ContainerIndex);
+	// DetailItemNodeKey->ParentNode = AsShared();
+	// DetailItemNodeKey->bIsInContainer = true;
+	// DetailItemNodeKey->bIsMapKey = true;
+	// if (DetailItemNodeKey->RowDataInContainer)
+	// {
+	// 	DetailItemNodeKey->ValueText = DataTableUtils::GetPropertyValueAsTextDirect(MapHelper.GetKeyProperty(), DetailItemNodeKey->RowDataInContainer);
+	// }
+	// DetailItemNodeKey->GenerateChildren();
+	// Children.Add(DetailItemNodeKey);
+	//
+	// TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeValue = MakeShareable(new FUnrealDiffDetailItemNode(DetailView));
+	// if (DetailView)
+	// {
+	// 	DetailItemNodeValue->SetNodeIndex(DetailView->GetCachedNodeNum());
+	// 	DetailView->AddCacheNode(DetailItemNodeValue);
+	// }
+	// DetailItemNodeValue->Property = MapProp->GetValueProperty();
+	// DetailItemNodeValue->RowDataInContainer = MapHelper.GetValuePtr(ContainerIndex);
+	// DetailItemNodeValue->ParentNode = AsShared();
+	// DetailItemNodeValue->bIsMapValue = true;
+	// DetailItemNodeValue->bIsInContainer = true;
+	// if (DetailItemNodeValue->RowDataInContainer)
+	// {
+	// 	DetailItemNodeValue->ValueText = GetValueTextEntry(MapHelper.GetValueProperty(), DetailItemNodeValue->RowDataInContainer);
+	// }
+	// DetailItemNodeValue->GenerateChildren();
+	// Children.Add(DetailItemNodeValue);
+	
 }
 
 void* FUnrealDiffDetailItemNode::GetStructData(int32 ArrayIndex)

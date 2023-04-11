@@ -33,6 +33,16 @@ bool FUnrealDiffDetailTreeNode::IsContainerNode() const
 	return Children.Num() > 0;
 }
 
+bool FUnrealDiffDetailTreeNode::IsMapKeyOrValue()
+{
+	if (Property.Get())
+	{
+		return CastField<FMapProperty>(Property.Get()) && ContainerIndex >= 0;
+	}
+
+	return false;
+}
+
 FString FUnrealDiffDetailTreeNode::GetPropertyValueAsString()
 {
 	return FString();
