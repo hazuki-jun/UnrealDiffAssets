@@ -32,15 +32,15 @@ void SUnrealDiffDataTableListViewRow::Construct(const FArguments& InArgs, const 
 
 	FText Tooltip;
 	
-	if (RowDataPtr->RowState == EDataTableVisualDiff::Removed)
+	if (RowDataPtr->RowState == EUnrealVisualDiff::Removed)
 	{
 		Tooltip =  FText::FromString(FString::Format(TEXT("Removed row {0}"), { *RowDataPtr->RowId.ToString() }));
 	}
-	else if (RowDataPtr->RowState == EDataTableVisualDiff::Added)
+	else if (RowDataPtr->RowState == EUnrealVisualDiff::Added)
 	{
 		Tooltip =  FText::FromString(FString::Format(TEXT("Added row {0}"), { *RowDataPtr->RowId.ToString() }));
 	}
-	else if (RowDataPtr->RowState == EDataTableVisualDiff::Modify)
+	else if (RowDataPtr->RowState == EUnrealVisualDiff::Modify)
 	{
 		Tooltip =  FText::FromString(FString::Format(TEXT("Row {0} changed"), { *RowDataPtr->RowId.ToString() }));
 	}
@@ -187,7 +187,7 @@ TSharedRef<SWidget> SUnrealDiffDataTableListViewRow::MakeRowActionsMenu()
 		);
 	}
 
-	if (RowDataPtr->RowState == EDataTableVisualDiff::Modify)
+	if (RowDataPtr->RowState == EUnrealVisualDiff::Modify)
 	{
 		MenuBuilder.AddMenuEntry(
 		LOCTEXT("DataTableRowMenuActions_ShowDifference", "Show Difference"),
@@ -217,7 +217,7 @@ void SUnrealDiffDataTableListViewRow::OnMenuActionCopyValue()
 
 	if (DataTableVisual)
 	{
-		if (RowDataPtr->RowState != EDataTableVisualDiff::Removed)
+		if (RowDataPtr->RowState != EUnrealVisualDiff::Removed)
 		{
 			DataTableVisual->CopyRow(bIsLocal, RowDataPtr->RowId);
 		}
@@ -240,7 +240,7 @@ void SUnrealDiffDataTableListViewRow::OnMenuActionMerge()
 {
 	if (DataTableVisual)
 	{
-		if (RowDataPtr->RowState == EDataTableVisualDiff::Removed)
+		if (RowDataPtr->RowState == EUnrealVisualDiff::Removed)
 		{
 			DataTableVisual->MergeAction_DeleteRow(RowDataPtr->RowId);	
 		}
@@ -255,7 +255,7 @@ FReply SUnrealDiffDataTableListViewRow::OnMouseButtonDoubleClick(const FGeometry
 {
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		if (RowDataPtr->RowState == EDataTableVisualDiff::Modify)
+		if (RowDataPtr->RowState == EUnrealVisualDiff::Modify)
 		{
 			OnMenuActionShowDifference();
 		}

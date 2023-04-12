@@ -4,28 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "DataTableEditorUtils.h"
+#include "SVisualDiffWidget.h"
 #include "Widgets/SCompoundWidget.h"
 #include "DataTableWidgets/SUnrealDiffDataTableListViewRow.h"
-
-namespace EDataTableVisualDiff
-{
-	enum RowViewOption
-	{
-		Normal = 0x00000001,
-		Modify = 0x00000002,
-		Added = 0x00000004,
-		Removed = 0x00000008,
-		
-		Max = Normal + Modify + Added + Removed
-	};
-}
-
-ENUM_CLASS_FLAGS(EDataTableVisualDiff::RowViewOption);
 
 /**
  * 
  */
-class UNREALDIFFASSETSEDITOR_API SDataTableVisualDiff : public SCompoundWidget
+class UNREALDIFFASSETSEDITOR_API SDataTableVisualDiff : public SVisualDiffWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SDataTableVisualDiff){}
@@ -46,8 +32,6 @@ public:
 	EVisibility OnGetRowDetailViewVisibility() const;
 	
 	float GetRowDetailViewSplitterValue() const;
-
-	TSharedRef<SWidget> MakeToolbar();
 	
 	TSharedRef<SWidget> BuildLayoutWidget(FText InTitle, bool bIsLocal);
 
@@ -57,36 +41,14 @@ public:
 
 	TSharedPtr<FStructOnScope> GetStructure();
 	
-	//~ Begin Toolbar
-	
-	// Toolbar Action
-	// Next
-	void ToolbarAction_HighlightNextDifference();
-	// Prev
-	void ToolbarAction_HighlightPrevDifference();
-	// Diff
-	void ToolbarAction_Diff();
-	bool ToolbarAction_CanDiff();
-	// Merge
-	void ToolbarAction_Merge();
-	//~ Toolbar Action
-
-	// ViewOption Content
-	TSharedRef<SWidget> GetShowViewOptionContent();
-
-	/** Called when show only view option is clicked */
-	void OnShowOnlyViewOptionClicked(EDataTableVisualDiff::RowViewOption InViewOption);
-	
-	bool HasRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption) const;
-	void ClearRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption);
-	void SetRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption);
-	void SetRowViewOptionTo(EDataTableVisualDiff::RowViewOption InViewOption);
-	void ReverseRowViewOption(EDataTableVisualDiff::RowViewOption InViewOption);
-	void ModifyConfig();
-	
-	// Modified Check State
-	bool IsShowOnlyRowViewOptionChecked(EDataTableVisualDiff::RowViewOption InViewOption) const;
-	//~ End Toolbar
+	//~ Begin SVisualDiffWidget Interface
+	virtual void ToolbarAction_HighlightNextDifference() override;
+	virtual void ToolbarAction_HighlightPrevDifference() override;
+	virtual void ToolbarAction_Diff() override;
+	virtual bool ToolbarAction_CanDiff() override;
+	virtual void ToolbarAction_Merge() override;
+	virtual void ModifyConfig() override;
+	//~ End SVisualDiffWidget Interface
 	
 	/**
 	 * @brief 选中行/鼠标点击了行
@@ -203,7 +165,5 @@ protected:
 
 	// Parent Window Window Size
 	mutable FVector2D WindowSize;
-	
-	EDataTableVisualDiff::RowViewOption RowViewOption = EDataTableVisualDiff::Max;
 };
 
