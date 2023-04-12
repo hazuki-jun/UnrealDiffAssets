@@ -126,7 +126,6 @@ void FUnrealDiffDetailItemNode::GenerateChildren()
 			Children.Add(DetailItemNode);
 		}
 	}
-
 }
 
 void FUnrealDiffDetailItemNode::GenerateMapKeyValueChildren()
@@ -161,7 +160,7 @@ void FUnrealDiffDetailItemNode::GenerateMapKeyValueChildren()
 	
 	TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeMapKey = CreateChildItemNode(MapProp->GetKeyProperty(), true);
 	DetailItemNodeMapKey->RawPtr = MapHelper.GetKeyPtr(ContainerIndex);
-	DetailItemNodeMapKey->DisplayNameText = FText::FromString(TEXT("Key "));
+	DetailItemNodeMapKey->DisplayNameText = FText::FromString(FString::Format(TEXT("Key({0})"), {MapProp->GetKeyProperty()->GetDisplayNameText().ToString()}));
 	DetailItemNodeMapKey->ContainerIndex = 0;
 	DetailItemNodeMapKey->bIsMapElement = true;
 	DetailItemNodeMapKey->ValueText = GetValueTextInternal(DetailItemNodeMapKey->RawPtr, MapHelper.GetKeyProperty());
@@ -171,7 +170,7 @@ void FUnrealDiffDetailItemNode::GenerateMapKeyValueChildren()
 
 	TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeMapValue = CreateChildItemNode(MapProp->GetValueProperty(), true);
 	DetailItemNodeMapValue->RawPtr = MapHelper.GetValuePtr(ContainerIndex);
-	DetailItemNodeMapValue->DisplayNameText = FText::FromString(TEXT("Value "));
+	DetailItemNodeMapValue->DisplayNameText = FText::FromString(FString::Format(TEXT("Value({0})"), {MapProp->GetValueProperty()->GetDisplayNameText().ToString()}));
 	DetailItemNodeMapValue->ContainerIndex = 1;
 	DetailItemNodeMapValue->bIsMapElement = true;
 	FString ValueStr = DataTableUtils::GetPropertyValueAsStringDirect(MapHelper.GetValueProperty(), DetailItemNodeMapValue->RawPtr, EDataTableExportFlags::UseJsonObjectsForStructs);;
