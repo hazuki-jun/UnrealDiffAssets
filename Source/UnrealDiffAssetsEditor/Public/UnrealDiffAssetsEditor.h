@@ -9,24 +9,19 @@ public:
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
  
-    /**
-     * @brief DiffAsset 菜单按钮
-     */
     void BuildDiffAssetsMenu();
 
-    /**
-     * @brief 点击DiffAsset
-     */
-    void OnDiffAssetMenuClicked();
-
-    /**
-     * @brief 是否支持对比的资源
-     * @return 
-     */
+    // Diff
+    void OnOptionDiffClicked();
+ 
+    // Update
+    void OnOptionUpdateClicked();
+ 
+    // 是否支持对比的资源
     bool IsSupported();
 
     void OnDiffWindowClosed();
-	
+ 
     void DeleteLoadedUAssets();
 
     /**

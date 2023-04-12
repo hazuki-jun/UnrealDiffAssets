@@ -37,7 +37,7 @@ public:
 
 	void SetVerticalScrollOffset(float ScrollOffset);
 
-	void RefreshForEachWidget(const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& InItems);
+	void RefreshEachWidget(const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& InItems);
 	
 	void RefreshWidgetFromItem(const TSharedPtr<class FUnrealDiffDetailTreeNode>& InItem);
 	

@@ -160,7 +160,7 @@ void SUnrealDiffDataTableDetailTree::SetVerticalScrollOffset(float ScrollOffset)
 	}
 }
 
-void SUnrealDiffDataTableDetailTree::RefreshForEachWidget(const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& InItems)
+void SUnrealDiffDataTableDetailTree::RefreshEachWidget(const TArray<TSharedPtr<FUnrealDiffDetailTreeNode>>& InItems)
 {
 	if (!MyTreeView)
 	{

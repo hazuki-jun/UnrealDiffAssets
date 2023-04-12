@@ -36,27 +36,43 @@ void FUnrealDiffAssetsEditorModule::ShutdownModule()
 void FUnrealDiffAssetsEditorModule::BuildDiffAssetsMenu()
 {
 	UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu");
-	FToolMenuSection& Section = Menu->AddSection("UnrealDiffAssetsSection");
-	// .FSlateIcon(FUnrealDiffWindowStyle::GetStyleSetName(), "UnrealDiffAssets.WindowBackground"),
+	FToolMenuSection& Section = Menu->AddSection("UnrealDiffAssetsOptions", LOCTEXT("UnrealDiffAssetsOptionsLabel", "Unreal Differ Plugin"));
 #if ENGINE_MAJOR_VERSION == 5
-	FToolMenuEntry Entry = FToolMenuEntry::InitMenuEntry(
-		TEXT("DiffAsset"),
-		LOCTEXT("DiffAssetLable","Diff Asset"),
-		LOCTEXT("DiffAsset_ToolTip","Diff Asset"),
+	FToolMenuEntry EntryDiffAsset = FToolMenuEntry::InitMenuEntry(
+		TEXT("Diff"),
+		LOCTEXT("DiffAssetDiffLable","Diff"),
+		LOCTEXT("DiffAssetDiff_ToolTip","Diff"),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Diff"),
-		FUIAction(FExecuteAction::CreateLambda([this](){ OnDiffAssetMenuClicked(); })));
+		FUIAction(FExecuteAction::CreateLambda([this](){ OnOptionDiffClicked(); })));
 	
-	Section.AddEntry(Entry);
+	Section.AddEntry(EntryDiffAsset);
 #else
-	Section.AddMenuEntry(TEXT("DiffAsset"),
-		LOCTEXT("DiffAssetLable","Diff Asset"),
-		LOCTEXT("DiffAsset_ToolTip","Diff Asset"),
+	Section.AddMenuEntry(TEXT("DiffAssetDiff"),
+		LOCTEXT("DiffAssetDiffLable","Diff"),
+		LOCTEXT("DiffAssetDiff_ToolTip","Diff"),
 		FSlateIcon(FEditorStyle::GetStyleSetName(), "SourceControl.Actions.Diff"),
 		FUIAction(FExecuteAction::CreateLambda([this](){ OnDiffAssetMenuClicked(); })));
 #endif
+
+#if ENGINE_MAJOR_VERSION == 5
+	FToolMenuEntry EntryUpdate = FToolMenuEntry::InitMenuEntry(
+		TEXT("Update"),
+		LOCTEXT("DiffAssetUpdateLable","Update"),
+		LOCTEXT("DiffAssetUpdate_ToolTip","Update"),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Refresh"),
+		FUIAction(FExecuteAction::CreateLambda([this](){ OnOptionUpdateClicked(); })));
+	
+	Section.AddEntry(EntryUpdate);
+#else
+	Section.AddMenuEntry(TEXT("Update"),
+		LOCTEXT("DiffAssetUpdateLable","Update"),
+		LOCTEXT("DiffAssetUpdate_ToolTip","Update"),
+		FSlateIcon(FEditorStyle::GetStyleSetName(), "SourceControl.Actions.Refresh"),
+		FUIAction(FExecuteAction::CreateLambda([this](){ OnOptionUpdateClicked(); })));
+#endif
 }
 
-void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
+void FUnrealDiffAssetsEditorModule::OnOptionDiffClicked()
 {
 	static int32 DiffCount = 0;
 	IDesktopPlatform* DesktopPlatform = FDesktopPlatformModule::Get();
@@ -106,6 +122,11 @@ void FUnrealDiffAssetsEditorModule::OnDiffAssetMenuClicked()
 			ExecuteDiffAssets(SelectedAssets[0], RemoteAsset);
 		}
 	}
+}
+
+void FUnrealDiffAssetsEditorModule::OnOptionUpdateClicked()
+{
+	
 }
 
 bool FUnrealDiffAssetsEditorModule::IsSupported()

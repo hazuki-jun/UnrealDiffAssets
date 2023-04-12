@@ -130,11 +130,11 @@ const FSlateBrush* SUnrealDiffDetailCategoryRow::GetBackgroundImage() const
 {
 	if (IsHovered())
 	{
-		return IsItemExpanded() ? FEditorStyle::GetBrush("DetailsView.CategoryTop_Hovered") : FEditorStyle::GetBrush("DetailsView.CollapsedCategory_Hovered");
+		return IsItemExpanded() ? FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryTop_Hovered") : FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CollapsedCategory_Hovered");
 	}
 	else
 	{
-		return IsItemExpanded() ? FEditorStyle::GetBrush("DetailsView.CategoryTop") : FEditorStyle::GetBrush("DetailsView.CollapsedCategory");
+		return IsItemExpanded() ? FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryTop") : FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CollapsedCategory");
 	}
 	
 	// return FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryTop");

@@ -187,7 +187,7 @@ void SUnrealDiffDataTableRowDetailView::RefreshForEachWidget(const TArray<TShare
 {
 	if (MyDetailTree)
 	{
-		MyDetailTree->RefreshForEachWidget(InItems);
+		MyDetailTree->RefreshEachWidget(InItems);
 	}
 }
 
