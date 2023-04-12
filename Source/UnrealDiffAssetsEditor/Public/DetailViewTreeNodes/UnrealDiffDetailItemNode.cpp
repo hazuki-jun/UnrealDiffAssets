@@ -1,6 +1,9 @@
 ﻿#include "UnrealDiffDetailItemNode.h"
 
 #include "ObjectEditorUtils.h"
+#if ENGINE_MAJOR_VERSION == 4
+	#include "WeakFieldPtr.h"
+#endif
 #include "PropertyViewWidgets/SUnrealDiffDetailSingleItemRow.h"
 #include "PropertyViewWidgets/SUnrealDiffDetailView.h"
 
@@ -158,9 +161,9 @@ void FUnrealDiffDetailItemNode::GenerateMapKeyValueChildren()
 		return;
 	}
 	
-	TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeMapKey = CreateChildItemNode(MapProp->GetKeyProperty(), true);
+	TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeMapKey = CreateChildItemNode( MapHelper.GetKeyProperty(), true);
 	DetailItemNodeMapKey->RawPtr = MapHelper.GetKeyPtr(ContainerIndex);
-	DetailItemNodeMapKey->DisplayNameText = FText::FromString(FString::Format(TEXT("Key({0})"), {MapProp->GetKeyProperty()->GetDisplayNameText().ToString()}));
+	DetailItemNodeMapKey->DisplayNameText = FText::FromString(FString::Format(TEXT("Key({0})"), { MapHelper.GetKeyProperty()->GetDisplayNameText().ToString()}));
 	DetailItemNodeMapKey->ContainerIndex = 0;
 	DetailItemNodeMapKey->bIsMapElement = true;
 	DetailItemNodeMapKey->ValueText = GetValueTextInternal(DetailItemNodeMapKey->RawPtr, MapHelper.GetKeyProperty());
@@ -168,9 +171,9 @@ void FUnrealDiffDetailItemNode::GenerateMapKeyValueChildren()
 	DetailItemNodeMapKey->GenerateChildren();
 	Children.Add(DetailItemNodeMapKey);
 
-	TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeMapValue = CreateChildItemNode(MapProp->GetValueProperty(), true);
+	TSharedPtr<FUnrealDiffDetailItemNode> DetailItemNodeMapValue = CreateChildItemNode(MapHelper.GetValueProperty(), true);
 	DetailItemNodeMapValue->RawPtr = MapHelper.GetValuePtr(ContainerIndex);
-	DetailItemNodeMapValue->DisplayNameText = FText::FromString(FString::Format(TEXT("Value({0})"), {MapProp->GetValueProperty()->GetDisplayNameText().ToString()}));
+	DetailItemNodeMapValue->DisplayNameText = FText::FromString(FString::Format(TEXT("Value({0})"), {MapHelper.GetValueProperty()->GetDisplayNameText().ToString()}));
 	DetailItemNodeMapValue->ContainerIndex = 1;
 	DetailItemNodeMapValue->bIsMapElement = true;
 	FString ValueStr = DataTableUtils::GetPropertyValueAsStringDirect(MapHelper.GetValueProperty(), DetailItemNodeMapValue->RawPtr, EDataTableExportFlags::UseJsonObjectsForStructs);;

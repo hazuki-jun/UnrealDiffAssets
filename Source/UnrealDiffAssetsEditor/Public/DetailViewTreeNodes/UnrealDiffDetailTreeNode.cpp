@@ -1,5 +1,9 @@
 ﻿#include "UnrealDiffDetailTreeNode.h"
 
+#if ENGINE_MAJOR_VERSION == 4
+	#include "WeakFieldPtr.h"
+#endif
+
 FUnrealDiffDetailTreeNode::FUnrealDiffDetailTreeNode()
 {
 }

@@ -38,17 +38,10 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSh
 	}
 	
 	TSharedRef<SHorizontalBox> HeaderBox = SNew(SHorizontalBox)
-		// + SHorizontalBox::Slot()
-		// .HAlign(HAlign_Left)
-		// .VAlign(VAlign_Fill)
-		// .AutoWidth()
-		// [
-		// 	SNew(SDetailRowIndent, SharedThis(this))
-		// ]
 		+ SHorizontalBox::Slot()
 		.HAlign(HAlign_Left)
 		.VAlign(VAlign_Center)
-		.Padding(2, 0, 0, 0)
+		.Padding(0, 0, 0, 0)
 		.AutoWidth()
 		[
 			SNew(SUnrealDiffDetailExpanderArrow, SharedThis(this))
@@ -61,8 +54,6 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSh
 		[
 			SNew(STextBlock)
 			.Text(FText::FromName(InArgs._CategoryName))
-			// .Text(InArgs._DisplayName)
-			// .Font(FAppStyle::Get().GetFontStyle(bIsInnerCategory ? PropertyEditorConstants::PropertyFontStyle : PropertyEditorConstants::CategoryFontStyle))
 			.TextStyle(FUnrealDiffWindowStyle::GetAppStyle(), "DetailsView.CategoryTextStyle")
 			.ColorAndOpacity(this, &SUnrealDiffDetailCategoryRow::GetDisplayNameColor)
 		];
@@ -70,33 +61,14 @@ void SUnrealDiffDetailCategoryRow::Construct(const FArguments& InArgs, const TSh
 	this->ChildSlot
 	[
 		SNew(SBorder)
-		.BorderImage(FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.GridLine"))
-		.Padding(FMargin(0, 0, 0, 1))
+		.BorderImage(this, &SUnrealDiffDetailCategoryRow::GetBackgroundImage)
+		.Padding(FMargin(0, 0, 0, 0))
 		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
+			SNew(SBox)
+			.MinDesiredHeight(26.f)
 			[
-				SNew(SBorder)
-				.BorderImage(this, &SUnrealDiffDetailCategoryRow::GetBackgroundImage)
-				.BorderBackgroundColor(this, &SUnrealDiffDetailCategoryRow::GetInnerBackgroundColor)
-				.Padding(0)
-				[
-					SNew(SBox)
-					.MinDesiredHeight(26.f)
-					[
-						HeaderBox
-					]
-				]
+				HeaderBox
 			]
-			// + SHorizontalBox::Slot()
-			// .HAlign(HAlign_Right)
-			// .AutoWidth()
-			// [
-			// 	SNew(SBorder)
-			// 	.BorderImage_Lambda(GetScrollbarWellBrush)
-			// 	.BorderBackgroundColor_Lambda(GetScrollbarWellTint)
-			// 	.Padding(FMargin(0, 0, SDetailTableRowBase::ScrollBarPadding, 0))
-			// ]
 		]
 	];
 
@@ -156,7 +128,16 @@ void SUnrealDiffDetailCategoryRow::Refresh()
 
 const FSlateBrush* SUnrealDiffDetailCategoryRow::GetBackgroundImage() const
 {
-	return FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryTop");
+	if (IsHovered())
+	{
+		return IsItemExpanded() ? FEditorStyle::GetBrush("DetailsView.CategoryTop_Hovered") : FEditorStyle::GetBrush("DetailsView.CollapsedCategory_Hovered");
+	}
+	else
+	{
+		return IsItemExpanded() ? FEditorStyle::GetBrush("DetailsView.CategoryTop") : FEditorStyle::GetBrush("DetailsView.CollapsedCategory");
+	}
+	
+	// return FUnrealDiffWindowStyle::GetAppSlateBrush("DetailsView.CategoryTop");
 	
 	// if (bShowBorder)
 	// {

@@ -66,6 +66,7 @@ void SUnrealDiffDataTableLayout::Construct(const FArguments& InArgs)
 				// Title
 				SNew(STextBlock)
 				.Text(Title)
+				.Font(FCoreStyle::GetDefaultFontStyle("Bold", 13))
 			]
 			
 			+ SVerticalBox::Slot()

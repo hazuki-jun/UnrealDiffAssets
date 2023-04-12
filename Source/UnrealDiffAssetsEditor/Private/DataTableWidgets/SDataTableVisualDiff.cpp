@@ -121,7 +121,7 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 				.Orientation(EOrientation::Orient_Vertical)
 				+ SSplitter::Slot()
 				[
-					BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [local]"), { *LocalAsset->GetName() })), true)
+					BuildLayoutWidget(FText::FromString(FString::Format(TEXT("{0} [ Local ]"), { *LocalAsset->GetName() })), true)
 				]
 			]
 
@@ -131,7 +131,7 @@ TSharedRef<SWidget> SDataTableVisualDiff::BuildWidgetContent()
 				.Orientation(EOrientation::Orient_Vertical)
 				+ SSplitter::Slot()
 				[
-					BuildLayoutWidget(FText::FromString(FString::Format(TEXT("DataTable {0} [Remote]"), { *RemoteAsset->GetName() })), false)
+					BuildLayoutWidget(FText::FromString(FString::Format(TEXT("{0} [ Remote ]"), { *RemoteAsset->GetName() })), false)
 				]
 			]
 		]
@@ -221,12 +221,12 @@ TSharedRef<SWidget> SDataTableVisualDiff::MakeToolbar()
 	[
 		DataTableVisualToolbarBuilder.MakeWidget()
 	];
-
+	
 	// View option
 	TSharedPtr<SLayeredImage> FilterImage =
 		SNew(SLayeredImage)
 #if ENGINE_MAJOR_VERSION == 4
-		.Image(FUnrealDiffWindowStyle::GetAppStyle().GetBrush("GenericViewButton"))
+		.Image(FUnrealDiffWindowStyle::Get().GetBrush("UnrealDiffAssets.ViewOptions"))
 #else
 		.Image(FUnrealDiffWindowStyle::GetAppStyle().GetBrush("DetailsView.ViewOptions"))
 #endif
@@ -237,7 +237,7 @@ TSharedRef<SWidget> SDataTableVisualDiff::MakeToolbar()
 		.HasDownArrow(false)
 		.ContentPadding(0)
 		.ForegroundColor(FSlateColor::UseForeground())
-		.ButtonStyle(FUnrealDiffWindowStyle::GetAppStyle(), "SimpleButton")
+		.ButtonStyle(FUnrealDiffWindowStyle::GetAppStyle(), "NoBorder")
 		.AddMetaData<FTagMetaData>(FTagMetaData(TEXT("ViewOptions")))
 		.MenuContent()
 		[

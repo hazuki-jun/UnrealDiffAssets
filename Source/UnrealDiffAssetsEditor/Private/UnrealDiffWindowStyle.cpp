@@ -8,6 +8,7 @@
 #define BORDER_BRUSH( RelativePath, ... ) FSlateBorderBrush( Style->RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 
 const FVector2D Icon1920x1080(1920.f, 1080.f);
+const FVector2D Icon16x16(16.f, 16.f);
 
 TSharedPtr< FSlateStyleSet > FUnrealDiffWindowStyle::StyleInstance = nullptr;
 
@@ -80,6 +81,7 @@ TSharedRef<FSlateStyleSet> FUnrealDiffWindowStyle::Create()
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("UnrealDiffAssets")->GetBaseDir() / TEXT("Resources"));
 
 	Style->Set("UnrealDiffAssets.WindowBackground", new IMAGE_BRUSH(TEXT("Background"), Icon1920x1080));
+	Style->Set( "UnrealDiffAssets.ViewOptions",  new IMAGE_BRUSH("Settings",  Icon16x16, FLinearColor::White));
 
 	return Style;
 }

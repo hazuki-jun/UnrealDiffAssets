@@ -26,6 +26,14 @@ void SBlueprintDiffWindow::Construct(const FArguments& InArgs)
 	auto DiffWidget = GetBlueprintDiffWidget(InArgs._LocalAsset, InArgs._RemoteAsset);
 	SetContent(SNew(SOverlay)
 		+ SOverlay::Slot()
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		[
+			SNew(SBorder)
+			.ColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f))
+		]
+		
+		+ SOverlay::Slot()
 		.HAlign(EHorizontalAlignment::HAlign_Fill)
 		.VAlign(EVerticalAlignment::VAlign_Fill)
 		[

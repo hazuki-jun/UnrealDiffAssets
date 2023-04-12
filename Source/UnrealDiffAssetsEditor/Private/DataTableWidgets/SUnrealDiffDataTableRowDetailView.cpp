@@ -37,8 +37,6 @@ void SUnrealDiffDataTableRowDetailView::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Center)
 			[
 				SNew(SBox)
-				.WidthOverride(32.f)
-				.HeightOverride(32.f)
 				[
 					SAssignNew(CloseButton, SButton)
 					.IsFocusable(false)
