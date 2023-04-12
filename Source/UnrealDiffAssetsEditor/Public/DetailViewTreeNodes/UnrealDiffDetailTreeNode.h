@@ -27,6 +27,8 @@ public:
 	
 	virtual void* GetStructData(int32 ArrayIndex = 0) { return nullptr; }
 
+	bool IsMapElement() const;
+	
 	bool IsContainerNode() const;
 
 	bool IsInContainer() const { return ContainerIndex >= 0; }
@@ -74,7 +76,8 @@ public:
 	FText ValueText;
 	
 	bool bIsExpanded = false;
-	
+
+	bool bIsMapElement = false;
 protected:
 	TArray<TSharedPtr<FUnrealDiffDetailTreeNode>> Children;
 

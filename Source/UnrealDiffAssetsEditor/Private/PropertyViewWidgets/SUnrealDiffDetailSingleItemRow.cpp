@@ -160,7 +160,7 @@ TSharedRef<SWidget> SUnrealDiffDetailSingleItemRow::MakeRowActionsMenu()
 	
 	if (!OwnerTreeNode.Pin()->GetDetailsView()->IsLocalAsset()
 		&& OwnerTreeNode.Pin()->HasAnyDifferenceRecurse())
-		// && !OwnerTreeNode.Pin()->IsContainerNode()
+		//&& !OwnerTreeNode.Pin()->IsMapElement())
 	{
 		MenuBuilder.AddMenuEntry(
 			LOCTEXT("DetailSingleItemRowActions_MergeRow", "Use This Change"),

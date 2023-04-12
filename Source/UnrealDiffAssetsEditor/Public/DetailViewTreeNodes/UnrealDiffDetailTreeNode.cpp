@@ -8,6 +8,11 @@ FUnrealDiffDetailTreeNode::~FUnrealDiffDetailTreeNode()
 {
 }
 
+bool FUnrealDiffDetailTreeNode::IsMapElement() const
+{
+	return bIsMapElement;
+}
+
 bool FUnrealDiffDetailTreeNode::IsContainerNode() const
 {
 	if (CastField<FStructProperty>(Property.Get()))
