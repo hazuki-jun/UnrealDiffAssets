@@ -478,7 +478,6 @@ FSlateColor SUnrealDiffDataTableLayout::GetCellTextColor(const FName& InColumnId
 			if (RowData->RowState == EUnrealVisualDiff::Removed)
 			{
 				return FSlateColor(FLinearColor(0.8, 0.0, 0.1, 1.0));
-				
 			}
 			else if (RowData->RowState == EUnrealVisualDiff::Added)
 			{

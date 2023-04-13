@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UnrealDiffStringTableEntry.h"
 #include "Widgets/SCompoundWidget.h"
 
 
@@ -23,22 +24,12 @@ public:
 	void Refresh();
 	
 	void SetupRowsListSources();
+
+	void HighlightRow(const FString& RowKey);
+
+	void MergeRow(const FString& RowKey);
 	
 public:
-	/** Cached string table entry */
-	struct FCachedStringTableEntry
-	{
-		FCachedStringTableEntry(FString InKey, FString InSourceString)
-			: Key(MoveTemp(InKey))
-			, SourceString(MoveTemp(InSourceString))
-			, RowState(0)
-		{
-		}
-
-		FString Key;
-		FString SourceString;
-		int32 RowState;
-	};
 	TArray<TSharedPtr<FCachedStringTableEntry>> CachedStringTableEntries;
 
 protected:
@@ -54,19 +45,4 @@ protected:
 	TSharedPtr<SListView<TSharedPtr<FCachedStringTableEntry>>> MyListView;
 };
 
-class SUnrealDiffStringTableEntryRow : public SMultiColumnTableRow<TSharedPtr<SUnrealDiffStringTableListView::FCachedStringTableEntry>>
-{
-public:
-	void Construct(const FTableRowArgs& InArgs, const TSharedRef<STableViewBase>& OwnerTableView, TSharedPtr<SUnrealDiffStringTableListView::FCachedStringTableEntry> InCachedStringTableEntry);
-	
-	virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override;
 
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-
-	TSharedRef<SWidget> MakeRowActionsMenu();
-
-	void OnMenuActionCopyName();
-	void OnMenuActionCopyValue();
-	
-	TSharedPtr<SUnrealDiffStringTableListView::FCachedStringTableEntry> CachedStringTableEntry;
-};

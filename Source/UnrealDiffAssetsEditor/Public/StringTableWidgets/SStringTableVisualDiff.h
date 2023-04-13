@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SVisualDiffWidget.h"
+#include "UnrealDiffStringTableEntry.h"
 
 /**
  * 
@@ -20,7 +21,11 @@ public:
 public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+	
+	void OnRowSelected(bool bIsLocal, FString RowKey);
 
+	void Sync_HighlightRow(bool bIsLocal, FString RowKey);
+	
 	void InitSettings();
 	
 	//~ Begin SVisualDiffWidget Toolbar Action Interface
@@ -44,7 +49,11 @@ public:
 	FStringTableConstRef GetStringTableRef(bool bIsLocal);
 
 	int32 GetRowState(bool bIsLocal, const FString& RowKey);
+	
+	void GetStringTableData(bool bIsLocal, TArray<TSharedPtr<FCachedStringTableEntry>>& OutEntries);
 
+	void PerformMerge(const FString& RowKey);
+	
 protected:
 	TSharedPtr<class SUnrealDiffStringTableListView> StringTableListViewLocal;
 	TSharedPtr<class SUnrealDiffStringTableListView> StringTableListViewRemote;
@@ -54,4 +63,6 @@ protected:
 	UObject* LocalAsset = nullptr;
 	UObject* RemoteAsset = nullptr;
 };
+
+
 

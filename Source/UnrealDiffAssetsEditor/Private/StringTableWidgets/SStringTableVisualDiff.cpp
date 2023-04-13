@@ -4,6 +4,7 @@
 #include "StringTableWidgets/SStringTableVisualDiff.h"
 
 #include "SlateOptMacros.h"
+#include "UnrealDiffAssetDelegate.h"
 #include "Internationalization/StringTable.h"
 #include "Internationalization/StringTableCore.h"
 #include "StringTableWidgets/SUnrealDiffStringTableListView.h"
@@ -19,6 +20,8 @@ void SStringTableVisualDiff::Construct(const FArguments& InArgs)
 	RemoteAsset = InArgs._RemoteAsset;
 	ParentWindow->SetTitle(FText::FromString(TEXT("Difference StringTable")));
 	InitSettings();
+
+	UUnrealDiffAssetDelegate::OnStringTableRowSelected.BindRaw(this, &SStringTableVisualDiff::OnRowSelected);
 	
 	if (!LocalAsset || !RemoteAsset)
 	{
@@ -60,6 +63,28 @@ void SStringTableVisualDiff::Construct(const FArguments& InArgs)
 			]
 		]
 	];
+}
+
+void SStringTableVisualDiff::OnRowSelected(bool bIsLocal, FString RowKey)
+{
+	Sync_HighlightRow(bIsLocal, RowKey);
+}
+
+void SStringTableVisualDiff::Sync_HighlightRow(bool bIsLocal, FString RowKey)
+{
+	if (!StringTableListViewLocal.IsValid() || !StringTableListViewRemote.IsValid())
+	{
+		return;
+	}
+
+	if (bIsLocal)
+	{
+		StringTableListViewRemote->HighlightRow(RowKey);
+	}
+	else
+	{
+		StringTableListViewLocal->HighlightRow(RowKey);
+	}
 }
 
 void SStringTableVisualDiff::InitSettings()
@@ -149,29 +174,101 @@ FStringTableConstRef SStringTableVisualDiff::GetStringTableRef(bool bIsLocal)
 
 int32 SStringTableVisualDiff::GetRowState(bool bIsLocal, const FString& RowKey)
 {
-	auto StringTableRefLocal = GetStringTableRef(true);
-	auto StringTableRefRemote = GetStringTableRef(false);
-
-	auto StringTableEntryLocal = StringTableRefLocal->FindEntry(RowKey);
-	auto StringTableEntryRemote = StringTableRefRemote->FindEntry(RowKey);
-
-	if (StringTableEntryLocal.IsValid() && StringTableEntryRemote.IsValid())
+	if (bIsLocal)
 	{
-		if (!StringTableEntryLocal->GetSourceString().Equals(StringTableEntryRemote->GetSourceString()))
+		for (const auto& Entry : StringTableListViewLocal->CachedStringTableEntries)
 		{
-			return EUnrealVisualDiff::Modify;
+			if (Entry->Key.Equals(RowKey))
+			{
+				return Entry->RowState;
+			}
 		}
 	}
-	else if (bIsLocal && !StringTableEntryRemote.IsValid())
+	else
 	{
-		return EUnrealVisualDiff::Added;
+		for (const auto& Entry : StringTableListViewRemote->CachedStringTableEntries)
+		{
+			if (Entry->Key.Equals(RowKey))
+			{
+				return Entry->RowState;
+			}
+		}
 	}
-	else if (!bIsLocal && !StringTableEntryLocal.IsValid())
-	{
-		return EUnrealVisualDiff::Added;
-	}
+	
+	return 1;
+}
 
-	return EUnrealVisualDiff::Normal;
+void SStringTableVisualDiff::GetStringTableData(bool bIsLocal, TArray<TSharedPtr<FCachedStringTableEntry>>& OutEntries)
+{
+	const auto StringTableRefLocal = GetStringTableRef(true);
+	const auto StringTableRefRemote = GetStringTableRef(false);
+
+	auto SetupEntries = [&OutEntries](const FStringTableConstRef& Dest, const FStringTableConstRef& Src)
+	{
+		Dest->EnumerateSourceStrings([&](const FString& InKey, const FString& InSourceString)
+		{
+			TSharedPtr<FCachedStringTableEntry> NewStringTableEntry = MakeShared<FCachedStringTableEntry>(InKey, InSourceString);
+			NewStringTableEntry->RowState = EUnrealVisualDiff::Normal;
+			OutEntries.Add(NewStringTableEntry);
+
+			return true; // continue enumeration
+			
+		});
+
+		for (auto& Entry : OutEntries)
+		{
+			auto SrcEntry = Src->FindEntry(Entry->Key);
+			if (!SrcEntry)
+			{
+				Entry->RowState = EUnrealVisualDiff::Added;
+			}
+			else
+			{
+				if (!Entry->SourceString.Equals(SrcEntry->GetSourceString()))
+				{
+					Entry->RowState = EUnrealVisualDiff::Modify;
+				}
+			}
+		}
+
+		Src->EnumerateSourceStrings([&](const FString& InKey, const FString& InSourceString)
+		{
+			if (!Dest->FindEntry(InKey))
+			{
+				TSharedPtr<FCachedStringTableEntry> NewStringTableEntry = MakeShared<FCachedStringTableEntry>(InKey, FString());
+				NewStringTableEntry->RowState = EUnrealVisualDiff::Removed;
+				OutEntries.Add(NewStringTableEntry);			
+			}
+					
+			return true; // continue enumeration
+		});
+	};
+	
+	if (bIsLocal)
+	{
+		SetupEntries(StringTableRefLocal, StringTableRefRemote);
+	}
+	else
+	{
+		SetupEntries(StringTableRefRemote, StringTableRefLocal);
+	}
+}
+
+void SStringTableVisualDiff::PerformMerge(const FString& RowKey)
+{
+	EUnrealVisualDiff::RowViewOption RowState = static_cast<EUnrealVisualDiff::RowViewOption>(GetRowState(true, RowKey));  
+	if (RowState == EUnrealVisualDiff::Removed)
+	{
+	
+	}
+	else if (RowState == EUnrealVisualDiff::Added)
+	{
+		
+	}
+	else if (RowState == EUnrealVisualDiff::Modify)
+	{
+		
+	}
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

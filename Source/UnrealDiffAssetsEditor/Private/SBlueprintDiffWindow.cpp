@@ -36,6 +36,7 @@ void SBlueprintDiffWindow::Construct(const FArguments& InArgs)
 	{
 		UUnrealDiffAssetDelegate::OnWindowResized.Clear();
 		UUnrealDiffAssetDelegate::OnDataTableRowSelected.Unbind();
+		UUnrealDiffAssetDelegate::OnStringTableRowSelected.Unbind();
 	});
 }
 

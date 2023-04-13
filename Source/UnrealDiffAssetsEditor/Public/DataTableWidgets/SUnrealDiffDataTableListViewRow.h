@@ -34,7 +34,7 @@ typedef TSharedPtr<FUnrealDiffDataTableRowListViewData> FUnrealDiffDataTableRowL
 class UNREALDIFFASSETSEDITOR_API SUnrealDiffDataTableListViewRow : public SMultiColumnTableRow<FUnrealDiffDataTableRowListViewDataPtr>
 {
 public:
-	SLATE_BEGIN_ARGS(SUnrealDiffDataTableListViewRow){}
+	SLATE_BEGIN_ARGS(SUnrealDiffDataTableListViewRow) {}
 		SLATE_ARGUMENT(bool, IsLocal)
 		SLATE_ARGUMENT(TSharedPtr<class SDataTableVisualDiff>, DataTableVisual)
 		SLATE_ARGUMENT(TSharedPtr<class SUnrealDiffDataTableLayout>, DataTableLayout)

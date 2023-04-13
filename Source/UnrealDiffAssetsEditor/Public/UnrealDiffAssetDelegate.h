@@ -18,6 +18,9 @@ public:
 	DECLARE_DELEGATE_ThreeParams(FOnDataTableRowSelected, bool, FName, int32)
 	static FOnDataTableRowSelected OnDataTableRowSelected;
 
+	DECLARE_DELEGATE_TwoParams(FOnStringTableRowSelected, bool, FString)
+	static FOnStringTableRowSelected OnStringTableRowSelected;
+	
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWindowResized, FVector2D)
 	static FOnWindowResized OnWindowResized;
 };

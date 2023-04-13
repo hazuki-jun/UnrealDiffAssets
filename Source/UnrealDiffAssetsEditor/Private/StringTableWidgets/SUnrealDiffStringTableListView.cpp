@@ -4,13 +4,13 @@
 #include "StringTableWidgets/SUnrealDiffStringTableListView.h"
 
 #include "SlateOptMacros.h"
-#include "UnrealDiffWindowStyle.h"
 #include "Internationalization/StringTableCore.h"
 #include "StringTableWidgets/SStringTableVisualDiff.h"
+#include "StringTableWidgets/SUnrealDiffStringTableEntryRow.h"
 
 #define LOCTEXT_NAMESPACE "SUnrealDiffStringTableListView"
 
-namespace
+namespace NS_UnrealDiffStringTableListView
 {
 	const FName StringTableDummyColumnId("Dummy");
 	const FName StringTableKeyColumnId("Key");
@@ -18,101 +18,6 @@ namespace
 }
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
-
-void SUnrealDiffStringTableEntryRow::Construct(const FTableRowArgs& InArgs, const TSharedRef<STableViewBase>& OwnerTableView, TSharedPtr<SUnrealDiffStringTableListView::FCachedStringTableEntry> InCachedStringTableEntry)
-{
-	CachedStringTableEntry = InCachedStringTableEntry;
-		
-	FSuperRowType::Construct(FSuperRowType::
-		FArguments()
-		.Style(FUnrealDiffWindowStyle::GetAppStyle(), "DataTableEditor.CellListViewRow"),
-		OwnerTableView);
-}
-
-TSharedRef<SWidget> SUnrealDiffStringTableEntryRow::GenerateWidgetForColumn(const FName& ColumnName)
-{
-	TSharedPtr<SWidget> Return;
-
-	FSlateColor TextColor = FLinearColor(0.9f, 0.9f, 0.9f);
-	if (CachedStringTableEntry->RowState == EUnrealVisualDiff::Modify)
-	{
-		TextColor = FLinearColor(1.0, 1.0, 0.1, 1.0);
-	}
-	else if (CachedStringTableEntry->RowState == EUnrealVisualDiff::Added)
-	{
-		TextColor = FLinearColor(0.0, 0.8, 0.1, 1.0);
-	}
-	
-	if (ColumnName.IsEqual(StringTableKeyColumnId))
-	{
-		Return = SNew(SOverlay)
-			+ SOverlay::Slot()
-			.HAlign(HAlign_Left)
-			.Padding(FMargin(10.f, 0.f, 0.f, 0.f))
-			[
-				SNew(STextBlock)
-				.Text(FText::FromString(CachedStringTableEntry.Get()->Key))
-				.ColorAndOpacity(TextColor)
-			];
-	}
-	else if (ColumnName.IsEqual(StringTableSourceStringColumnId))
-	{
-		Return = SNew(SOverlay)
-			+ SOverlay::Slot()
-			.Padding(FMargin(10.f, 0.f, 0.f, 0.f))
-			.HAlign(HAlign_Left)
-			[
-				SNew(STextBlock)
-				.Text(FText::FromString(CachedStringTableEntry.Get()->SourceString))
-				.ColorAndOpacity(TextColor)
-			];
-	}
-	
-	return Return.IsValid() ? Return.ToSharedRef() : SNullWidget::NullWidget;
-}
-
-FReply SUnrealDiffStringTableEntryRow::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
-	{
-		// UUnrealDiffAssetDelegate::OnDataTableRowSelected.Execute(bIsLocal, RowDataPtr->RowId, RowDataPtr->RowNum);	
-
-		TSharedRef<SWidget> MenuWidget = MakeRowActionsMenu();
-
-		FWidgetPath WidgetPath = MouseEvent.GetEventPath() != nullptr ? *MouseEvent.GetEventPath() : FWidgetPath();
-		FSlateApplication::Get().PushMenu(AsShared(), WidgetPath, MenuWidget, MouseEvent.GetScreenSpacePosition(), FPopupTransitionEffect::ContextMenu);
-	}
-	
-	return STableRow::OnMouseButtonUp(MyGeometry, MouseEvent);
-}
-
-TSharedRef<SWidget> SUnrealDiffStringTableEntryRow::MakeRowActionsMenu()
-{
-	FMenuBuilder MenuBuilder(true, NULL);
-	MenuBuilder.AddMenuEntry(
-		LOCTEXT("DataTableRowMenuActions_CopyName", "Copy Name"),
-		LOCTEXT("DataTableRowMenuActions_CopyNamTooltip", "Copy row name"),
-		FUnrealDiffWindowStyle::GetAppSlateIcon("GenericCommands.Copy"),
-		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffStringTableEntryRow::OnMenuActionCopyName))
-	);
-	
-	MenuBuilder.AddMenuEntry(
-		LOCTEXT("DataTableRowMenuActions_Copy", "Copy Value"),
-		LOCTEXT("DataTableRowMenuActions_CopyTooltip", "Copy this row"),
-		FUnrealDiffWindowStyle::GetAppSlateIcon("GenericCommands.Copy"),
-		FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffStringTableEntryRow::OnMenuActionCopyValue))
-	);
-
-	return MenuBuilder.MakeWidget();
-}
-
-void SUnrealDiffStringTableEntryRow::OnMenuActionCopyName()
-{
-}
-
-void SUnrealDiffStringTableEntryRow::OnMenuActionCopyValue()
-{
-}
 
 void SUnrealDiffStringTableListView::Construct(const FArguments& InArgs, TSharedPtr<class SStringTableVisualDiff> InStringTableVisualDiff)
 {
@@ -126,15 +31,15 @@ void SUnrealDiffStringTableListView::Construct(const FArguments& InArgs, TShared
 				.OnGenerateRow(this, &SUnrealDiffStringTableListView::OnGenerateStringTableEntryRow)
 				.HeaderRow(
 					SNew(SHeaderRow)
-						+SHeaderRow::Column(StringTableDummyColumnId)
+						+SHeaderRow::Column(NS_UnrealDiffStringTableListView::StringTableDummyColumnId)
 						.DefaultLabel(FText::GetEmpty())
 						.FixedWidth(20)
 
-						+SHeaderRow::Column(StringTableKeyColumnId)
+						+SHeaderRow::Column(NS_UnrealDiffStringTableListView::StringTableKeyColumnId)
 						.DefaultLabel(LOCTEXT("KeyColumnLabel", "Key"))
 						.FillWidth(0.2f)
 
-						+SHeaderRow::Column(StringTableSourceStringColumnId)
+						+SHeaderRow::Column(NS_UnrealDiffStringTableListView::StringTableSourceStringColumnId)
 						.DefaultLabel(LOCTEXT("SourceStringColumnLabel", "Source String"))
 						.FillWidth(1.0f)
 				)
@@ -151,26 +56,13 @@ void SUnrealDiffStringTableListView::Refresh()
 
 void SUnrealDiffStringTableListView::SetupRowsListSources()
 {
-	FStringTableConstRef StringTableRef = StringTableVisualDiff->GetStringTableRef(bIsLocal);
-	StringTableRef->EnumerateSourceStrings([&](const FString& InKey, const FString& InSourceString)
-	{
-		TSharedPtr<FCachedStringTableEntry> NewStringTableEntry = MakeShared<FCachedStringTableEntry>(InKey, InSourceString);
-		CachedStringTableEntries.Add(NewStringTableEntry);
-
-		return true; // continue enumeration
-	});
-
+	StringTableVisualDiff->GetStringTableData(bIsLocal, CachedStringTableEntries);
+	
 	CachedStringTableEntries.Sort([](const TSharedPtr<FCachedStringTableEntry>& InEntryOne, const TSharedPtr<FCachedStringTableEntry>& InEntryTwo)
 	{
 		return InEntryOne->Key < InEntryTwo->Key;
 	});
-
 	
-	for (auto& Entry : CachedStringTableEntries)
-	{
-		Entry->RowState = StringTableVisualDiff->GetRowState(bIsLocal, Entry->Key);
-	}
-
 	CachedStringTableEntries.RemoveAll([this](const TSharedPtr<FCachedStringTableEntry>& Entry)
 	{
 		if (StringTableVisualDiff->HasRowViewOption(static_cast<EUnrealVisualDiff::RowViewOption>(Entry->RowState)))
@@ -182,10 +74,33 @@ void SUnrealDiffStringTableListView::SetupRowsListSources()
 	});
 }
 
+void SUnrealDiffStringTableListView::HighlightRow(const FString& RowKey)
+{
+	for (const auto& Entry : CachedStringTableEntries)
+	{
+		if (Entry->Key.Equals(RowKey))
+		{
+			MyListView->SetItemSelection(Entry, true);
+		}
+		else
+		{
+			MyListView->SetItemSelection(Entry, false);
+		}
+	}
+}
+
+void SUnrealDiffStringTableListView::MergeRow(const FString& RowKey)
+{
+	if (StringTableVisualDiff.IsValid())
+	{
+		StringTableVisualDiff->PerformMerge(RowKey);
+	}
+}
+
 
 TSharedRef<ITableRow> SUnrealDiffStringTableListView::OnGenerateStringTableEntryRow(TSharedPtr<FCachedStringTableEntry> CachedStringTableEntry, const TSharedRef<STableViewBase>& Table)
 {
-	return SNew(SUnrealDiffStringTableEntryRow, Table, CachedStringTableEntry);
+	return SNew(SUnrealDiffStringTableEntryRow, Table, CachedStringTableEntry, SharedThis(this)).IsLocal(bIsLocal);
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
