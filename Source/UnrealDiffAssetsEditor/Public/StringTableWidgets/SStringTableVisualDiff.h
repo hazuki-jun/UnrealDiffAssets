@@ -17,9 +17,12 @@ public:
 		SLATE_ARGUMENT(UObject*, RemoteAsset)
 	SLATE_END_ARGS()
 
+public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+	void InitSettings();
+	
 	//~ Begin SVisualDiffWidget Toolbar Action Interface
 	// Next
 	virtual void ToolbarAction_HighlightNextDifference() override;
@@ -37,9 +40,18 @@ public:
 	virtual void ModifyConfig() override;
 	// End SVisualDiffWidget ViewOption Interface
 	
+	class UStringTable* GetStringTable(bool bIsLocal);
+	FStringTableConstRef GetStringTableRef(bool bIsLocal);
+
+	int32 GetRowState(bool bIsLocal, const FString& RowKey);
+
+protected:
+	TSharedPtr<class SUnrealDiffStringTableListView> StringTableListViewLocal;
+	TSharedPtr<class SUnrealDiffStringTableListView> StringTableListViewRemote;
+	
 protected:
 	TSharedPtr<SWindow> ParentWindow;
-	
 	UObject* LocalAsset = nullptr;
 	UObject* RemoteAsset = nullptr;
 };
+

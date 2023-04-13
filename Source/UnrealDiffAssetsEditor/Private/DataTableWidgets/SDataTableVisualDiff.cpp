@@ -70,8 +70,7 @@ void SDataTableVisualDiff::InitSettings()
 {
 	const FString FileName = FPaths::ProjectConfigDir() / FString(TEXT("DefaultUnrealDiffAssetSettings.ini"));
 	const FString SectionName = TEXT("/Script/UnrealDiffAssetsEditor.UnrealDiffAssetSettings");
-
-
+	
 	bool Checked = true;
 	GConfig->GetBool(*SectionName, TEXT("DataTableVisualDiffShowOnlyNormal"), Checked, FileName);
 	Checked ? SetRowViewOption(EUnrealVisualDiff::Normal) : ClearRowViewOption(EUnrealVisualDiff::Normal);

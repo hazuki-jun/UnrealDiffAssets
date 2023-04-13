@@ -34,5 +34,15 @@ public:
 	// UPROPERTY(EditAnywhere, Config, Category = DataTableDiff, DisplayName = "ShowOnlyRemoved")
 	// bool DataTableVisualDiffShowOnlyRemoved = true;
 	//~ End DataTableDiff Config
+	
+	//~ Begin StringTableDiff Config
+	UPROPERTY(EditAnywhere, Config, Category = StringTableDiff, DisplayName = "StringTableShowOnlyNormal")
+	bool StringTableVisualDiffShowOnlyNormal = true;
 
+	UPROPERTY(EditAnywhere, Config, Category = StringTableDiff, DisplayName = "StringTableShowOnlyModify")
+	bool StringTableVisualDiffShowOnlyModify = true;
+
+	UPROPERTY(EditAnywhere, Config, Category = StringTableDiff, DisplayName = "StringTableShowOnlyAdded")
+	bool StringTableVisualDiffShowOnlyAdded = true;
+	//~ End StringTableDiff Config
 };
