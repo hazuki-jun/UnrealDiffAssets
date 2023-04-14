@@ -61,6 +61,9 @@ TSharedRef<SWidget> SUnrealDiffStringTableEntryRow::GenerateWidgetForColumn(cons
 				SNew(STextBlock)
 				.Text(FText::FromString(CachedStringTableEntry.Get()->Key))
 				.ColorAndOpacity(TextColor)
+#if ENGINE_MAJOR_VERSION == 4
+				.Font(FCoreStyle::GetDefaultFontStyle("Regular", 10))
+#endif
 			];
 	}
 	else if (ColumnName.IsEqual(NS_UnrealDiffStringTableEntryRow::StringTableSourceStringColumnId))
@@ -73,6 +76,9 @@ TSharedRef<SWidget> SUnrealDiffStringTableEntryRow::GenerateWidgetForColumn(cons
 				SNew(STextBlock)
 				.Text(FText::FromString(CachedStringTableEntry.Get()->SourceString))
 				.ColorAndOpacity(TextColor)
+#if ENGINE_MAJOR_VERSION == 4
+				.Font(FCoreStyle::GetDefaultFontStyle("Regular", 10))
+#endif
 			];
 	}
 	
