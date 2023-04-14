@@ -6,6 +6,7 @@
 #include "SlateOptMacros.h"
 #include "UnrealDiffWindowStyle.h"
 #include "Widgets/Images/SLayeredImage.h"
+#include "Widgets/Input/SSearchBox.h"
 
 #define LOCTEXT_NAMESPACE "SVisualDiffWidget"
 
@@ -18,6 +19,28 @@ void SVisualDiffWidget::Construct(const FArguments& InArgs)
 TSharedRef<SWidget> SVisualDiffWidget::MakeToolbar()
 {
 	TSharedRef<SOverlay> Overlay = SNew(SOverlay);
+	
+	TSharedRef<SVerticalBox> OutVerticalBox =
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.HAlign(HAlign_Fill)
+			.AutoHeight()
+		[
+			Overlay
+		];
+	
+	if (IsSearchable())
+	{
+		OutVerticalBox->AddSlot()
+		.HAlign(HAlign_Fill)
+		.AutoHeight()
+		[
+			SAssignNew(SearchBoxWidget, SSearchBox)
+			.InitialText(this, &SVisualDiffWidget::GetFilterText)
+			.OnTextChanged(this, &SVisualDiffWidget::OnFilterTextChanged)
+			.OnTextCommitted(this, &SVisualDiffWidget::OnFilterTextCommitted)
+		];
+	}
 	
 	FToolBarBuilder DataTableVisualToolbarBuilder(TSharedPtr< const FUICommandList >(), FMultiBoxCustomization::None);
 	DataTableVisualToolbarBuilder.AddToolBarButton(
@@ -35,14 +58,17 @@ TSharedRef<SWidget> SVisualDiffWidget::MakeToolbar()
 		, LOCTEXT("NextTooltip", "Next Difference")
 		, FUnrealDiffWindowStyle::GetAppSlateIcon("BlueprintMerge.NextDiff")
 	);
-
-	DataTableVisualToolbarBuilder.AddToolBarButton(
-	FUIAction(FExecuteAction::CreateSP(this, &SVisualDiffWidget::ToolbarAction_Diff))
-		, NAME_None
-		, LOCTEXT("DiffLabel", "Diff")
-		, LOCTEXT("DiffTooltip", "Diff")
-		, FUnrealDiffWindowStyle::GetAppSlateIcon("SourceControl.Actions.Diff")
-	);
+	
+	if (IsDiffable())
+	{
+			DataTableVisualToolbarBuilder.AddToolBarButton(
+		FUIAction(FExecuteAction::CreateSP(this, &SVisualDiffWidget::ToolbarAction_Diff))
+			, NAME_None
+			, LOCTEXT("DiffLabel", "Diff")
+			, LOCTEXT("DiffTooltip", "Diff")
+			, FUnrealDiffWindowStyle::GetAppSlateIcon("SourceControl.Actions.Diff")
+		);
+	}
 	
 	DataTableVisualToolbarBuilder.AddToolBarButton(
 	FUIAction(FExecuteAction::CreateSP(this, &SVisualDiffWidget::ToolbarAction_Merge))
@@ -96,7 +122,31 @@ TSharedRef<SWidget> SVisualDiffWidget::MakeToolbar()
 		ComboButton
 	];
 	
-	return Overlay;
+	return OutVerticalBox;
+}
+
+FText SVisualDiffWidget::GetFilterText() const
+{
+	return ActiveFilterText;
+}
+
+void SVisualDiffWidget::OnFilterTextChanged(const FText& InFilterText)
+{
+	ActiveFilterText = InFilterText;
+	UpdateVisibleRows();
+}
+
+void SVisualDiffWidget::OnFilterTextCommitted(const FText& NewText, ETextCommit::Type CommitInfo)
+{
+	if (CommitInfo == ETextCommit::OnCleared)
+	{
+		SearchBoxWidget->SetText(FText::GetEmpty());
+		OnFilterTextChanged(FText::GetEmpty());
+	}
+}
+
+void SVisualDiffWidget::UpdateVisibleRows()
+{
 }
 
 void SVisualDiffWidget::ToolbarAction_HighlightNextDifference()
@@ -105,6 +155,11 @@ void SVisualDiffWidget::ToolbarAction_HighlightNextDifference()
 
 void SVisualDiffWidget::ToolbarAction_HighlightPrevDifference()
 {
+}
+
+bool SVisualDiffWidget::IsDiffable()
+{
+	return true;
 }
 
 void SVisualDiffWidget::ToolbarAction_Diff()
@@ -118,6 +173,11 @@ bool SVisualDiffWidget::ToolbarAction_CanDiff()
 
 void SVisualDiffWidget::ToolbarAction_Merge()
 {
+}
+
+bool SVisualDiffWidget::IsSearchable()
+{
+	return true;
 }
 
 TSharedRef<SWidget> SVisualDiffWidget::GetShowViewOptionContent()

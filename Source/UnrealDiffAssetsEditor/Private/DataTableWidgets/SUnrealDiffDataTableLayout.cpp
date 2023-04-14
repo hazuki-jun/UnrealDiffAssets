@@ -102,7 +102,12 @@ void SUnrealDiffDataTableLayout::SetupRowsData()
 		Row->DesiredRowHeight = RowData->DesiredRowHeight;
 		VisibleRows.Add(Row);
 	}
+	
+	ArrangeRows();
+}
 
+void SUnrealDiffDataTableLayout::ArrangeRows()
+{
 	VisibleRows.StableSort([](const FUnrealDiffDataTableRowListViewDataPtr& A, const FUnrealDiffDataTableRowListViewDataPtr& B)
 	{
 		return (A->RowId).ToString() < (B->RowId).ToString();
@@ -112,28 +117,20 @@ void SUnrealDiffDataTableLayout::SetupRowsData()
 	{
 		if (VisibleRows[i]->RowNum == -2)
 		{
-			// VisibleRows[i]->bIsRemoved = true;
 			VisibleRows[i]->RowState = EUnrealVisualDiff::Removed;
 		}
 		else if (VisibleRows[i]->RowNum == 0)
 		{
-			// VisibleRows[i]->bIsAdded = true;
 			VisibleRows[i]->RowState = EUnrealVisualDiff::Added;
 		}
 		else if (VisibleRows[i]->RowNum == -1)
 		{
-			// VisibleRows[i]->bHasAnyDifference = true;
 			VisibleRows[i]->RowState = EUnrealVisualDiff::Modify;
 		}
 		
 		VisibleRows[i]->RowNum = i + 1;
 	}
-
-	ArrangeRows();
-}
-
-void SUnrealDiffDataTableLayout::ArrangeRows()
-{
+	
 	if (!DataTableVisual)
 	{
 		return;
@@ -145,25 +142,41 @@ void SUnrealDiffDataTableLayout::ArrangeRows()
 		{
 			return false;
 		}
-
-		// if (DataTableVisual->HasRowViewOption(EUnrealVisualDiff::Added))
-		// {
-		// 	if (RowData->bIsAdded)
-		// 	{
-		// 		return false;
-		// 	}
-		// }
-		//
-		// if (DataTableVisual->HasRowViewOption(EUnrealVisualDiff::Removed))
-		// {
-		// 	if (RowData->bIsRemoved)
-		// 	{
-		// 		return false;
-		// 	}
-		// }
-		
 		return true;
 	});
+}
+
+void SUnrealDiffDataTableLayout::FilterRows(const FString& FilterName)
+{
+	VisibleRows.Empty();
+	
+	for (auto RowData : AvailableRows)
+	{
+		FUnrealDiffDataTableRowListViewDataPtr Row = MakeShared<FUnrealDiffDataTableRowListViewData>();
+		Row->CellData = RowData->CellData;
+		Row->DisplayName = RowData->DisplayName;
+		Row->RowId = RowData->RowId;
+		Row->RowNum = RowData->RowNum;
+		Row->DesiredRowHeight = RowData->DesiredRowHeight;
+		VisibleRows.Add(Row);
+	}
+
+	ArrangeRows();
+
+	if (!FilterName.IsEmpty())
+	{
+		VisibleRows.RemoveAll([this, &FilterName](const FUnrealDiffDataTableRowListViewDataPtr& RowData)
+		{
+			if (RowData->RowId.ToString().Find(FilterName) == INDEX_NONE)
+			{
+				return true;
+			}
+
+			return false;
+		});
+	}
+	
+	ListView->RequestListRefresh();
 }
 
 void SUnrealDiffDataTableLayout::Refresh()

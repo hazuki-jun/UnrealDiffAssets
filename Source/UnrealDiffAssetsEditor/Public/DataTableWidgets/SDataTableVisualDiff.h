@@ -42,6 +42,7 @@ public:
 	TSharedPtr<FStructOnScope> GetStructure();
 	
 	//~ Begin SVisualDiffWidget Interface
+	virtual void UpdateVisibleRows() override;
 	virtual void ToolbarAction_HighlightNextDifference() override;
 	virtual void ToolbarAction_HighlightPrevDifference() override;
 	virtual void ToolbarAction_Diff() override;

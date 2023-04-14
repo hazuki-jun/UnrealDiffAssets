@@ -22,6 +22,8 @@ public:
 	void Construct(const FArguments& InArgs, TSharedPtr<class SStringTableVisualDiff> InStringTableVisualDiff);
 
 	void Refresh();
+
+	void FilterRows(const FString& FilterName);
 	
 	void SetupRowsListSources();
 

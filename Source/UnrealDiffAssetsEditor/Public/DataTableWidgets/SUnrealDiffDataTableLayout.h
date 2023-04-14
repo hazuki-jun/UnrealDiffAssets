@@ -25,6 +25,8 @@ public:
 	void SetupRowsData();
 
 	void ArrangeRows();
+
+	void FilterRows(const FString& FilterName);
 	
 	void Refresh();
 

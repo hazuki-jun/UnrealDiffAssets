@@ -36,16 +36,23 @@ public:
 	
 	virtual TSharedRef<SWidget> MakeToolbar();
 	
+	virtual FText GetFilterText() const;
+	virtual void OnFilterTextChanged(const FText& InFilterText);
+	virtual void OnFilterTextCommitted(const FText& NewText, ETextCommit::Type CommitInfo);
+	virtual void UpdateVisibleRows();
+	
 	//~ Begin Toolbar Action Interface
 	// Next
 	virtual void ToolbarAction_HighlightNextDifference();
 	// Prev
 	virtual void ToolbarAction_HighlightPrevDifference();
 	// Diff
+	virtual bool IsDiffable();
 	virtual void ToolbarAction_Diff();
 	virtual bool ToolbarAction_CanDiff();
 	// Merge
 	virtual void ToolbarAction_Merge();
+	virtual bool IsSearchable();
 	//~ End Toolbar Action Interface
 	
 	// ViewOption Content
@@ -66,4 +73,6 @@ public:
 
 protected:
 	EUnrealVisualDiff::RowViewOption RowViewOption = EUnrealVisualDiff::Max;
+	FText ActiveFilterText;
+	TSharedPtr<SSearchBox> SearchBoxWidget;
 };

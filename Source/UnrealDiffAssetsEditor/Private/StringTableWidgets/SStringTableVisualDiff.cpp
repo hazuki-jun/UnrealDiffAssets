@@ -176,12 +176,7 @@ void SStringTableVisualDiff::ToolbarAction_HighlightPrevDifference()
 	}
 }
 
-void SStringTableVisualDiff::ToolbarAction_Diff()
-{
-	
-}
-
-bool SStringTableVisualDiff::ToolbarAction_CanDiff()
+bool SStringTableVisualDiff::IsDiffable()
 {
 	return false;
 }
@@ -192,12 +187,29 @@ void SStringTableVisualDiff::ToolbarAction_Merge()
 	RefreshLayout();
 }
 
+void SStringTableVisualDiff::UpdateVisibleRows()
+{
+	if (!StringTableListViewLocal || !StringTableListViewRemote)
+	{
+		return;
+	}
+
+	FString Filter;
+	
+	if (!ActiveFilterText.IsEmptyOrWhitespace())
+	{
+		Filter = ActiveFilterText.ToString();
+	}
+	
+	StringTableListViewLocal->FilterRows(Filter);
+	StringTableListViewRemote->FilterRows(Filter);
+}
+
 void SStringTableVisualDiff::RefreshLayout()
 {
 	if (StringTableListViewLocal.IsValid() && StringTableListViewRemote.IsValid())
 	{
-		StringTableListViewLocal->Refresh();
-		StringTableListViewRemote->Refresh();
+		UpdateVisibleRows();
 	}
 }
 
@@ -340,6 +352,8 @@ void SStringTableVisualDiff::PerformMerge(const FString& RowKey)
 			FUnrealDiffStringTableUtil::ModifyRow(GetStringTable(true), RowKey, Entry->GetSourceString());
 		}
 	}
+
+	UpdateVisibleRows();
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

@@ -228,6 +228,24 @@ TSharedPtr<FStructOnScope> SDataTableVisualDiff::GetStructure()
 	return MakeShareable(new FStructOnScope(DataTable->RowStruct));
 }
 
+void SDataTableVisualDiff::UpdateVisibleRows()
+{
+	if (!DataTableLayoutLocal || !DataTableLayoutRemote)
+	{
+		return;
+	}
+
+	FString Filter;
+	
+	if (!ActiveFilterText.IsEmptyOrWhitespace())
+	{
+		Filter = ActiveFilterText.ToString();
+	}
+	
+	DataTableLayoutLocal->FilterRows(Filter);
+	DataTableLayoutRemote->FilterRows(Filter);
+}
+
 void SDataTableVisualDiff::ToolbarAction_HighlightNextDifference()
 {
 	if (!DataTableLayoutLocal)
@@ -464,9 +482,10 @@ void SDataTableVisualDiff::RefreshLayout()
 		return;
 	}
 
-	DataTableLayoutLocal->Refresh();
-	DataTableLayoutRemote->Refresh();
-
+	DataTableLayoutLocal->SetupRowsData();
+	DataTableLayoutRemote->SetupRowsData();
+	UpdateVisibleRows();
+	
 	if (RowDetailViewLocal && RowDetailViewRemote)
 	{
 		RowDetailViewLocal->SetVisibility(EVisibility::Collapsed);

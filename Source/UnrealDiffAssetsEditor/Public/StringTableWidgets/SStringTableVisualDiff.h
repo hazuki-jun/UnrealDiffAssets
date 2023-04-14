@@ -27,7 +27,8 @@ public:
 	/**
 	 * @brief 选中指定行
 	 * @param bIsLocal 
-	 * @param RowKey 
+	 * @param RowKey
+	 * @param RowNumber 
 	 */
 	void OnRowSelected(bool bIsLocal, FString RowKey, int32 RowNumber);
 
@@ -40,15 +41,11 @@ public:
 	void Sync_VerticalScrollOffset(bool bIsLocal, float ScrollOffset);
 	
 	//~ Begin SVisualDiffWidget Toolbar Action Interface
-	// Next
 	virtual void ToolbarAction_HighlightNextDifference() override;
-	// Prev
 	virtual void ToolbarAction_HighlightPrevDifference() override;
-	// Diff
-	virtual void ToolbarAction_Diff() override;
-	virtual bool ToolbarAction_CanDiff() override;
-	// Merge
+	virtual bool IsDiffable() override;
 	virtual void ToolbarAction_Merge() override;
+	virtual void UpdateVisibleRows() override;
 	//~ End SVisualDiffWidget Toolbar Action Interface
 
 	// Begin SVisualDiffWidget ViewOption Interface

@@ -63,6 +63,27 @@ void SUnrealDiffStringTableListView::Refresh()
 	MyListView->RequestListRefresh();
 }
 
+void SUnrealDiffStringTableListView::FilterRows(const FString& FilterName)
+{
+	CachedStringTableEntries.Empty();
+	SetupRowsListSources();
+
+	if (!FilterName.IsEmpty())
+	{
+		CachedStringTableEntries.RemoveAll([&](const TSharedPtr<FCachedStringTableEntry>& Entry)
+		{
+			if (Entry->Key.Find(FilterName) == INDEX_NONE)
+			{
+				return true;
+			}
+
+			return false;
+		});	
+	}
+	
+	MyListView->RequestListRefresh();
+}
+
 void SUnrealDiffStringTableListView::SetupRowsListSources()
 {
 	StringTableVisualDiff->GetStringTableData(bIsLocal, CachedStringTableEntries);
