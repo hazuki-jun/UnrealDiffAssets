@@ -28,6 +28,10 @@ public:
 	void HighlightRow(const FString& RowKey);
 
 	void MergeRow(const FString& RowKey);
+
+	void SetScrollOffset(float InScrollOffset);
+	
+	void OnListViewScrolled(double InScrollOffset);
 	
 public:
 	TArray<TSharedPtr<FCachedStringTableEntry>> CachedStringTableEntries;
@@ -44,5 +48,7 @@ protected:
 	/** List view showing the cached string table entries */
 	TSharedPtr<SListView<TSharedPtr<FCachedStringTableEntry>>> MyListView;
 };
+
+
 
 

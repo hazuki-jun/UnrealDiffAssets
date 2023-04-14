@@ -51,7 +51,7 @@ void FUnrealDiffAssetsEditorModule::BuildDiffAssetsMenu()
 		LOCTEXT("DiffAssetDiffLable","Diff"),
 		LOCTEXT("DiffAssetDiff_ToolTip","Diff"),
 		FSlateIcon(FEditorStyle::GetStyleSetName(), "SourceControl.Actions.Diff"),
-		FUIAction(FExecuteAction::CreateLambda([this](){ OnDiffAssetMenuClicked(); })));
+		FUIAction(FExecuteAction::CreateLambda([this](){ OnOptionDiffClicked(); })));
 #endif
 
 // #if ENGINE_MAJOR_VERSION == 5

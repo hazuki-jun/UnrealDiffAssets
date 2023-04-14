@@ -37,6 +37,7 @@ public:
 	 * @param RowKey 
 	 */
 	void Sync_HighlightRow(bool bIsLocal, FString RowKey);
+	void Sync_VerticalScrollOffset(bool bIsLocal, float ScrollOffset);
 	
 	//~ Begin SVisualDiffWidget Toolbar Action Interface
 	// Next

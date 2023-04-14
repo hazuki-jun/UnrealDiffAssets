@@ -27,6 +27,7 @@ void SUnrealDiffStringTableListView::Construct(const FArguments& InArgs, TShared
 	ChildSlot
 	[
 		SAssignNew(MyListView, SListView<TSharedPtr<FCachedStringTableEntry>>)
+				.OnListViewScrolled(this, &SUnrealDiffStringTableListView::OnListViewScrolled)
 				.ListItemsSource(&CachedStringTableEntries)
 				.OnGenerateRow(this, &SUnrealDiffStringTableListView::OnGenerateStringTableEntryRow)
 				.HeaderRow(
@@ -45,6 +46,14 @@ void SUnrealDiffStringTableListView::Construct(const FArguments& InArgs, TShared
 				)
 	];
 
+}
+
+void SUnrealDiffStringTableListView::OnListViewScrolled(double InScrollOffset)
+{
+	if (StringTableVisualDiff)
+	{
+		StringTableVisualDiff->Sync_VerticalScrollOffset(bIsLocal, InScrollOffset);
+	}
 }
 
 void SUnrealDiffStringTableListView::Refresh()
@@ -99,6 +108,14 @@ void SUnrealDiffStringTableListView::MergeRow(const FString& RowKey)
 	if (StringTableVisualDiff.IsValid())
 	{
 		StringTableVisualDiff->PerformMerge(RowKey);
+	}
+}
+
+void SUnrealDiffStringTableListView::SetScrollOffset(float InScrollOffset)
+{
+	if (MyListView.IsValid())
+	{
+		MyListView->SetScrollOffset(InScrollOffset);
 	}
 }
 

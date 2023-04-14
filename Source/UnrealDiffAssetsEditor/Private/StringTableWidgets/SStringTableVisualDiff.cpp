@@ -32,6 +32,15 @@ void SStringTableVisualDiff::Construct(const FArguments& InArgs)
 	this->ChildSlot
 	[
 		SNew(SOverlay)
+#if ENGINE_MAJOR_VERSION == 4
+		+ SOverlay::Slot()
+		.HAlign(HAlign_Fill)
+		.VAlign(VAlign_Fill)
+		[
+			SNew(SImage)
+			.ColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f))
+		]
+#endif
 		+ SOverlay::Slot()
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Fill)
@@ -88,6 +97,23 @@ void SStringTableVisualDiff::Sync_HighlightRow(bool bIsLocal, FString RowKey)
 	{
 		StringTableListViewLocal->HighlightRow(RowKey);
 	}
+}
+
+void SStringTableVisualDiff::Sync_VerticalScrollOffset(bool bIsLocal, float ScrollOffset)
+{
+	if (!StringTableListViewLocal.IsValid() || !StringTableListViewRemote.IsValid())
+	{
+		return;
+	}
+	
+	if (bIsLocal)
+	{
+		StringTableListViewRemote->SetScrollOffset(ScrollOffset);
+	}
+	// else
+	// {
+	// 	StringTableListViewLocal->SetScrollOffset(ScrollOffset);
+	// }
 }
 
 void SStringTableVisualDiff::InitSettings()

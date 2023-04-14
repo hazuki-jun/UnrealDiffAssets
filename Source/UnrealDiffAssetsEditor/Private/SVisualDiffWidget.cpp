@@ -74,7 +74,7 @@ TSharedRef<SWidget> SVisualDiffWidget::MakeToolbar()
 		.HasDownArrow(false)
 		.ContentPadding(0)
 		.ForegroundColor(FSlateColor::UseForeground())
-#if ENGINE_NET_VERSION == 4
+#if ENGINE_MAJOR_VERSION == 4
 		.ButtonStyle(FUnrealDiffWindowStyle::GetAppStyle(), "NoBorder")
 #else
 		.ButtonStyle(FUnrealDiffWindowStyle::GetAppStyle(), "SimpleButton")
