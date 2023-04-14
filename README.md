@@ -8,12 +8,15 @@
 
 ## 使用
 
-### 1. 右键一个资源
+![LOGO](./Doc/Images/DiffImage_1.png)
 
+1. 右键一个资源
 2. 选择菜单按钮 “Diff”
 3. 从你的计算机上选择另外一个资源
 
 ## 对比窗口介绍
+
+![LOGO](./Doc/Images/DiffImage_2.png)
 
 ### 左侧为项目的资源，右侧为选择的另外一个资源
 
@@ -34,6 +37,8 @@
 
 ## 右键菜单
 
+![LOGO](./Doc/Images/DiffImage_3.png)
+
 1. CopyName: 拷贝行名
 2. CopyValue: 拷贝选中行的值
 
@@ -43,6 +48,8 @@
 
 ## 工具栏
 
+![LOGO](./Doc/Images/DiffImage_4.png)
+
 1. Prev: 选中上一个差异行
 2. Next: 选中下一个差异行
 3. Diff: 显示具体差异
@@ -50,6 +57,8 @@
 5. ViewOption:
 
 ## 具体差异窗口介绍
+
+![LOGO](./Doc/Images/DiffImage_5.png)
 
 1. Copy: 拷贝选中的Property值
 2. Use This Change: 将左侧的值修改为右侧的值
