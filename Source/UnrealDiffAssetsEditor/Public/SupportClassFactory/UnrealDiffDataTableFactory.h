@@ -17,5 +17,9 @@ class UNREALDIFFASSETSEDITOR_API UUnrealDiffDataTableFactory : public UUnrealDif
 public:
 	UUnrealDiffDataTableFactory() { SupportClassName = TEXT("DataTable"); }
 
+	virtual bool CanDiff(UObject* InLocalAsset, UObject* InRemoteAsset) override;
+
+	virtual FSuppressableWarningDialog::FSetupInfo GetDiffFailedDialogInfo() override;
+	
 	virtual TSharedRef<SWidget> FactoryCreateVisualWidget(TSharedPtr<class SWindow> ParentWindow, UObject* InLocalAsset, UObject* InRemoteAsset) override;
 };

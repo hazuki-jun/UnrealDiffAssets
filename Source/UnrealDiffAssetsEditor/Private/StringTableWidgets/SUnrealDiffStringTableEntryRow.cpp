@@ -85,7 +85,7 @@ FReply SUnrealDiffStringTableEntryRow::OnMouseButtonDown(const FGeometry& MyGeom
 	
 	if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		UUnrealDiffAssetDelegate::OnStringTableRowSelected.Execute(bIsLocal, CachedStringTableEntry->Key);
+		UUnrealDiffAssetDelegate::OnStringTableRowSelected.Execute(bIsLocal, CachedStringTableEntry->Key, CachedStringTableEntry->RowNumber);
 	}
 	
 	return FReply::Handled();
@@ -95,7 +95,7 @@ FReply SUnrealDiffStringTableEntryRow::OnMouseButtonUp(const FGeometry& MyGeomet
 {
 	if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 	{
-		UUnrealDiffAssetDelegate::OnStringTableRowSelected.Execute(bIsLocal, CachedStringTableEntry->Key);	
+		UUnrealDiffAssetDelegate::OnStringTableRowSelected.Execute(bIsLocal, CachedStringTableEntry->Key, CachedStringTableEntry->RowNumber);	
 
 		TSharedRef<SWidget> MenuWidget = MakeRowActionsMenu();
 

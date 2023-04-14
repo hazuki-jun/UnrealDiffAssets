@@ -4,6 +4,7 @@
 #include "DiffClassCollectionSubsystem.h"
 
 #include "AssetToolsModule.h"
+#include "Dialogs/Dialogs.h"
 #include "SupportClassFactory/UnrealDiffSupportClassFactory.h"
 
 UDiffClassCollectionSubsystem::UDiffClassCollectionSubsystem()
@@ -65,7 +66,19 @@ TSharedRef<SWidget> UDiffClassCollectionSubsystem::CreateVisualDiffWidget(TShare
 		auto UnrealDiffSupportClassFactory = Cast<UUnrealDiffSupportClassFactory>(Class->GetDefaultObject());
 		if (UnrealDiffSupportClassFactory && UnrealDiffSupportClassFactory->GetSupportedClass().IsEqual(SupportClass->GetFName()))
 		{
-			return UnrealDiffSupportClassFactory->FactoryCreateVisualWidget(ParentWindow, InLocalAsset, InRemoteAsset);	
+			if (UnrealDiffSupportClassFactory->CanDiff(InLocalAsset, InRemoteAsset))
+			{
+				return UnrealDiffSupportClassFactory->FactoryCreateVisualWidget(ParentWindow, InLocalAsset, InRemoteAsset);	
+			}
+			else
+			{
+				FSuppressableWarningDialog::FSetupInfo Info = UnrealDiffSupportClassFactory->GetDiffFailedDialogInfo();
+				if (!Info.Title.IsEmpty())
+				{
+					FSuppressableWarningDialog RemoveLevelWarning(Info);
+					auto Result = RemoveLevelWarning.ShowModal();
+				}
+			}
 		}
 	}
 	

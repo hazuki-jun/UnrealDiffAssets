@@ -22,11 +22,21 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	
-	void OnRowSelected(bool bIsLocal, FString RowKey);
-
-	void Sync_HighlightRow(bool bIsLocal, FString RowKey);
-	
 	void InitSettings();
+
+	/**
+	 * @brief 选中指定行
+	 * @param bIsLocal 
+	 * @param RowKey 
+	 */
+	void OnRowSelected(bool bIsLocal, FString RowKey, int32 RowNumber);
+
+	/**
+	 * @brief 同步左右2个选中状态
+	 * @param bIsLocal 
+	 * @param RowKey 
+	 */
+	void Sync_HighlightRow(bool bIsLocal, FString RowKey);
 	
 	//~ Begin SVisualDiffWidget Toolbar Action Interface
 	// Next
@@ -48,10 +58,25 @@ public:
 	class UStringTable* GetStringTable(bool bIsLocal);
 	FStringTableConstRef GetStringTableRef(bool bIsLocal);
 
+	/**
+	 * @brief 获取指定行状态 Added/Removed/Modify/Normal
+	 * @param bIsLocal 
+	 * @param RowKey 
+	 * @return [default] Normal
+	 */
 	int32 GetRowState(bool bIsLocal, const FString& RowKey);
-	
+
+	/**
+	 * @brief 获取所有StringTable所有Entry
+	 * @param bIsLocal 
+	 * @param OutEntries 
+	 */
 	void GetStringTableData(bool bIsLocal, TArray<TSharedPtr<FCachedStringTableEntry>>& OutEntries);
 
+	/**
+	 * @brief Merge右侧表指定行到左侧
+	 * @param RowKey 
+	 */
 	void PerformMerge(const FString& RowKey);
 	
 protected:
@@ -62,6 +87,9 @@ protected:
 	TSharedPtr<SWindow> ParentWindow;
 	UObject* LocalAsset = nullptr;
 	UObject* RemoteAsset = nullptr;
+
+	FString SelectedRowKey;
+	int32 SelectedRowNumber = -1;
 };
 
 

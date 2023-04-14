@@ -8,6 +8,16 @@ UUnrealDiffSupportClassFactory::UUnrealDiffSupportClassFactory()
 	
 }
 
+FSuppressableWarningDialog::FSetupInfo UUnrealDiffSupportClassFactory::GetDiffFailedDialogInfo()
+{
+	return FSuppressableWarningDialog::FSetupInfo(FText(), FText(), FString());
+}
+
+bool UUnrealDiffSupportClassFactory::CanDiff(UObject* InLocalAsset, UObject* InRemoteAsset)
+{
+	return true;
+}
+
 FName UUnrealDiffSupportClassFactory::GetSupportedClass()
 {
 	return SupportClassName;

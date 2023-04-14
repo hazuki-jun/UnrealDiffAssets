@@ -159,8 +159,8 @@ TSharedRef<SWidget> SUnrealDiffDetailSingleItemRow::MakeRowActionsMenu()
 				FUIAction(FExecuteAction::CreateRaw(this, &SUnrealDiffDetailSingleItemRow::OnMenuActionCopy)));
 	
 	if (!OwnerTreeNode.Pin()->GetDetailsView()->IsLocalAsset()
-		&& OwnerTreeNode.Pin()->HasAnyDifferenceRecurse())
-		//&& !OwnerTreeNode.Pin()->IsMapElement())
+		&& OwnerTreeNode.Pin()->HasAnyDifferenceRecurse()
+		&& !OwnerTreeNode.Pin()->IsMapElement())
 	{
 		MenuBuilder.AddMenuEntry(
 			LOCTEXT("DetailSingleItemRowActions_MergeRow", "Use This Change"),

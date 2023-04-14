@@ -8,6 +8,7 @@
 #include "Internationalization/StringTable.h"
 #include "Internationalization/StringTableCore.h"
 #include "StringTableWidgets/SUnrealDiffStringTableListView.h"
+#include "Utils/FUnrealDiffStringTableUtil.h"
 
 #define LOCTEXT_NAMESPACE "SDataTableVisualDiff"
 
@@ -65,8 +66,10 @@ void SStringTableVisualDiff::Construct(const FArguments& InArgs)
 	];
 }
 
-void SStringTableVisualDiff::OnRowSelected(bool bIsLocal, FString RowKey)
+void SStringTableVisualDiff::OnRowSelected(bool bIsLocal, FString RowKey, int32 RowNumber)
 {
+	SelectedRowKey = RowKey;
+	SelectedRowNumber = RowNumber;
 	Sync_HighlightRow(bIsLocal, RowKey);
 }
 
@@ -108,12 +111,43 @@ void SStringTableVisualDiff::InitSettings()
 
 void SStringTableVisualDiff::ToolbarAction_HighlightNextDifference()
 {
+	if (!StringTableListViewLocal.IsValid())
+	{
+		return;
+	}
+
+	TArray<TSharedPtr<FCachedStringTableEntry>>& Entries = StringTableListViewLocal->CachedStringTableEntries;
+	
+	for (int32 i = 0; i < Entries.Num(); ++i)
+	{
+		if (Entries[i]->RowNumber > SelectedRowNumber && Entries[i]->RowState != EUnrealVisualDiff::Normal)
+		{
+			OnRowSelected(true, Entries[i]->Key, Entries[i]->RowNumber);
+			OnRowSelected(false, Entries[i]->Key, Entries[i]->RowNumber);
+			break;
+		}
+	}
 	
 }
 
 void SStringTableVisualDiff::ToolbarAction_HighlightPrevDifference()
 {
+	if (!StringTableListViewLocal.IsValid())
+	{
+		return;
+	}
+
+	TArray<TSharedPtr<FCachedStringTableEntry>>& Entries = StringTableListViewLocal->CachedStringTableEntries;
 	
+	for (int32 i = Entries.Num() - 1; i >= 0; --i)
+	{
+		if (Entries[i]->RowNumber < SelectedRowNumber && Entries[i]->RowState != EUnrealVisualDiff::Normal)
+		{
+			OnRowSelected(true, Entries[i]->Key, Entries[i]->RowNumber);
+			OnRowSelected(false, Entries[i]->Key, Entries[i]->RowNumber);
+			break;
+		}
+	}
 }
 
 void SStringTableVisualDiff::ToolbarAction_Diff()
@@ -128,7 +162,8 @@ bool SStringTableVisualDiff::ToolbarAction_CanDiff()
 
 void SStringTableVisualDiff::ToolbarAction_Merge()
 {
-	
+	PerformMerge(SelectedRowKey);
+	RefreshLayout();
 }
 
 void SStringTableVisualDiff::RefreshLayout()
@@ -256,18 +291,28 @@ void SStringTableVisualDiff::GetStringTableData(bool bIsLocal, TArray<TSharedPtr
 
 void SStringTableVisualDiff::PerformMerge(const FString& RowKey)
 {
-	EUnrealVisualDiff::RowViewOption RowState = static_cast<EUnrealVisualDiff::RowViewOption>(GetRowState(true, RowKey));  
+	EUnrealVisualDiff::RowViewOption RowState = static_cast<EUnrealVisualDiff::RowViewOption>(GetRowState(false, RowKey));  
 	if (RowState == EUnrealVisualDiff::Removed)
 	{
-	
+		FUnrealDiffStringTableUtil::DeleteRow(GetStringTable(true), RowKey); 
 	}
 	else if (RowState == EUnrealVisualDiff::Added)
 	{
-		
+		auto StringTable = GetStringTableRef(false);
+		auto Entry = StringTable->FindEntry(RowKey);
+		if (Entry.IsValid())
+		{
+			FUnrealDiffStringTableUtil::AddRow(GetStringTable(true), RowKey, Entry->GetSourceString());
+		}
 	}
 	else if (RowState == EUnrealVisualDiff::Modify)
 	{
-		
+		auto StringTable = GetStringTableRef(false);
+		auto Entry = StringTable->FindEntry(RowKey);
+		if (Entry.IsValid())
+		{
+			FUnrealDiffStringTableUtil::ModifyRow(GetStringTable(true), RowKey, Entry->GetSourceString());
+		}
 	}
 }
 

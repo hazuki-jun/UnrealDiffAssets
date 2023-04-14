@@ -72,6 +72,11 @@ void SUnrealDiffStringTableListView::SetupRowsListSources()
 
 		return true;
 	});
+
+	for (int32 i = 0; i < CachedStringTableEntries.Num(); ++i)
+	{
+		CachedStringTableEntries[i]->RowNumber = i + 1;
+	}
 }
 
 void SUnrealDiffStringTableListView::HighlightRow(const FString& RowKey)
@@ -105,4 +110,4 @@ TSharedRef<ITableRow> SUnrealDiffStringTableListView::OnGenerateStringTableEntry
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-#undef  LOCTEXT_NAMESPACE
+#undef LOCTEXT_NAMESPACE

@@ -19,10 +19,9 @@ public:
 	void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& OwnerTableView, TSharedPtr<FCachedStringTableEntry> InCachedStringTableEntry, TSharedPtr<class SUnrealDiffStringTableListView> InStringTableListView);
 	
 	virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override;
-	
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-
+	
 	TSharedRef<SWidget> MakeRowActionsMenu();
 
 	void OnMenuActionCopyName();
