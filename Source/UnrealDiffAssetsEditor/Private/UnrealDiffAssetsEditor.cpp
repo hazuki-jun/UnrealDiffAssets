@@ -53,23 +53,6 @@ void FUnrealDiffAssetsEditorModule::BuildDiffAssetsMenu()
 		FSlateIcon(FEditorStyle::GetStyleSetName(), "SourceControl.Actions.Diff"),
 		FUIAction(FExecuteAction::CreateLambda([this](){ OnOptionDiffClicked(); })));
 #endif
-
-// #if ENGINE_MAJOR_VERSION == 5
-// 	FToolMenuEntry EntryUpdate = FToolMenuEntry::InitMenuEntry(
-// 		TEXT("Update"),
-// 		LOCTEXT("DiffAssetUpdateLable","Update"),
-// 		LOCTEXT("DiffAssetUpdate_ToolTip","Update"),
-// 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Refresh"),
-// 		FUIAction(FExecuteAction::CreateLambda([this](){ OnOptionUpdateClicked(); })));
-// 	
-// 	Section.AddEntry(EntryUpdate);
-// #else
-// 	Section.AddMenuEntry(TEXT("Update"),
-// 		LOCTEXT("DiffAssetUpdateLable","Update"),
-// 		LOCTEXT("DiffAssetUpdate_ToolTip","Update"),
-// 		FSlateIcon(FEditorStyle::GetStyleSetName(), "SourceControl.Actions.Refresh"),
-// 		FUIAction(FExecuteAction::CreateLambda([this](){ OnOptionUpdateClicked(); })));
-// #endif
 }
 
 void FUnrealDiffAssetsEditorModule::OnOptionDiffClicked()

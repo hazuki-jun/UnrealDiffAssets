@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Styling/SlateStyle.h"
 
-class FUnrealDiffWindowStyle
+class UNREALDIFFASSETSEDITOR_API FUnrealDiffWindowStyle
 {
 public:
 	static void Initialize();

@@ -24,6 +24,11 @@
       "Name": "UnrealDiffAssetsEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "UnrealDiffAssetsSourceControl",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
     }
   ]
 }
