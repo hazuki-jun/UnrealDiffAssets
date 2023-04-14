@@ -1,5 +1,6 @@
 ﻿#include "UnrealDiffAssetsSourceControl.h"
 
+#include "AssetViewUtils.h"
 #include "ISourceControlModule.h"
 #include "ISourceControlProvider.h"
 #include "SourceControlHelpers.h"
@@ -33,7 +34,7 @@ void FUnrealDiffAssetsSourceControlModule::BuildSourceControlMenu()
 		EUserInterfaceActionType::Button,
 		false,
 		FSlateIcon(FUnrealDiffWindowStyle::GetAppSlateIcon("SourceControl.StatusIcon.On"))
-		);
+	);
 }
 
 void FUnrealDiffAssetsSourceControlModule::FillSourceControlSubMenu(UToolMenu* Menu)
@@ -53,8 +54,9 @@ void FUnrealDiffAssetsSourceControlModule::OnMenuUpdateClicked()
 {
 	TArray<FString> PackageNames;
 	// GetSelectedPackageNames(PackageNames);
+	AssetViewUtils::SyncPackagesFromSourceControl(PackageNames);
 
-	ISourceControlModule::Get().GetProvider().Execute(ISourceControlOperation::Create<FUpdateStatus>(), SourceControlHelpers::PackageFilenames(PackageNames), EConcurrency::Asynchronous);
+	// ISourceControlModule::Get().GetProvider().Execute(ISourceControlOperation::Create<FUpdateStatus>(), SourceControlHelpers::PackageFilenames(PackageNames), EConcurrency::Asynchronous);
 }
 
 #undef LOCTEXT_NAMESPACE
