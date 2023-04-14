@@ -84,9 +84,9 @@ void SBlueprintVisualDiff::Construct(const FArguments& InArgs)
 		+SHorizontalBox::Slot()
 		.AutoWidth()
 		.Padding(MergeButtonMargin)
-		[
-			GraphToolbarBuilder.MakeWidget()
-		]
+		// [
+		// 	GraphToolbarBuilder.MakeWidget()
+		// ]
 		
 		// .Padding(FMargin(85.f, 45.0f, 0.0f, 0.f))
 		// [
@@ -199,8 +199,17 @@ void SBlueprintVisualDiff::AddFunctionGraph(UBlueprint* Blueprint, UEdGraph* Gra
 	NewGraph->GetNodesOfClass<UK2Node_FunctionEntry>(Entry);
 	if (ensure(Entry.Num() == 1))
 	{
-		// Discard category
-		Entry[0]->MetaData.Category = UEdGraphSchema_K2::VR_DefaultCategory;
+		TArray<UK2Node_FunctionEntry*> OldEntry;
+		Graph->GetNodesOfClass<UK2Node_FunctionEntry>(OldEntry);
+		if (OldEntry.Num() == 1)
+		{
+			// Discard category
+			Entry[0]->MetaData.Category = OldEntry[0]->MetaData.Category;
+		}
+		else
+		{
+			Entry[0]->MetaData.Category = UEdGraphSchema_K2::VR_DefaultCategory;
+		}
 
 		// Add necessary function flags
 		int32 AdditionalFunctionFlags = (FUNC_BlueprintEvent | FUNC_BlueprintCallable);
