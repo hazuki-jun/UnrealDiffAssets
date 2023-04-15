@@ -2,9 +2,8 @@
 
 ## 支持的资源类型
 
-1. Blueprint
-2. DataTable
-3. StringTable
+1. DataTable
+2. StringTable
 
 ## 使用
 
