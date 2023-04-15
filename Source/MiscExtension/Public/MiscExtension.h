@@ -13,7 +13,12 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-	void FillToolbar(FToolBarBuilder& ToolbarBuilder);
+	void OnEngineInit();
 	
+	void FillToolbar(FToolBarBuilder& ToolbarBuilder);
 	TSharedRef<FExtender> GetBlueprintToolExtender(const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects);
+	TSharedRef<SWidget> GenerateExtensionMenuContent();
+
+
+	TSharedPtr<class FUDATextPropertyExtension> TextPropertyExtensionPtr;
 };

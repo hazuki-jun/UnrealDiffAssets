@@ -7,12 +7,13 @@ public class MiscExtension : ModuleRules
 {
 	public MiscExtension(ReadOnlyTargetRules Target) : base(Target)
 	{
+		
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "Slate", "SlateCore",  "Projects", "Kismet", "ApplicationCore", "InputCore",
 			"ToolMenus", "MainFrame", "DesktopPlatform", "Blutility", "AssetTools", "ContentBrowser", "EditorStyle", "EditorSubsystem",
-			"GraphEditor", "UnrealEd", "BlueprintGraph", "DataTableEditor", "DeveloperSettings", "UMGEditor", "UMGEditor", "Kismet"
+			"GraphEditor", "UnrealEd", "BlueprintGraph", "DataTableEditor", "DeveloperSettings", "UMGEditor", "UMGEditor", "Kismet", "UnrealDiffAssetsEditor"
 		});
 		
 		string EngineDir = Path.GetFullPath(Target.RelativeEnginePath);
