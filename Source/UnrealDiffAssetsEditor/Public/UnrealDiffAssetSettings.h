@@ -45,4 +45,7 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category = StringTableDiff, DisplayName = "StringTableShowOnlyAdded")
 	bool StringTableVisualDiffShowOnlyAdded = true;
 	//~ End StringTableDiff Config
+
+	UPROPERTY(EditAnywhere, Config, Category = WidgetBlueprint)
+	TSoftObjectPtr<class UStringTable> DefaultGlobalStringTable;
 };

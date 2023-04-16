@@ -9,6 +9,8 @@ public:
 	static void Initialize();
 	static void Shutdown();
 	static const ISlateStyle& Get();
+
+	static FSlateIcon GetIcon(const FName IconName);
 	static FSlateIcon GetMyPluginIcon();
 	
 	static FName GetStyleSetName();

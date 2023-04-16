@@ -18,7 +18,7 @@ public class MiscExtension : ModuleRules
 		
 		string EngineDir = Path.GetFullPath(Target.RelativeEnginePath);
 		
-		// PrivateIncludePaths.AddRange(new string[] {Path.Combine(EngineDir, "Source/Editor/DataTableEditor/Private")});
+		PrivateIncludePaths.AddRange(new string[] {Path.Combine(EngineDir, "Source/Editor/UMGEditor/Private")});
 		// PrivateIncludePaths.AddRange(new string[] {Path.Combine(EngineDir, "Source/Editor/Kismet/Private")});
 		
 		// DynamicallyLoadedModuleNames.AddRange(

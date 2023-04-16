@@ -33,6 +33,11 @@ const ISlateStyle& FUnrealDiffWindowStyle::Get()
 	return *StyleInstance;
 }
 
+FSlateIcon FUnrealDiffWindowStyle::GetIcon(const FName IconName)
+{
+	return FSlateIcon(GetStyleSetName(), IconName);
+}
+
 FSlateIcon FUnrealDiffWindowStyle::GetMyPluginIcon()
 {
 	return FSlateIcon(GetStyleSetName(), "UnrealDiffAssets.PluginIcon");
@@ -88,6 +93,7 @@ TSharedRef<FSlateStyleSet> FUnrealDiffWindowStyle::Create()
 	Style->Set("UnrealDiffAssets.WindowBackground", new IMAGE_BRUSH(TEXT("Background"), Icon1920x1080));
 	Style->Set( "UnrealDiffAssets.ViewOptions",  new IMAGE_BRUSH("settings",  Icon16x16, FLinearColor::White));
 	Style->Set( "UnrealDiffAssets.PluginIcon",  new IMAGE_BRUSH("unreal_diff_icon",  Icon16x16, FLinearColor::White));
+	Style->Set( "UnrealDiffAssets.Apply",  new IMAGE_BRUSH("apply",  Icon16x16, FLinearColor::White));
 
 	return Style;
 }

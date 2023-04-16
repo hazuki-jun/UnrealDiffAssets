@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-struct FUnrealDiffDataTableUtil
+struct UNREALDIFFASSETSEDITOR_API FUnrealDiffDataTableUtil
 {
 	/**
 	 * @brief 导出DataTable指定行

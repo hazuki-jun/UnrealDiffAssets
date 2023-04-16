@@ -91,3 +91,59 @@ void UUnrealDiffSaveGame::Save(UUnrealDiffSaveGame* InSaveGame)
 {
 	UGameplayStatics::SaveGameToSlot(InSaveGame, SlotName, SlotIndex);
 }
+
+FString UUnrealDiffSaveGame::PropertyExtension_GetDefaultGlobalStringTable()
+{
+	const auto SaveGame = GetSaveGame();
+	if (!SaveGame)
+	{
+		return FString();
+	}
+
+	if (!SaveGame->DefaultGlobalStringTable.IsNull())
+	{
+		return SaveGame->DefaultGlobalStringTable.ToSoftObjectPath().ToString();
+	}
+
+	return FString();
+}
+
+void UUnrealDiffSaveGame::PropertyExtension_SetDefaultGlobalStringTable(TSoftObjectPtr<UStringTable> InDefaultGlobalStringTable)
+{
+	const auto SaveGame = GetSaveGame();
+	if (!SaveGame)
+	{
+		return;
+	}
+
+	SaveGame->DefaultGlobalStringTable = InDefaultGlobalStringTable;
+	Save(SaveGame);
+}
+
+void UUnrealDiffSaveGame::PropertyExtension_AddDefaultStringTable(const FName& BlueprintName, const FString& StringTablePath)
+{
+	const auto SaveGame = GetSaveGame();
+	if (!SaveGame)
+	{
+		return;
+	}
+
+	SaveGame->PropertyExtension_DefaultStringTables.Emplace(BlueprintName, StringTablePath);
+	Save(SaveGame);
+}
+
+FString UUnrealDiffSaveGame::PropertyExtension_GetDefaultStringTable(const FName& BlueprintName)
+{
+	const auto SaveGame = GetSaveGame();
+	if (!SaveGame)
+	{
+		return FString();
+	}
+
+	if (const auto Found = SaveGame->PropertyExtension_DefaultStringTables.Find(BlueprintName))
+	{
+		return *Found;
+	}
+
+	return FString();
+}

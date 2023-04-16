@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-struct FUnrealDiffStringTableUtil
+struct UNREALDIFFASSETSEDITOR_API FUnrealDiffStringTableUtil
 {
 public:
 	/**

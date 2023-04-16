@@ -3,6 +3,10 @@
 
 #include "UnrealDiffAssetSettings.h"
 
+#include "UnrealDiffSaveGame.h"
+#include "Blueprint/UserWidget.h"
+#include "Internationalization/StringTable.h"
+
 #define LOCTEXT_NAMESPACE "UUnrealDiffAssetSettings"
 
 UUnrealDiffAssetSettings::UUnrealDiffAssetSettings()
@@ -20,6 +24,13 @@ FText UUnrealDiffAssetSettings::GetSectionText() const
 void UUnrealDiffAssetSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (PropertyChangedEvent.Property->GetFName().IsEqual(TEXT("DefaultGlobalStringTable")))
+	{
+		UUnrealDiffSaveGame::PropertyExtension_SetDefaultGlobalStringTable(DefaultGlobalStringTable);
+		return;
+	}
+	
 	const FString FileName = FPaths::ProjectConfigDir() / FString(TEXT("DefaultUnrealDiffAssetSettings.ini"));
 	GConfig->Flush(true, FileName);
 }

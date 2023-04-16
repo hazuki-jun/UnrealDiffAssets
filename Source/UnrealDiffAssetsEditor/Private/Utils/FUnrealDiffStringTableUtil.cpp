@@ -12,6 +12,11 @@ void FUnrealDiffStringTableUtil::ModifyRow(UStringTable* StringTable, const FStr
 
 void FUnrealDiffStringTableUtil::AddRow(class UStringTable* StringTable, const FString& InKey, const FString& InSourceString)
 {
+	if (!StringTable || InKey.IsEmpty() || !InSourceString.IsEmpty())
+	{
+		return;
+	}
+	
 	if (StringTable)
 	{
 		const FScopedTransaction Transaction(LOCTEXT("SetStringTableEntry", "Set String Table Entry"));
@@ -22,6 +27,11 @@ void FUnrealDiffStringTableUtil::AddRow(class UStringTable* StringTable, const F
 
 void FUnrealDiffStringTableUtil::DeleteRow(UStringTable* StringTable, const FString& InKey)
 {
+	if (!StringTable || InKey.IsEmpty())
+	{
+		return;
+	}
+	
 	if (StringTable)
 	{
 		const FScopedTransaction Transaction(LOCTEXT("DeleteStringTableEntry", "Delete String Table Entry"));

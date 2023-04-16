@@ -12,13 +12,10 @@ public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-
+	
+protected:
 	void OnEngineInit();
 	
-	void FillToolbar(FToolBarBuilder& ToolbarBuilder);
-	TSharedRef<FExtender> GetBlueprintToolExtender(const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects);
-	TSharedRef<SWidget> GenerateExtensionMenuContent();
-
-
+protected:	
 	TSharedPtr<class FUDATextPropertyExtension> TextPropertyExtensionPtr;
 };
