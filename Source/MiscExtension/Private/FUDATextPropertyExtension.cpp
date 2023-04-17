@@ -11,6 +11,7 @@
 #include "Details/SWidgetDetailsView.h"
 #include "Interfaces/IMainFrameModule.h"
 #include "Internationalization/StringTable.h"
+#include "Internationalization/StringTableCore.h"
 #include "Utils/FUnrealDialogueMessage.h"
 #include "Utils/FUnrealDiffStringTableUtil.h"
 
@@ -31,6 +32,7 @@ namespace PropertyExtension\
 } \
 
 STEAL_PROPERTY(TWeakPtr<class FWidgetBlueprintEditor>, SWidgetDetailsView, BlueprintEditor)
+STEAL_PROPERTY(UWidgetBlueprint*, FWidgetBlueprintEditor, PreviewBlueprint)
 
 #define LOCTEXT_NAMESPACE "FUDATextPropertyExtension"
 
@@ -59,18 +61,18 @@ TSharedRef<FExtender> FUDATextPropertyExtension::GetBlueprintToolExtender(const 
 	
 	TSharedRef<FExtender> ToolbarExtender(new FExtender());
 	TSharedPtr<class FUICommandList> PluginCommands = MakeShareable(new FUICommandList);
-	ToolbarExtender->AddToolBarExtension("Debugging", EExtensionHook::After, PluginCommands, FToolBarExtensionDelegate::CreateRaw(this, &FUDATextPropertyExtension::FillToolbar));
+	ToolbarExtender->AddToolBarExtension("Debugging", EExtensionHook::After, PluginCommands, FToolBarExtensionDelegate::CreateRaw(this, &FUDATextPropertyExtension::FillToolbar, WidgetBlueprint->GetFName()));
 	
 	return ToolbarExtender;
 }
 
-void FUDATextPropertyExtension::FillToolbar(FToolBarBuilder& ToolbarBuilder)
+void FUDATextPropertyExtension::FillToolbar(FToolBarBuilder& ToolbarBuilder, FName BlueprintName)
 {
 	ToolbarBuilder.BeginSection("MiscExtension");
 	{
 		ToolbarBuilder.AddComboButton(
 			FUIAction(),
-			FOnGetContent::CreateRaw(this, &FUDATextPropertyExtension::OnGenerateToolbarMenu),
+			FOnGetContent::CreateRaw(this, &FUDATextPropertyExtension::OnGenerateToolbarMenu, BlueprintName),
 			LOCTEXT("MiscExtension_Label", "Misc Extension"),
 			FText::GetEmpty(),
 			FUnrealDiffWindowStyle::GetMyPluginIcon(),
@@ -80,38 +82,39 @@ void FUDATextPropertyExtension::FillToolbar(FToolBarBuilder& ToolbarBuilder)
 	ToolbarBuilder.EndSection();
 }
 
-TSharedRef<SWidget> FUDATextPropertyExtension::OnGenerateToolbarMenu()
+TSharedRef<SWidget> FUDATextPropertyExtension::OnGenerateToolbarMenu(FName BlueprintName)
 {
 	FMenuBuilder MenuBuilder(true, NULL);
 	MenuBuilder.AddMenuEntry(
 				LOCTEXT("PropertyExtensionAddSourceString_Label", "Add Source String"),
 				LOCTEXT("PropertyExtensionAddSourceString_Tooltip", "Add a source string to string table"),
 				FUnrealDiffWindowStyle::GetAppSlateIcon("Plus"),
-				FUIAction(FExecuteAction::CreateRaw(this, &FUDATextPropertyExtension::OnExtension_AddSourceString)));
+				FUIAction(FExecuteAction::CreateRaw(this, &FUDATextPropertyExtension::OnExtension_AddSourceString, BlueprintName)));
 
 	MenuBuilder.AddMenuEntry(
 			LOCTEXT("PropertyExtensionSetStringTable_Label", "Set String Table"),
 			LOCTEXT("PropertyExtensionSetStringTable_Tooltip", "Set a string table for this widget blueprint"),
 			FUnrealDiffWindowStyle::GetIcon("UnrealDiffAssets.ViewOptions"),
-			FUIAction(FExecuteAction::CreateRaw(this, &FUDATextPropertyExtension::OnExtension_SetStringTable)));
+			FUIAction(FExecuteAction::CreateRaw(this, &FUDATextPropertyExtension::OnExtension_SetStringTable, BlueprintName)));
 	
 	return MenuBuilder.MakeWidget();
 }
 
-void FUDATextPropertyExtension::OnExtension_AddSourceString()
+void FUDATextPropertyExtension::OnExtension_AddSourceString(FName BlueprintName)
 {
 	
 }
 
-void FUDATextPropertyExtension::OnExtension_SetStringTable()
+void FUDATextPropertyExtension::OnExtension_SetStringTable(FName BlueprintName)
 {
-	CreateSettingsWindow();
+	CreateSettingsWindow(BlueprintName);
 }
 
-void FUDATextPropertyExtension::CreateSettingsWindow()
+void FUDATextPropertyExtension::CreateSettingsWindow(FName BlueprintName)
 {
+	MyStringTableText = FText::FromString(UUnrealDiffSaveGame::PropertyExtension_GetDefaultStringTable(BlueprintName)); 
+	
 	FVector2D MousePos = FSlateApplication::Get().GetCursorPos();
-	
 	TSharedPtr<SWindow> Window =
 		SNew(SWindow)
 		.Title(FText::FromString(TEXT("Set String Table")))
@@ -154,7 +157,7 @@ void FUDATextPropertyExtension::CreateSettingsWindow()
 		.Padding(FMargin(5.f, 0.f, 2.f, 0.f))
 		[
 			SNew(SButton)
-			.OnClicked(this, &FUDATextPropertyExtension::OnUseAssetButtonClicked)
+			.OnClicked(this, &FUDATextPropertyExtension::OnUseAssetButtonClicked, BlueprintName)
 			[
 				SNew(SImage)
 				.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("Icons.Use"))
@@ -164,15 +167,17 @@ void FUDATextPropertyExtension::CreateSettingsWindow()
 	;
 }
 
-FReply FUDATextPropertyExtension::OnUseAssetButtonClicked()
+FReply FUDATextPropertyExtension::OnUseAssetButtonClicked(FName InBlueprintName)
 {
 	TArray<UObject*> SelectedAssets =  UEditorUtilityLibrary::GetSelectedAssets();
-	if (SelectedAssets.Num() <= 0)
+	if (SelectedAssets.Num() <= 0 || !SelectedAssets[0]->IsA(UStringTable::StaticClass()))
 	{
 		return FReply::Unhandled();	
 	}
 
+	UStringTable* StringTable = Cast<UStringTable>(SelectedAssets[0]);
 	MyStringTableText = FText::FromString(SelectedAssets[0]->GetFName().ToString());
+	UUnrealDiffSaveGame::PropertyExtension_AddDefaultStringTable(InBlueprintName, StringTable->GetStringTableId().ToString());
 	
 	return FReply::Unhandled();
 }
@@ -230,7 +235,9 @@ void FUDATextPropertyExtension::ApplySourceString()
 	{
 		return;
 	}
-
+	
+// LOCTABLE("/Game/UnrealDiffAsset/ST_B.ST_B", "ABC")
+	
 	FText Value;
 	PropertyHandle.Pin()->GetValue(Value);
 	if (Value.IsEmpty())
@@ -239,12 +246,30 @@ void FUDATextPropertyExtension::ApplySourceString()
 	}
 
 	auto StringTable = GetStringTable(StringTablePath);
-	FUnrealDiffStringTableUtil::AddRow(StringTable, IncrementStringTableSourceString(StringTable), Value.ToString());
+	FUnrealDiffStringTableUtil::AddRow(StringTable, IncrementStringTableSourceString(StringTable, BlueprintName), Value.ToString());
+
+	
+	// PropertyHandle.Pin()->SetValueFromFormattedString()
 }
 
-FString FUDATextPropertyExtension::IncrementStringTableSourceString(const UStringTable* InStringTable)
+FString FUDATextPropertyExtension::IncrementStringTableSourceString(const UStringTable* InStringTable, const FName& InBlueprintName)
 {
-	return FString();
+	if (!InStringTable)
+	{
+		return FString(); 
+	}
+
+	auto StringTableRef = InStringTable->GetStringTable();
+
+	TArray<FString> Keys;
+	
+	StringTableRef->EnumerateSourceStrings([&](const FString& InKey, const FString& InSourceString) -> bool
+	{
+		Keys.Add(InKey);
+		return true;
+	});
+
+	return InBlueprintName.ToString() + FString(TEXT("_")) + FString::FromInt(Keys.Num());
 }
 
 FName FUDATextPropertyExtension::GetActiveWidgetBlueprintName()
@@ -252,7 +277,8 @@ FName FUDATextPropertyExtension::GetActiveWidgetBlueprintName()
 	const auto WidgetPrintEditor = GetActiveWidgetBlueprintEditor();
 	if (WidgetPrintEditor.IsValid())
 	{
-		auto Preview  = WidgetPrintEditor.Pin()->GetPreview();
+		auto StolenPreviewBlueprint =  PropertyExtension::StealPreviewBlueprint();
+		auto Preview  = WidgetPrintEditor.Pin().Get()->*StolenPreviewBlueprint;
 		if (Preview)
 		{
 			return Preview->GetFName();

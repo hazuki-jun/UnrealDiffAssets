@@ -10,26 +10,26 @@ public:
 	/** 添加部菜单按钮 */
 	TSharedRef<FExtender> GetBlueprintToolExtender(const TSharedRef<FUICommandList> CommandList, const TArray<UObject*> ContextSensitiveObjects);
 
-	void FillToolbar(FToolBarBuilder& ToolbarBuilder);
+	void FillToolbar(FToolBarBuilder& ToolbarBuilder, FName BlueprintName);
 
-	TSharedRef<SWidget> OnGenerateToolbarMenu();
+	TSharedRef<SWidget> OnGenerateToolbarMenu(FName BlueprintName);
 
 	// 点击 AddSourceString
-	void OnExtension_AddSourceString();
+	void OnExtension_AddSourceString(FName BlueprintName);
 	
 	// 点击 SetStringTable 给此蓝图设置一个StringTable
-	void OnExtension_SetStringTable();
+	void OnExtension_SetStringTable(FName BlueprintName);
 	
-	void CreateSettingsWindow();
+	void CreateSettingsWindow(FName BlueprintName);
 
-	FReply OnUseAssetButtonClicked();
+	FReply OnUseAssetButtonClicked(FName InBlueprintName);
 	
 	// 在 FText Property 后添加Apply按钮
 	void RegisterAddSourceStringExtensionHandler(const FOnGenerateGlobalRowExtensionArgs& Args, TArray<FPropertyRowExtensionButton>& OutExtensionButtons);
 	
 	void ApplySourceString();
 	
-	FString IncrementStringTableSourceString(const class UStringTable* InStringTable);
+	FString IncrementStringTableSourceString(const class UStringTable* InStringTable, const FName& InBlueprintName);
 	
 	class UStringTable* GetStringTable(const FString& InStringTablePath);
 
