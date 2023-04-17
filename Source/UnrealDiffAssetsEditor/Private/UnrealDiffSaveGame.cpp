@@ -128,6 +128,12 @@ void UUnrealDiffSaveGame::PropertyExtension_AddDefaultStringTable(const FName& B
 		return;
 	}
 
+
+	if (BlueprintName.IsNone() || StringTablePath.IsEmpty())
+	{
+		return;
+	}
+	
 	SaveGame->PropertyExtension_DefaultStringTables.Emplace(BlueprintName, StringTablePath);
 	Save(SaveGame);
 }
@@ -140,6 +146,13 @@ FString UUnrealDiffSaveGame::PropertyExtension_GetDefaultStringTable(const FName
 		return FString();
 	}
 
+	if (BlueprintName.IsNone())
+	{
+		return FString();
+	}
+
+	SaveGame->PropertyExtension_DefaultStringTables.Remove(NAME_None);
+	
 	if (const auto Found = SaveGame->PropertyExtension_DefaultStringTables.Find(BlueprintName))
 	{
 		return *Found;

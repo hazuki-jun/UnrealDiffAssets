@@ -10,11 +10,11 @@ void FUnrealDiffStringTableUtil::ModifyRow(UStringTable* StringTable, const FStr
 	AddRow(StringTable, InKey, InSourceString);
 }
 
-void FUnrealDiffStringTableUtil::AddRow(class UStringTable* StringTable, const FString& InKey, const FString& InSourceString)
+bool FUnrealDiffStringTableUtil::AddRow(class UStringTable* StringTable, const FString& InKey, const FString& InSourceString)
 {
-	if (!StringTable || InKey.IsEmpty() || !InSourceString.IsEmpty())
+	if (!StringTable || InKey.IsEmpty() || InSourceString.IsEmpty())
 	{
-		return;
+		return false;
 	}
 	
 	if (StringTable)
@@ -23,6 +23,8 @@ void FUnrealDiffStringTableUtil::AddRow(class UStringTable* StringTable, const F
 		StringTable->Modify();
 		StringTable->GetMutableStringTable()->SetSourceString(InKey, InSourceString);
 	}
+
+	return true;
 }
 
 void FUnrealDiffStringTableUtil::DeleteRow(UStringTable* StringTable, const FString& InKey)

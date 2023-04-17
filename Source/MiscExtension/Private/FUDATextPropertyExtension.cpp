@@ -85,11 +85,11 @@ void FUDATextPropertyExtension::FillToolbar(FToolBarBuilder& ToolbarBuilder, FNa
 TSharedRef<SWidget> FUDATextPropertyExtension::OnGenerateToolbarMenu(FName BlueprintName)
 {
 	FMenuBuilder MenuBuilder(true, NULL);
-	MenuBuilder.AddMenuEntry(
-				LOCTEXT("PropertyExtensionAddSourceString_Label", "Add Source String"),
-				LOCTEXT("PropertyExtensionAddSourceString_Tooltip", "Add a source string to string table"),
-				FUnrealDiffWindowStyle::GetAppSlateIcon("Plus"),
-				FUIAction(FExecuteAction::CreateRaw(this, &FUDATextPropertyExtension::OnExtension_AddSourceString, BlueprintName)));
+	// MenuBuilder.AddMenuEntry(
+	// 			LOCTEXT("PropertyExtensionAddSourceString_Label", "Add Source String"),
+	// 			LOCTEXT("PropertyExtensionAddSourceString_Tooltip", "Add a source string to string table"),
+	// 			FUnrealDiffWindowStyle::GetAppSlateIcon("Plus"),
+	// 			FUIAction(FExecuteAction::CreateRaw(this, &FUDATextPropertyExtension::OnExtension_AddSourceString, BlueprintName)));
 
 	MenuBuilder.AddMenuEntry(
 			LOCTEXT("PropertyExtensionSetStringTable_Label", "Set String Table"),
@@ -235,8 +235,7 @@ void FUDATextPropertyExtension::ApplySourceString()
 	{
 		return;
 	}
-	
-// LOCTABLE("/Game/UnrealDiffAsset/ST_B.ST_B", "ABC")
+
 	
 	FText Value;
 	PropertyHandle.Pin()->GetValue(Value);
@@ -246,10 +245,12 @@ void FUDATextPropertyExtension::ApplySourceString()
 	}
 
 	auto StringTable = GetStringTable(StringTablePath);
-	FUnrealDiffStringTableUtil::AddRow(StringTable, IncrementStringTableSourceString(StringTable, BlueprintName), Value.ToString());
-
-	
-	// PropertyHandle.Pin()->SetValueFromFormattedString()
+	FString Key = IncrementStringTableSourceString(StringTable, BlueprintName);
+	if (FUnrealDiffStringTableUtil::AddRow(StringTable, Key, Value.ToString()))
+	{
+		FString FormattedString = FString::Format(TEXT("LOCTABLE(\"{0}\", \"{1}\")"), {StringTablePath, Key});
+		PropertyHandle.Pin()->SetValueFromFormattedString(FormattedString);	
+	}
 }
 
 FString FUDATextPropertyExtension::IncrementStringTableSourceString(const UStringTable* InStringTable, const FName& InBlueprintName)

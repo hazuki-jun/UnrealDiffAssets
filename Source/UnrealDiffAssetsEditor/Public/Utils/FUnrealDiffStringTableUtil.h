@@ -19,7 +19,7 @@ public:
 	 * @param InKey 
 	 * @param InSourceString 
 	 */
-	static void AddRow(class UStringTable* StringTable, const FString& InKey, const FString& InSourceString);
+	static bool AddRow(class UStringTable* StringTable, const FString& InKey, const FString& InSourceString);
 
 	/**
 	 * @brief 删除一行
