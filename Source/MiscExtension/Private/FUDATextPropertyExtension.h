@@ -29,7 +29,7 @@ public:
 	
 	void ApplySourceString();
 	
-	FString IncrementStringTableSourceString(const class UStringTable* InStringTable, const FName& InBlueprintName);
+	FString IncrementStringTableSourceString(const class UStringTable* InStringTable, const FName& InBlueprintName, const FString& InSourceString);
 	
 	class UStringTable* GetStringTable(const FString& InStringTablePath);
 
@@ -37,8 +37,10 @@ public:
 
 	FName GetActiveWidgetBlueprintName();
 	
+	class UWidgetBlueprint* GetActiveWidgetBlueprint();
+	
 	TWeakPtr<class FWidgetBlueprintEditor> GetActiveWidgetBlueprintEditor();
-
+	
 protected:
 	FText OnGetMyStringTableText() const;
 	

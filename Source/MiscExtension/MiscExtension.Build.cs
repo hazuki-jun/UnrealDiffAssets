@@ -11,7 +11,7 @@ public class MiscExtension : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "Slate", "SlateCore",  "Projects", "Kismet", "ApplicationCore", "InputCore",
+			"Core", "CoreUObject", "Engine", "Slate", "SlateCore",  "Projects", "Kismet", "ApplicationCore", "InputCore", "UMG",
 			"ToolMenus", "MainFrame", "DesktopPlatform", "Blutility", "AssetTools", "ContentBrowser", "EditorStyle", "EditorSubsystem",
 			"GraphEditor", "UnrealEd", "BlueprintGraph", "DataTableEditor", "DeveloperSettings", "UMGEditor", "UMGEditor", "Kismet", "UnrealDiffAssetsEditor"
 		});

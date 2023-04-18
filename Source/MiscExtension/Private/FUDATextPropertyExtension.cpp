@@ -3,15 +3,18 @@
 #include "BlueprintEditorModule.h"
 #include "EditorUtilityLibrary.h"
 #include "IDetailTreeNode.h"
+#include "ObjectEditorUtils.h"
 #include "Selection.h"
 #include "UnrealDiffSaveGame.h"
 #include "UnrealDiffWindowStyle.h"
 #include "WidgetBlueprint.h"
 #include "Async/Async.h"
+#include "Blueprint/WidgetTree.h"
 #include "Details/SWidgetDetailsView.h"
 #include "Interfaces/IMainFrameModule.h"
 #include "Internationalization/StringTable.h"
 #include "Internationalization/StringTableCore.h"
+#include "Kismet2/BlueprintEditorUtils.h"
 #include "Utils/FUnrealDialogueMessage.h"
 #include "Utils/FUnrealDiffStringTableUtil.h"
 
@@ -245,15 +248,36 @@ void FUDATextPropertyExtension::ApplySourceString()
 	}
 
 	auto StringTable = GetStringTable(StringTablePath);
-	FString Key = IncrementStringTableSourceString(StringTable, BlueprintName);
+	FString Key = IncrementStringTableSourceString(StringTable, BlueprintName, Value.ToString());
 	if (FUnrealDiffStringTableUtil::AddRow(StringTable, Key, Value.ToString()))
 	{
+		auto Editor = GetActiveWidgetBlueprintEditor();
+		if (!Editor.IsValid())
+		{
+			return;
+		}
+		
+		FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "PasteProperty", "Paste Property"));
 		FString FormattedString = FString::Format(TEXT("LOCTABLE(\"{0}\", \"{1}\")"), {StringTablePath, Key});
-		PropertyHandle.Pin()->SetValueFromFormattedString(FormattedString);	
+		PropertyHandle.Pin()->SetValueFromFormattedString(FormattedString, EPropertyValueSetFlags::InstanceObjects);
+		
+		const auto &SelectedWidgets = Editor.Pin()->GetSelectedWidgets();
+		for (const FWidgetReference& WidgetRef : SelectedWidgets)
+		{
+			UWidget* PreviewWidget = WidgetRef.GetPreview();
+			if (PreviewWidget)
+			{
+				FName PreviewWidgetName = PreviewWidget->GetFName();
+				auto Blueprint = GetActiveWidgetBlueprint();
+				UWidget* TemplateWidget = Blueprint->WidgetTree->FindWidget(PreviewWidgetName);
+				FObjectEditorUtils::MigratePropertyValue(PreviewWidget, TextProperty, TemplateWidget, TextProperty);
+				FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
+			}
+		}
 	}
 }
 
-FString FUDATextPropertyExtension::IncrementStringTableSourceString(const UStringTable* InStringTable, const FName& InBlueprintName)
+FString FUDATextPropertyExtension::IncrementStringTableSourceString(const UStringTable* InStringTable, const FName& InBlueprintName, const FString& InSourceString)
 {
 	if (!InStringTable)
 	{
@@ -263,30 +287,48 @@ FString FUDATextPropertyExtension::IncrementStringTableSourceString(const UStrin
 	auto StringTableRef = InStringTable->GetStringTable();
 
 	TArray<FString> Keys;
-	
-	StringTableRef->EnumerateSourceStrings([&](const FString& InKey, const FString& InSourceString) -> bool
+
+	FString FoundKey;
+	StringTableRef->EnumerateSourceStrings([&](const FString& InKey, const FString& SourceString) -> bool
 	{
+		if (SourceString.Equals(InSourceString))
+		{
+			FoundKey = InKey;
+		}
 		Keys.Add(InKey);
 		return true;
 	});
 
+	if (!FoundKey.IsEmpty())
+	{
+		return FoundKey; 
+	}
+	
 	return InBlueprintName.ToString() + FString(TEXT("_")) + FString::FromInt(Keys.Num());
 }
 
 FName FUDATextPropertyExtension::GetActiveWidgetBlueprintName()
+{
+	auto Preview  = GetActiveWidgetBlueprint();
+	if (Preview)
+	{
+		return Preview->GetFName();
+	}
+
+	return NAME_None;
+}
+
+UWidgetBlueprint* FUDATextPropertyExtension::GetActiveWidgetBlueprint()
 {
 	const auto WidgetPrintEditor = GetActiveWidgetBlueprintEditor();
 	if (WidgetPrintEditor.IsValid())
 	{
 		auto StolenPreviewBlueprint =  PropertyExtension::StealPreviewBlueprint();
 		auto Preview  = WidgetPrintEditor.Pin().Get()->*StolenPreviewBlueprint;
-		if (Preview)
-		{
-			return Preview->GetFName();
-		}
+		return Preview;
 	}
 
-	return NAME_None;
+	return nullptr;
 }
 
 TWeakPtr<FWidgetBlueprintEditor> FUDATextPropertyExtension::GetActiveWidgetBlueprintEditor()
