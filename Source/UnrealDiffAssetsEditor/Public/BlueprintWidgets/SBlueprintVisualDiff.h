@@ -4,9 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "SBlueprintDiff.h"
-#include "Widgets/SCompoundWidget.h"
-
-
 
 /**
  * 蓝图资源 对比 窗口
@@ -23,11 +20,11 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+	void ConstructSuper();
+	
+	void OnTreeItemSelected(TSharedPtr<FBlueprintDifferenceTreeEntry> InTreeItem, ESelectInfo::Type Type);
+	
 	virtual ~SBlueprintVisualDiff() override;
-	
-	UObject* LocalAsset = nullptr;
-	
-	UObject* RemoteAsse = nullptr;
 	
 	void OnActionMerge();
 
@@ -38,6 +35,25 @@ public:
 	void AddFunctionGraph(UBlueprint* Blueprint, class UEdGraph* Graph);
 
 	void RemoveFunctionGraph(UBlueprint* Blueprint, const FString& GraphPath);
+
+protected:
+	void GenerateDifferencesList();
+
+	/** Called when user clicks on a new graph list item */
+	void Internal_OnGraphSelectionChanged(TSharedPtr<struct FGraphToDiff> Item, ESelectInfo::Type SelectionType);
+
+	void Internal_CreateGraphEntry(UEdGraph* GraphOld, UEdGraph* GraphNew);
+	
+protected:
+	UObject* LocalAsset = nullptr;
+	
+	UObject* RemoteAsset = nullptr;
+
+	TSharedPtr<SWindow> ParentWindow;
+
+	FString SelectedGraphPath;
+
+	TArray<FBlueprintVisualCacheGraph> CachedGraphs;
 };
 
 

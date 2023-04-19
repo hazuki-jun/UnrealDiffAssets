@@ -18,7 +18,7 @@ public class UnrealDiffAssetsEditor : ModuleRules
 		PrivateIncludePaths.AddRange(new string[] {Path.Combine(EngineDir, "Source/Editor/DataTableEditor/Private")});
 		
 #if UE_5_0_OR_LATER
-        
+		PrivateIncludePaths.AddRange(new string[] {Path.Combine(EngineDir, "Source/Editor/Kismet/Private")});
 #else
 		
 		PrivateIncludePaths.AddRange(new string[] {Path.Combine(EngineDir, "Source/Editor/Kismet/Private")});
