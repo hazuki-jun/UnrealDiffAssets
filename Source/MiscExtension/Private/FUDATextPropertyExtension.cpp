@@ -4,7 +4,6 @@
 #include "EditorUtilityLibrary.h"
 #include "IDetailTreeNode.h"
 #include "ObjectEditorUtils.h"
-#include "Selection.h"
 #include "UnrealDiffSaveGame.h"
 #include "UnrealDiffWindowStyle.h"
 #include "WidgetBlueprint.h"
@@ -163,7 +162,11 @@ void FUDATextPropertyExtension::CreateSettingsWindow(FName BlueprintName)
 			.OnClicked(this, &FUDATextPropertyExtension::OnUseAssetButtonClicked, BlueprintName)
 			[
 				SNew(SImage)
+#if ENGINE_MAJOR_VERSION == 5
 				.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("Icons.Use"))
+#else
+				.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("PropertyWindow.Button_Use"))
+#endif
 			]
 		]
 	)
@@ -185,6 +188,46 @@ FReply FUDATextPropertyExtension::OnUseAssetButtonClicked(FName InBlueprintName)
 	return FReply::Unhandled();
 }
 
+#if ENGINE_MAJOR_VERSION == 4
+void FUDATextPropertyExtension::RegisterAddSourceStringExtensionHandler(const FOnGenerateGlobalRowExtensionArgs& InArgs, FOnGenerateGlobalRowExtensionArgs::EWidgetPosition InWidgetPosition, TArray<TSharedRef<SWidget>>& OutExtensions)
+{
+	if (InWidgetPosition != FOnGenerateGlobalRowExtensionArgs::EWidgetPosition::Right)
+	{
+		return;
+	}
+	
+	if (!InArgs.PropertyHandle)
+	{
+		return;
+	}
+
+	if (!CastField<FTextProperty>(InArgs.PropertyHandle->GetProperty()))
+	{
+		return;
+	}
+
+	CachedPropertyHandle.AddUnique(InArgs.PropertyHandle);
+	
+	TSharedRef<SWidget> OutWidget =
+		SNew(SButton)
+		.OnClicked(this, &FUDATextPropertyExtension::ApplySourceString_UE4, CachedPropertyHandle[CachedPropertyHandle.Num() - 1])
+		.ToolTipText(NSLOCTEXT("MiscExtension", "AddSourceStringToolTip", "Apply this source string to string table"))
+		[
+			SNew(SImage)
+			.Image(FUnrealDiffWindowStyle::Get().GetBrush("UnrealDiffAssets.Apply"))
+		];
+	
+	OutExtensions.Add(OutWidget);
+}
+
+FReply FUDATextPropertyExtension::ApplySourceString_UE4(TSharedPtr<IPropertyHandle> PropertyHandle)
+{
+	ApplySourceString(PropertyHandle);
+	return FReply::Unhandled();
+}
+#endif
+
+#if ENGINE_MAJOR_VERSION == 5
 void FUDATextPropertyExtension::RegisterAddSourceStringExtensionHandler(const FOnGenerateGlobalRowExtensionArgs& Args, TArray<FPropertyRowExtensionButton>& OutExtensionButtons)
 {
 	if (!Args.PropertyHandle)
@@ -197,16 +240,18 @@ void FUDATextPropertyExtension::RegisterAddSourceStringExtensionHandler(const FO
 		return;
 	}
 	
-	PropertyHandle = Args.PropertyHandle;
+	CachedPropertyHandle.AddUnique(InArgs.PropertyHandle);
+	
 	static FSlateIcon ApplyIcon(FUnrealDiffWindowStyle::GetIcon("UnrealDiffAssets.Apply"));
 	FPropertyRowExtensionButton& ApplyButton = OutExtensionButtons.AddDefaulted_GetRef();
 	ApplyButton.Icon = ApplyIcon;
 	ApplyButton.Label = NSLOCTEXT("MiscExtension", "AddSourceString", "Aplply Source String");
 	ApplyButton.ToolTip = NSLOCTEXT("MiscExtension", "AddSourceStringToolTip", "Apply this source string to string table");
-	ApplyButton.UIAction = FUIAction(FExecuteAction::CreateRaw(this, &FUDATextPropertyExtension::ApplySourceString));
+	ApplyButton.UIAction = FUIAction(FExecuteAction::CreateRaw(this, &FUDATextPropertyExtension::ApplySourceString, CachedPropertyHandle[CachedPropertyHandle.Num() - 1]));
 }
+#endif
 
-void FUDATextPropertyExtension::ApplySourceString()
+void FUDATextPropertyExtension::ApplySourceString(TSharedPtr<IPropertyHandle> PropertyHandle)
 {
 	auto BlueprintName = GetActiveWidgetBlueprintName();
 	
@@ -233,15 +278,14 @@ void FUDATextPropertyExtension::ApplySourceString()
 		return;
 	}
 
-	FTextProperty* TextProperty = CastField<FTextProperty>(PropertyHandle.Pin()->GetProperty());
+	FTextProperty* TextProperty = CastField<FTextProperty>(PropertyHandle->GetProperty());
 	if (!TextProperty)
 	{
 		return;
 	}
-
 	
 	FText Value;
-	PropertyHandle.Pin()->GetValue(Value);
+	PropertyHandle->GetValue(Value);
 	if (Value.IsEmpty())
 	{
 		return;
@@ -259,8 +303,11 @@ void FUDATextPropertyExtension::ApplySourceString()
 		
 		FScopedTransaction Transaction(NSLOCTEXT("UnrealEd", "PasteProperty", "Paste Property"));
 		FString FormattedString = FString::Format(TEXT("LOCTABLE(\"{0}\", \"{1}\")"), {StringTablePath, Key});
-		PropertyHandle.Pin()->SetValueFromFormattedString(FormattedString, EPropertyValueSetFlags::InstanceObjects);
-		
+#if ENGINE_MAJOR_VERSION == 5
+		PropertyHandle->SetValueFromFormattedString(FormattedString, EPropertyValueSetFlags::InstanceObjects);
+#else
+		PropertyHandle->SetValueFromFormattedString(FormattedString, EPropertyValueSetFlags::DefaultFlags);
+#endif
 		const auto &SelectedWidgets = Editor.Pin()->GetSelectedWidgets();
 		for (const FWidgetReference& WidgetRef : SelectedWidgets)
 		{
@@ -353,9 +400,5 @@ UStringTable* FUDATextPropertyExtension::GetStringTable(const FString& InStringT
 	return OutStringTable;
 }
 
-void FUDATextPropertyExtension::SetEditorObject(UObject* InEditorObject)
-{
-	EditorObject = InEditorObject;
-}
 
 #undef LOCTEXT_NAMESPACE

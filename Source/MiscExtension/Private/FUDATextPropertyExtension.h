@@ -23,17 +23,21 @@ public:
 	void CreateSettingsWindow(FName BlueprintName);
 
 	FReply OnUseAssetButtonClicked(FName InBlueprintName);
-	
+
+#if ENGINE_MAJOR_VERSION == 5 
 	// 在 FText Property 后添加Apply按钮
 	void RegisterAddSourceStringExtensionHandler(const FOnGenerateGlobalRowExtensionArgs& Args, TArray<FPropertyRowExtensionButton>& OutExtensionButtons);
+#else
+	void RegisterAddSourceStringExtensionHandler(const FOnGenerateGlobalRowExtensionArgs& InArgs, FOnGenerateGlobalRowExtensionArgs::EWidgetPosition InWidgetPosition, TArray<TSharedRef<class SWidget>>& OutExtensions);
+#endif
+
+	FReply ApplySourceString_UE4(TSharedPtr<IPropertyHandle> PropertyHandle);
 	
-	void ApplySourceString();
+	void ApplySourceString(TSharedPtr<IPropertyHandle> PropertyHandle);
 	
 	FString IncrementStringTableSourceString(const class UStringTable* InStringTable, const FName& InBlueprintName, const FString& InSourceString);
 	
 	class UStringTable* GetStringTable(const FString& InStringTablePath);
-
-	void SetEditorObject(UObject* InEditorObject);
 
 	FName GetActiveWidgetBlueprintName();
 	
@@ -43,12 +47,11 @@ public:
 	
 protected:
 	FText OnGetMyStringTableText() const;
+
+	TArray<TSharedPtr<IPropertyHandle>> CachedPropertyHandle;
 	
 protected:
 	FText MyStringTableText;
-	
-	TWeakObjectPtr<UObject> EditorObject;
-	TWeakPtr<IPropertyHandle> PropertyHandle;
 	FDelegateHandle OnGetGlobalRowExtensionHandle;
 };
 

@@ -39,7 +39,6 @@ public:
 	UPROPERTY()
 	TMap<FName, FUnrealDiffExpandedStruct> DataTableRowExpandedMap;
 
-	
 public:
 	static FString PropertyExtension_GetDefaultGlobalStringTable();
 	
@@ -52,6 +51,12 @@ public:
 	UPROPERTY()
 	TMap<FName, FString> PropertyExtension_DefaultStringTables;
 
+	UPROPERTY()
+	TMap<FName, FString> PropertyExtension_StringTableKeyPrefix;
+	
 	UPROPERTY(EditAnywhere, Category = WidgetBlueprint)
 	TSoftObjectPtr<class UStringTable> DefaultGlobalStringTable;
+
+	UPROPERTY(EditAnywhere, Category = WidgetBlueprint)
+	FString DefaultStringTableKeyPrefix;
 };
