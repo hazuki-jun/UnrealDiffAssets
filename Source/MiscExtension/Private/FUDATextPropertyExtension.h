@@ -24,14 +24,13 @@ public:
 
 	FReply OnUseAssetButtonClicked(FName InBlueprintName);
 
-#if ENGINE_MAJOR_VERSION == 5 
 	// 在 FText Property 后添加Apply按钮
+#if ENGINE_MAJOR_VERSION == 5 
 	void RegisterAddSourceStringExtensionHandler(const FOnGenerateGlobalRowExtensionArgs& Args, TArray<FPropertyRowExtensionButton>& OutExtensionButtons);
 #else
+	FReply ApplySourceString_UE4(TSharedPtr<IPropertyHandle> PropertyHandle);
 	void RegisterAddSourceStringExtensionHandler(const FOnGenerateGlobalRowExtensionArgs& InArgs, FOnGenerateGlobalRowExtensionArgs::EWidgetPosition InWidgetPosition, TArray<TSharedRef<class SWidget>>& OutExtensions);
 #endif
-
-	FReply ApplySourceString_UE4(TSharedPtr<IPropertyHandle> PropertyHandle);
 	
 	void ApplySourceString(TSharedPtr<IPropertyHandle> PropertyHandle);
 	
@@ -52,6 +51,7 @@ protected:
 	
 protected:
 	FText MyStringTableText;
+	
 	FDelegateHandle OnGetGlobalRowExtensionHandle;
 };
 

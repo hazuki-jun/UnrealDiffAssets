@@ -30,6 +30,10 @@ void UUnrealDiffAssetSettings::PostEditChangeProperty(FPropertyChangedEvent& Pro
 		UUnrealDiffSaveGame::PropertyExtension_SetDefaultGlobalStringTable(DefaultGlobalStringTable);
 		return;
 	}
+	else if (PropertyChangedEvent.Property->GetFName().IsEqual(TEXT("DefaultStringTableKeyPrefix")))
+	{
+		UUnrealDiffSaveGame::PropertyExtension_SetDefaultGlobalStringTable(DefaultGlobalStringTable);
+	}
 	
 	const FString FileName = FPaths::ProjectConfigDir() / FString(TEXT("DefaultUnrealDiffAssetSettings.ini"));
 	GConfig->Flush(true, FileName);

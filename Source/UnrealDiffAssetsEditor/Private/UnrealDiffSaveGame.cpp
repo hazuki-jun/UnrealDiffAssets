@@ -92,6 +92,58 @@ void UUnrealDiffSaveGame::Save(UUnrealDiffSaveGame* InSaveGame)
 	UGameplayStatics::SaveGameToSlot(InSaveGame, SlotName, SlotIndex);
 }
 
+void UUnrealDiffSaveGame::PropertyExtension_AddBlueprintStringTableKeyPrefix(const FName& InBlueprintName, const FString& InPrefix)
+{
+	if (InBlueprintName.IsNone() || InPrefix.IsEmpty())
+	{
+		return;
+	}
+	
+	auto SaveGame = GetSaveGame();
+	if (!SaveGame)
+	{
+		return;	
+	}
+
+	SaveGame->PropertyExtension_StringTableKeyPrefix.Emplace(InBlueprintName, InPrefix);
+	Save(SaveGame);
+}
+
+FString UUnrealDiffSaveGame::PropertyExtension_GetBlueprintStringTableKeyPrefix(const FName& InBlueprintName)
+{
+	if (InBlueprintName.IsNone())
+	{
+		return FString();
+	}
+
+	const auto SaveGame = GetSaveGame();
+	if (!SaveGame)
+	{
+		return FString();
+	}
+
+	if (const auto Prefix = SaveGame->PropertyExtension_StringTableKeyPrefix.Find(InBlueprintName))
+	{
+		return *Prefix;
+	}
+	else
+	{
+		return SaveGame->DefaultGlobalStringTableKeyPrefix;
+	}
+}
+
+void UUnrealDiffSaveGame::PropertyExtension_SetDefaultGlobalStringTableKeyPrefix(const FString& InPrefix)
+{
+	const auto SaveGame = GetSaveGame();
+	if (!SaveGame)
+	{
+		return;
+	}
+
+	SaveGame->DefaultGlobalStringTableKeyPrefix = InPrefix;
+	Save(SaveGame);
+}
+
 FString UUnrealDiffSaveGame::PropertyExtension_GetDefaultGlobalStringTable()
 {
 	const auto SaveGame = GetSaveGame();
@@ -120,7 +172,7 @@ void UUnrealDiffSaveGame::PropertyExtension_SetDefaultGlobalStringTable(TSoftObj
 	Save(SaveGame);
 }
 
-void UUnrealDiffSaveGame::PropertyExtension_AddDefaultStringTable(const FName& BlueprintName, const FString& StringTablePath)
+void UUnrealDiffSaveGame::PropertyExtension_AddStringTable(const FName& BlueprintName, const FString& StringTablePath)
 {
 	const auto SaveGame = GetSaveGame();
 	if (!SaveGame)
@@ -138,7 +190,7 @@ void UUnrealDiffSaveGame::PropertyExtension_AddDefaultStringTable(const FName& B
 	Save(SaveGame);
 }
 
-FString UUnrealDiffSaveGame::PropertyExtension_GetDefaultStringTable(const FName& BlueprintName)
+FString UUnrealDiffSaveGame::PropertyExtension_GetStringTable(const FName& BlueprintName)
 {
 	const auto SaveGame = GetSaveGame();
 	if (!SaveGame)

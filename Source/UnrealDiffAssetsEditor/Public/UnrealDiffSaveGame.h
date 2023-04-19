@@ -40,23 +40,30 @@ public:
 	TMap<FName, FUnrealDiffExpandedStruct> DataTableRowExpandedMap;
 
 public:
-	static FString PropertyExtension_GetDefaultGlobalStringTable();
+	static void PropertyExtension_AddBlueprintStringTableKeyPrefix(const FName& InBlueprintName, const FString& InPrefix);
 	
-	static void PropertyExtension_SetDefaultGlobalStringTable(TSoftObjectPtr<class UStringTable> InDefaultGlobalStringTable);
-	
-	static void PropertyExtension_AddDefaultStringTable(const FName& BlueprintName, const FString& StringTablePath);
-	
-	static FString PropertyExtension_GetDefaultStringTable(const FName& BlueprintName);
-	
-	UPROPERTY()
-	TMap<FName, FString> PropertyExtension_DefaultStringTables;
+	static FString PropertyExtension_GetBlueprintStringTableKeyPrefix(const FName& InBlueprintName);
+
+	void PropertyExtension_SetDefaultGlobalStringTableKeyPrefix(const FString& InPrefix);
 
 	UPROPERTY()
 	TMap<FName, FString> PropertyExtension_StringTableKeyPrefix;
 	
 	UPROPERTY(EditAnywhere, Category = WidgetBlueprint)
-	TSoftObjectPtr<class UStringTable> DefaultGlobalStringTable;
+	FString DefaultGlobalStringTableKeyPrefix = TEXT("DefaultKey");
+	
+public:
+	static FString PropertyExtension_GetDefaultGlobalStringTable();
+	
+	static void PropertyExtension_SetDefaultGlobalStringTable(TSoftObjectPtr<class UStringTable> InDefaultGlobalStringTable);
+	
+	static void PropertyExtension_AddStringTable(const FName& BlueprintName, const FString& StringTablePath);
+	
+	static FString PropertyExtension_GetStringTable(const FName& BlueprintName);
 
+	UPROPERTY()
+	TMap<FName, FString> PropertyExtension_DefaultStringTables;
+	
 	UPROPERTY(EditAnywhere, Category = WidgetBlueprint)
-	FString DefaultStringTableKeyPrefix;
+	TSoftObjectPtr<class UStringTable> DefaultGlobalStringTable;
 };

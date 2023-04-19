@@ -46,6 +46,11 @@ public:
 	bool StringTableVisualDiffShowOnlyAdded = true;
 	//~ End StringTableDiff Config
 
+	/** 默认 StringTable 界面蓝图未设置时会使用此张表 */
 	UPROPERTY(EditAnywhere, Config, Category = WidgetBlueprint)
 	TSoftObjectPtr<class UStringTable> DefaultGlobalStringTable;
+
+	/** 默认 StringTable的Key 前缀 界面蓝图未设置时会使用前缀 */
+	UPROPERTY(EditAnywhere, Config, Category = WidgetBlueprint)
+	FString DefaultGlobalStringTableKeyPrefix = TEXT("DefaultKey");
 };

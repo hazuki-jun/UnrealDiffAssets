@@ -114,13 +114,13 @@ void FUDATextPropertyExtension::OnExtension_SetStringTable(FName BlueprintName)
 
 void FUDATextPropertyExtension::CreateSettingsWindow(FName BlueprintName)
 {
-	MyStringTableText = FText::FromString(UUnrealDiffSaveGame::PropertyExtension_GetDefaultStringTable(BlueprintName)); 
+	MyStringTableText = FText::FromString(UUnrealDiffSaveGame::PropertyExtension_GetStringTable(BlueprintName)); 
 	
 	FVector2D MousePos = FSlateApplication::Get().GetCursorPos();
 	TSharedPtr<SWindow> Window =
 		SNew(SWindow)
 		.Title(FText::FromString(TEXT("Set String Table")))
-		.ClientSize(FVector2D(200.f,30.f))
+		.ClientSize(FVector2D(200.f,60.f))
 		.SupportsMaximize(false)
 		.SupportsMinimize(false)
 	;
@@ -139,34 +139,74 @@ void FUDATextPropertyExtension::CreateSettingsWindow(FName BlueprintName)
 	}
 
 	Window->SetContent(
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
-		.VAlign(VAlign_Center)
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.VAlign(VAlign_Fill)
+		.AutoHeight()
 		[
-			SNew(SBox)
-			.WidthOverride(80.f)
-			.HeightOverride(20.f)
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
 			[
-				SNew(SEditableTextBox)
-				.Text(this, &FUDATextPropertyExtension::OnGetMyStringTableText)
-				.IsReadOnly(true)
+				SNew(SBox)
+				.WidthOverride(80.f)
+				.HeightOverride(20.f)
+				[
+					SNew(SEditableTextBox)
+					.Text(this, &FUDATextPropertyExtension::OnGetMyStringTableText)
+					.IsReadOnly(true)
+				]
+			]
+			
+			+ SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			.AutoWidth()
+			.Padding(FMargin(5.f, 0.f, 2.f, 0.f))
+			[
+				SNew(SButton)
+				.OnClicked(this, &FUDATextPropertyExtension::OnUseAssetButtonClicked, BlueprintName)
+				[
+					SNew(SImage)
+	#if ENGINE_MAJOR_VERSION == 5
+					.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("Icons.Use"))
+	#else
+					.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("PropertyWindow.Button_Use"))
+	#endif
+				]
 			]
 		]
 		
-		+ SHorizontalBox::Slot()
-		.VAlign(VAlign_Center)
-		.AutoWidth()
-		.Padding(FMargin(5.f, 0.f, 2.f, 0.f))
+		// Prefix Setting
+		+ SVerticalBox::Slot()
+		.VAlign(VAlign_Fill)
+		.HAlign(HAlign_Fill)
+		.AutoHeight()
 		[
-			SNew(SButton)
-			.OnClicked(this, &FUDATextPropertyExtension::OnUseAssetButtonClicked, BlueprintName)
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			.AutoWidth()
+			.Padding(FMargin(2.f, 3.f, 2.f, 0.f))
 			[
-				SNew(SImage)
-#if ENGINE_MAJOR_VERSION == 5
-				.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("Icons.Use"))
-#else
-				.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("PropertyWindow.Button_Use"))
-#endif
+				SNew(STextBlock)
+				.Text(LOCTEXT("MiscExtension", "Prefix:"))
+				.Font(FCoreStyle::GetDefaultFontStyle("Regular", 10))
+			]
+
+			+ SHorizontalBox::Slot()
+			.VAlign(VAlign_Center)
+			.Padding(FMargin(3.f, 3.f, 1.f, 0.f))
+			[
+				SNew(SEditableTextBox)
+				.Justification(ETextJustify::Center)
+				.Text(FText::FromString(UUnrealDiffSaveGame::PropertyExtension_GetBlueprintStringTableKeyPrefix(BlueprintName)))
+				.OnTextCommitted_Lambda([this, BlueprintName](const FText& InText, ETextCommit::Type InTextCommit)
+				{
+					if (!InText.IsEmptyOrWhitespace())
+					{
+						UUnrealDiffSaveGame::PropertyExtension_AddBlueprintStringTableKeyPrefix(BlueprintName, InText.ToString());
+					}
+				})
 			]
 		]
 	)
@@ -183,7 +223,7 @@ FReply FUDATextPropertyExtension::OnUseAssetButtonClicked(FName InBlueprintName)
 
 	UStringTable* StringTable = Cast<UStringTable>(SelectedAssets[0]);
 	MyStringTableText = FText::FromString(SelectedAssets[0]->GetFName().ToString());
-	UUnrealDiffSaveGame::PropertyExtension_AddDefaultStringTable(InBlueprintName, StringTable->GetStringTableId().ToString());
+	UUnrealDiffSaveGame::PropertyExtension_AddStringTable(InBlueprintName, StringTable->GetStringTableId().ToString());
 	
 	return FReply::Unhandled();
 }
@@ -240,8 +280,7 @@ void FUDATextPropertyExtension::RegisterAddSourceStringExtensionHandler(const FO
 		return;
 	}
 	
-	CachedPropertyHandle.AddUnique(InArgs.PropertyHandle);
-	
+	CachedPropertyHandle.AddUnique(Args.PropertyHandle);
 	static FSlateIcon ApplyIcon(FUnrealDiffWindowStyle::GetIcon("UnrealDiffAssets.Apply"));
 	FPropertyRowExtensionButton& ApplyButton = OutExtensionButtons.AddDefaulted_GetRef();
 	ApplyButton.Icon = ApplyIcon;
@@ -255,7 +294,7 @@ void FUDATextPropertyExtension::ApplySourceString(TSharedPtr<IPropertyHandle> Pr
 {
 	auto BlueprintName = GetActiveWidgetBlueprintName();
 	
-	FString StringTablePath = UUnrealDiffSaveGame::PropertyExtension_GetDefaultStringTable(BlueprintName);
+	FString StringTablePath = UUnrealDiffSaveGame::PropertyExtension_GetStringTable(BlueprintName);
 	if (StringTablePath.IsEmpty())
 	{
 		// 此蓝图的StringTable未设置
@@ -335,6 +374,12 @@ FString FUDATextPropertyExtension::IncrementStringTableSourceString(const UStrin
 
 	TArray<FString> Keys;
 
+	FString Prefix = UUnrealDiffSaveGame::PropertyExtension_GetBlueprintStringTableKeyPrefix(InBlueprintName);
+	if (Prefix.IsEmpty())
+	{
+		return Prefix;
+	}
+	
 	FString FoundKey;
 	StringTableRef->EnumerateSourceStrings([&](const FString& InKey, const FString& SourceString) -> bool
 	{
@@ -351,7 +396,7 @@ FString FUDATextPropertyExtension::IncrementStringTableSourceString(const UStrin
 		return FoundKey; 
 	}
 	
-	return InBlueprintName.ToString() + FString(TEXT("_")) + FString::FromInt(Keys.Num());
+	return Prefix + FString(TEXT("_")) + FString::FromInt(Keys.Num());
 }
 
 FName FUDATextPropertyExtension::GetActiveWidgetBlueprintName()
