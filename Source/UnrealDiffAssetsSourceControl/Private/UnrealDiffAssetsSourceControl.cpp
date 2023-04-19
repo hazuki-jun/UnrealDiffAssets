@@ -12,7 +12,7 @@
 
 void FUnrealDiffAssetsSourceControlModule::StartupModule()
 {
-	BuildSourceControlMenu();
+	// BuildSourceControlMenu();
 }
 
 void FUnrealDiffAssetsSourceControlModule::ShutdownModule()
