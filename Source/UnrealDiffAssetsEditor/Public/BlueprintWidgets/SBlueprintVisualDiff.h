@@ -25,6 +25,8 @@ public:
 	void OnTreeItemSelected(TSharedPtr<FBlueprintDifferenceTreeEntry> InTreeItem, ESelectInfo::Type Type);
 	
 	virtual ~SBlueprintVisualDiff() override;
+
+	FReply OnMergeClicked();
 	
 	void OnActionMerge();
 
@@ -34,14 +36,18 @@ public:
 	
 	void AddFunctionGraph(UBlueprint* Blueprint, class UEdGraph* Graph);
 
-	void RemoveFunctionGraph(UBlueprint* Blueprint, const FString& GraphPath);
+	void RemoveFunctionGraph(UBlueprint* Blueprint, class UEdGraph* InGraph);
 
+	EVisibility GetMergeButtonVisibility() const;
+	
 protected:
-	void GenerateDifferencesList();
+	void Internal_GenerateDifferencesList();
 
 	/** Called when user clicks on a new graph list item */
 	void Internal_OnGraphSelectionChanged(TSharedPtr<struct FGraphToDiff> Item, ESelectInfo::Type SelectionType);
 
+	void Internal_OnDiffListSelectionChanged(TSharedPtr<struct FDiffResultItem> TheDiff);
+	
 	void Internal_CreateGraphEntry(UEdGraph* GraphOld, UEdGraph* GraphNew);
 	
 protected:
@@ -53,8 +59,10 @@ protected:
 
 	FString SelectedGraphPath;
 
-	TArray<FBlueprintVisualCacheGraph> CachedGraphs;
+	EVisibility MergeButtonVisibility = EVisibility::Collapsed;
 };
+
+
 
 
 
