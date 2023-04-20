@@ -4,7 +4,7 @@
 
 1. DataTable
 2. StringTable
-3.Blueprint(仅支持合并函数)
+3. Blueprint(仅支持合并函数)
 
 ## 使用
 
