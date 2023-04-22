@@ -243,6 +243,8 @@ void SBlueprintVisualDiff::ConstructSuper()
 			]	
 		];
 
+	const FButtonStyle& ButtonStyle = FUnrealDiffWindowStyle::GetAppStyle().GetWidgetStyle<FButtonStyle>("SimpleButton");
+	
 	this->ChildSlot
 		[
 			SNew(SBorder)
@@ -269,31 +271,35 @@ void SBlueprintVisualDiff::ConstructSuper()
 					[
 						SNew(SHorizontalBox)
 						+ SHorizontalBox::Slot()
-						.Padding(4.f)
+						.Padding(0.f)
 						.AutoWidth()
 						[
 							NavToolBarBuilder.MakeWidget()
 						]
 						+ SHorizontalBox::Slot()
 						.AutoWidth()
+						.Padding(FMargin(1.f, 0.f, 0.f, 0.f))
 						[
 							SNew(SButton)
+							.ContentPadding(0.f)
 							.Visibility(this, &SBlueprintVisualDiff::GetMergeButtonVisibility)
-							.ToolTipText(LOCTEXT("UseSelectedDifferenceFromRemote", "Use selected difference function from remote"))
-							.ButtonStyle(&FUnrealDiffWindowStyle::GetAppStyle().GetWidgetStyle<FButtonStyle>("Button"))
+							.ToolTipText(LOCTEXT("UseSelectedDifferenceFromRemote", "Use remote diffs"))
+							.ButtonStyle(&ButtonStyle)
 							.OnClicked(this, &SBlueprintVisualDiff::OnMergeClicked)
 							[
 								SNew(SVerticalBox)
 								+ SVerticalBox::Slot()
 								.HAlign(HAlign_Center)
 								.VAlign(VAlign_Center)
+								.Padding(FMargin(0.f, 0.f, 0.f, 0.f))
 								[
 									SNew(SImage)
 									.Image(FUnrealDiffWindowStyle::GetAppSlateBrush("ContentReference.UseSelectionFromContentBrowser"))
 								]
 								+ SVerticalBox::Slot()
-								.HAlign(HAlign_Fill)
+								.HAlign(HAlign_Center)
 								.VAlign(VAlign_Bottom)
+								.Padding(FMargin(0.f, 0.f, 0.f, 0.f))
 								[
 									SNew(STextBlock)
 									.Font(FCoreStyle::GetDefaultFontStyle("Regular", 10))
@@ -331,8 +337,18 @@ void SBlueprintVisualDiff::ConstructSuper()
 	SetCurrentMode(NS_BlueprintVisualDiff::MyBlueprintMode);
 
 	// Bind to blueprint changed events as they may be real in memory blueprints that will be modified
-	const_cast<UBlueprint*>(PanelNew.Blueprint)->OnChanged().AddSP(this, &SBlueprintDiff::OnBlueprintChanged);
-	const_cast<UBlueprint*>(PanelOld.Blueprint)->OnChanged().AddSP(this, &SBlueprintDiff::OnBlueprintChanged);
+	const_cast<UBlueprint*>(PanelNew.Blueprint)->OnChanged().AddSP(this, &SBlueprintVisualDiff::Internal_OnBlueprintChanged);
+	const_cast<UBlueprint*>(PanelOld.Blueprint)->OnChanged().AddSP(this, &SBlueprintVisualDiff::Internal_OnBlueprintChanged);
+}
+
+void SBlueprintVisualDiff::Internal_OnBlueprintChanged(UBlueprint* InBlueprint)
+{
+	if (InBlueprint == PanelOld.Blueprint || InBlueprint == PanelNew.Blueprint)
+	{
+		// After a BP has changed significantly, we need to regenerate the UI and set back to initial UI to avoid crashes
+		Internal_GenerateDifferencesList();
+		SetCurrentMode(NS_BlueprintVisualDiff::MyBlueprintMode);
+	}
 }
 
 void SBlueprintVisualDiff::OnTreeItemSelected(TSharedPtr<FBlueprintDifferenceTreeEntry> InTreeItem, ESelectInfo::Type Type)
@@ -373,18 +389,13 @@ void SBlueprintVisualDiff::OnActionMerge()
 			break;
 		}
 	}
-
-	if (!DiffResults)
-	{
-		return;
-	}
 	
 	PerformMerge(DiffResults, GraphOld, GraphNew);
 }
 
 void SBlueprintVisualDiff::PerformMerge(TSharedPtr<TArray<FDiffSingleResult>> DiffResults, UEdGraph* LocalGraph, UEdGraph* RemoteGraph)
 {
-	if (!DiffResults)
+	if (!DiffResults || DiffResults->IsEmpty())
 	{
 		return;
 	}

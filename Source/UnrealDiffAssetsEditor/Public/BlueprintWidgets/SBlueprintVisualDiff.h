@@ -21,6 +21,9 @@ public:
 	void Construct(const FArguments& InArgs);
 
 	void ConstructSuper();
+
+	/** Called when blueprint is modified */
+	void Internal_OnBlueprintChanged(UBlueprint* InBlueprint);
 	
 	void OnTreeItemSelected(TSharedPtr<FBlueprintDifferenceTreeEntry> InTreeItem, ESelectInfo::Type Type);
 	
@@ -42,7 +45,7 @@ public:
 	
 protected:
 	void Internal_GenerateDifferencesList();
-
+	
 	/** Called when user clicks on a new graph list item */
 	void Internal_OnGraphSelectionChanged(TSharedPtr<struct FGraphToDiff> Item, ESelectInfo::Type SelectionType);
 
