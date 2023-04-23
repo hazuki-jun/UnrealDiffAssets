@@ -445,10 +445,14 @@ void SBlueprintVisualDiff::MergeFunctionGraph(UBlueprint* Blueprint, UEdGraph* L
 
 void SBlueprintVisualDiff::AddFunctionGraph(UBlueprint* Blueprint, UEdGraph* Graph)
 {
+	// 原来的粘贴板的内容
+	FString SavedClipboard;
+	FPlatformApplicationMisc::ClipboardPaste(SavedClipboard);
+
+	// 复制函数
 	FString OutputString;
 	FUnrealDiffClipboardData ClipboardData(Graph);
 	ClipboardData.StaticStruct()->ExportText(OutputString, &ClipboardData, &ClipboardData, nullptr, 0, nullptr, false);
-
 	if (!OutputString.IsEmpty())
 	{
 		OutputString = ::GRAPH_PREFIX + OutputString;;
@@ -456,6 +460,7 @@ void SBlueprintVisualDiff::AddFunctionGraph(UBlueprint* Blueprint, UEdGraph* Gra
 		FPlatformApplicationMisc::ClipboardCopy(OutputString.GetCharArray().GetData());
 	}
 
+	// 粘贴函数
 	FUnrealDiffClipboardData FuncData;
 	FStringOutputDevice Errors;
 	FString ClipboardText;
@@ -498,6 +503,9 @@ void SBlueprintVisualDiff::AddFunctionGraph(UBlueprint* Blueprint, UEdGraph* Gra
 	}
 	
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
+
+	// 还原粘贴板
+	FPlatformApplicationMisc::ClipboardCopy(SavedClipboard.GetCharArray().GetData());
 }
 
 void SBlueprintVisualDiff::RemoveFunctionGraph(UBlueprint* Blueprint, class UEdGraph* InGraph)
