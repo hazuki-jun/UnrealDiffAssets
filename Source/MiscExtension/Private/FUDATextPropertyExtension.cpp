@@ -14,6 +14,7 @@
 #include "Internationalization/StringTable.h"
 #include "Internationalization/StringTableCore.h"
 #include "Kismet2/BlueprintEditorUtils.h"
+#include "UObject/UnrealTypePrivate.h"
 #include "Utils/FUnrealDialogueMessage.h"
 #include "Utils/FUnrealDiffStringTableUtil.h"
 
@@ -276,6 +277,12 @@ void FUDATextPropertyExtension::RegisterAddSourceStringExtensionHandler(const FO
 	}
 
 	if (!CastField<FTextProperty>(Args.PropertyHandle->GetProperty()))
+	{
+		return;
+	}
+
+	auto OwnerObject = Args.PropertyHandle.Get()->GetProperty()->GetOwnerUObject();
+	if (!OwnerObject || Cast<UScriptStruct>(OwnerObject))
 	{
 		return;
 	}
