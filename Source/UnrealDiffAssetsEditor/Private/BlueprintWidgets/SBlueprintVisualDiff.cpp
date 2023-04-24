@@ -395,11 +395,6 @@ void SBlueprintVisualDiff::OnActionMerge()
 
 void SBlueprintVisualDiff::PerformMerge(TSharedPtr<TArray<FDiffSingleResult>> DiffResults, UEdGraph* LocalGraph, UEdGraph* RemoteGraph)
 {
-	if (!DiffResults || DiffResults->IsEmpty())
-	{
-		return;
-	}
-	
 	UBlueprint* LocalAssetBlueprint = CastChecked<UBlueprint>(LocalAsset);
 
 	bool bIsFunctionGraph = false;
@@ -504,8 +499,11 @@ void SBlueprintVisualDiff::AddFunctionGraph(UBlueprint* Blueprint, UEdGraph* Gra
 	
 	FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 
-	// 还原粘贴板
-	FPlatformApplicationMisc::ClipboardCopy(SavedClipboard.GetCharArray().GetData());
+	if (!SavedClipboard.IsEmpty())
+	{
+		// 还原粘贴板
+		FPlatformApplicationMisc::ClipboardCopy(SavedClipboard.GetCharArray().GetData());	
+	}
 }
 
 void SBlueprintVisualDiff::RemoveFunctionGraph(UBlueprint* Blueprint, class UEdGraph* InGraph)
