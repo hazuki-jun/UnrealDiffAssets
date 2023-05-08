@@ -2,8 +2,9 @@
 
 
 #include "BlueprintWidgets/SBlueprintVisualDiff.h"
-
+#if ENGINE_MAJOR_VERSION == 5
 #include "DiffControl.h"
+#endif
 #include "EdGraphUtilities.h"
 #include "FileHelpers.h"
 #include "GraphDiffControl.h"
@@ -55,8 +56,10 @@ namespace NS_BlueprintVisualDiff
 
 STEAL_PROPERTY(UEdGraph*, SMyBlueprint, EdGraph)
 STEAL_PROPERTY(UEdGraph*, SGraphEditor, EdGraphObj)
+#if ENGINE_MAJOR_VERSION == 5
 STEAL_PROPERTY(UEdGraph*, FGraphToDiff, GraphOld)
 STEAL_PROPERTY(UEdGraph*, FGraphToDiff, GraphNew)
+#endif
 // STEAL_PROPERTY(STreeView<TSharedPtr<FBlueprintDifferenceTreeEntry>>::FOnSelectionChanged, STreeView<TSharedPtr<FBlueprintDifferenceTreeEntry>>, OnSelectionChanged)
 // 	bool bTreeItemsAreDirty = false;
 #define LOCTEXT_NAMESPACE "SBlueprintVisualDiff"
@@ -69,14 +72,18 @@ void SBlueprintVisualDiff::Construct(const FArguments& InArgs)
 	RemoteAsset = InArgs._RemoteAsset;
 	ParentWindow = InArgs._ParentWindow;
 	
-	FMargin MergeButtonMargin(100.f, 48.0f, 0.0f, 0.f);
 #if ENGINE_MAJOR_VERSION == 4
-	MergeButtonMargin = FMargin(100.f, 40.0f, 0.0f, 0.f);
-#endif
-	
+	SBlueprintDiff::Construct(SBlueprintDiff::FArguments()
+		.ParentWindow(InArgs._ParentWindow)
+		 .BlueprintOld(Cast<UBlueprint>(LocalAsset))
+		 .BlueprintNew(Cast<UBlueprint>(RemoteAsset))
+		 .OldRevision(FRevisionInfo { TEXT("Local") })
+		 .NewRevision(FRevisionInfo { TEXT("Remote") })
+		 .ShowAssetNames(true));
+#else
 	InArgs._ParentWindow->SetTitle(FText::FromString(TEXT("Difference Blueprint")));
-
 	ConstructSuper();
+#endif
 }
 
 void SBlueprintVisualDiff::ConstructSuper()
@@ -178,9 +185,10 @@ void SBlueprintVisualDiff::ConstructSuper()
 		.OnGenerateRow(STreeView< TSharedPtr< FBlueprintDifferenceTreeEntry > >::FOnGenerateRow::CreateStatic(RowGenerator))
 		.OnGetChildren(STreeView< TSharedPtr< FBlueprintDifferenceTreeEntry > >::FOnGetChildren::CreateStatic(ChildrenAccessor))
 		.OnSelectionChanged(STreeView< TSharedPtr< FBlueprintDifferenceTreeEntry > >::FOnSelectionChanged::CreateRaw(this, &SBlueprintVisualDiff::OnTreeItemSelected))
-		.TreeItemsSource(&PrimaryDifferencesList);
-	
-	
+#if ENGINE_MAJOR_VERSION == 5
+		.TreeItemsSource(&PrimaryDifferencesList)
+#endif
+	;
 	// DifferencesTreeView = DiffTreeView::CreateTreeView(&PrimaryDifferencesList);
 
 	Internal_GenerateDifferencesList();
@@ -363,6 +371,7 @@ void SBlueprintVisualDiff::OnTreeItemSelected(TSharedPtr<FBlueprintDifferenceTre
 
 void SBlueprintVisualDiff::OnActionMerge()
 {
+#if ENGINE_MAJOR_VERSION == 5
 	if (SelectedGraphPath.IsEmpty())
 	{
 		return;
@@ -391,6 +400,7 @@ void SBlueprintVisualDiff::OnActionMerge()
 	}
 	
 	PerformMerge(DiffResults, GraphOld, GraphNew);
+#endif
 }
 
 void SBlueprintVisualDiff::PerformMerge(TSharedPtr<TArray<FDiffSingleResult>> DiffResults, UEdGraph* LocalGraph, UEdGraph* RemoteGraph)
@@ -508,6 +518,7 @@ void SBlueprintVisualDiff::AddFunctionGraph(UBlueprint* Blueprint, UEdGraph* Gra
 
 void SBlueprintVisualDiff::RemoveFunctionGraph(UBlueprint* Blueprint, class UEdGraph* InGraph)
 {
+#if ENGINE_MAJOR_VERSION == 5
 	if (InGraph && InGraph->bAllowDeletion)
 	{
 		if (const UEdGraphSchema* Schema = InGraph->GetSchema())
@@ -540,6 +551,7 @@ void SBlueprintVisualDiff::RemoveFunctionGraph(UBlueprint* Blueprint, class UEdG
 	}
 	
 	FEditorFileUtils::PromptForCheckoutAndSave({ LocalAsset->GetOutermost() }, false, /*bPromptToSave=*/ false);
+#endif
 }
 
 EVisibility SBlueprintVisualDiff::GetMergeButtonVisibility() const
@@ -549,6 +561,7 @@ EVisibility SBlueprintVisualDiff::GetMergeButtonVisibility() const
 
 void SBlueprintVisualDiff::Internal_GenerateDifferencesList()
 {
+#if ENGINE_MAJOR_VERSION == 5
 	PrimaryDifferencesList.Empty();
 	RealDifferences.Empty();
 	Graphs.Empty();
@@ -660,10 +673,12 @@ void SBlueprintVisualDiff::Internal_GenerateDifferencesList()
 	}
 
 	DifferencesTreeView->RebuildList();
+#endif
 }
 
 void SBlueprintVisualDiff::Internal_OnGraphSelectionChanged(TSharedPtr<FGraphToDiff> Item, ESelectInfo::Type SelectionType)
 {
+#if ENGINE_MAJOR_VERSION == 5
 	OnGraphSelectionChanged(Item, SelectionType);
 
 	auto GraphOldPtr = NS_BlueprintVisualDiff::StealGraphOld();
@@ -676,6 +691,7 @@ void SBlueprintVisualDiff::Internal_OnGraphSelectionChanged(TSharedPtr<FGraphToD
 
 	MergeButtonVisibility = EVisibility::Visible;
 	SelectedGraphPath = FGraphDiffControl::GetGraphPath(Graph);
+#endif
 }
 
 void SBlueprintVisualDiff::Internal_OnDiffListSelectionChanged(TSharedPtr<FDiffResultItem> TheDiff)
@@ -694,6 +710,7 @@ void SBlueprintVisualDiff::Internal_CreateGraphEntry(UEdGraph* GraphOld, UEdGrap
 
 SBlueprintVisualDiff::~SBlueprintVisualDiff()
 {
+#if ENGINE_MAJOR_VERSION == 5
 	for (const auto& TreeEntry : PrimaryDifferencesList)
 	{
 		if (TreeEntry.IsValid())
@@ -709,7 +726,7 @@ SBlueprintVisualDiff::~SBlueprintVisualDiff()
 			TreeEntry->OnFocus.Unbind();
 		}
 	}
-	
+#endif
 	UUnrealDiffAssetDelegate::OnBlueprintDiffWidgetClosed.ExecuteIfBound();
 	UUnrealDiffAssetDelegate::OnBlueprintDiffWidgetClosed.Unbind();
 }
