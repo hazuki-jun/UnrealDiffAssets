@@ -14,9 +14,6 @@ public:
     // Diff
     void OnOptionDiffClicked();
  
-    // Update
-    void OnOptionUpdateClicked();
- 
     // 是否支持对比的资源
     bool IsSupported();
 
@@ -44,5 +41,16 @@ public:
     void PerformDiffAction(UObject* AssetA, UObject* AssetB);
 
     FString RemoteAssetPath;
- 
+
+	static inline FUnrealDiffAssetsEditorModule& Get()
+	{
+		static FName UnrealDiffAssetsModule("UnrealDiffAssetsEditor");
+		return FModuleManager::LoadModuleChecked<FUnrealDiffAssetsEditorModule>(UnrealDiffAssetsModule);
+	}
+
+public:
+	virtual void Extern_ExecuteDiffAssets(UObject* AssetA, UObject* AssetB)
+	{
+		ExecuteDiffAssets(AssetA, AssetB);
+	}
 };

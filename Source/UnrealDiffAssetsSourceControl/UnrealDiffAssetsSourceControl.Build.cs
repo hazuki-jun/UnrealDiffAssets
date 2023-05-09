@@ -11,7 +11,7 @@ public class UnrealDiffAssetsSourceControl : ModuleRules
             "Core", "CoreUObject", "Engine", "Slate", "SlateCore",  "Projects", "Kismet", "ApplicationCore", "InputCore",
             "ToolMenus", "MainFrame", "DesktopPlatform", "Blutility", "AssetTools", "ContentBrowser", "EditorStyle", "EditorSubsystem",
             "GraphEditor", "UnrealEd", "BlueprintGraph", "DataTableEditor", "DeveloperSettings", "UnrealDiffAssetsEditor",
-            "SourceControl"
+            "SourceControl", "SourceControlWindows"
         });
     }
 }

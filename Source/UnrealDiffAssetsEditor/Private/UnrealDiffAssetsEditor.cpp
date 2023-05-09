@@ -107,11 +107,6 @@ void FUnrealDiffAssetsEditorModule::OnOptionDiffClicked()
 	}
 }
 
-void FUnrealDiffAssetsEditorModule::OnOptionUpdateClicked()
-{
-	
-}
-
 bool FUnrealDiffAssetsEditorModule::IsSupported()
 {
 	TArray<UObject*> SelectedAssets =  UEditorUtilityLibrary::GetSelectedAssets();
