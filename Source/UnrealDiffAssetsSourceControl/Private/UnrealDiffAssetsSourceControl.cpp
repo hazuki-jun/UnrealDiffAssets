@@ -1,7 +1,12 @@
 ﻿#include "UnrealDiffAssetsSourceControl.h"
 
 #include "AssetViewUtils.h"
-#include "Dialogs.h"
+#if ENGINE_MAJOR_VERSION == 4
+	#include "Dialogs.h"
+#else
+	#include "Dialogs/Dialogs.h"
+#endif
+
 #include "EditorUtilityLibrary.h"
 #include "ISourceControlModule.h"
 #include "ISourceControlProvider.h"
@@ -10,7 +15,13 @@
 #include "SourceControlHelpers.h"
 #include "SourceControlOperations.h"
 #include "SourceControlWindows.h"
-#include "StringTable.h"
+
+#if ENGINE_MAJOR_VERSION == 4
+	#include "StringTable.h"
+#else
+	#include "Internationalization/StringTable.h"
+#endif
+
 #include "ToolMenus.h"
 #include "UnrealDiffAssetsEditor.h"
 #include "UnrealDiffWindowStyle.h"
@@ -20,31 +31,10 @@
 void FUnrealDiffAssetsSourceControlModule::StartupModule()
 {
 	BuildSourceControlMenu();
-
-	 // SourceControlStateChanged_Handle = ISourceControlModule::Get().GetProvider().RegisterSourceControlStateChanged_Handle(FSourceControlStateChanged::FDelegate::CreateRaw(this, &FUnrealDiffAssetsSourceControlModule::OnSourceControlStateChanged));
-}
-
-void FUnrealDiffAssetsSourceControlModule::OnSourceControlStateChanged()
-{
-	TArray<UObject*> SelectedAssets =  UEditorUtilityLibrary::GetSelectedAssets();
-	if (SelectedAssets.Num() <= 0)
-	{
-		return;
-	}
-
-	if (SelectedAssets[0]->IsA(UDataTable::StaticClass()))
-	{
-		
-	}
-	else if (SelectedAssets[0]->IsA(UStringTable::StaticClass()))
-	{
-		
-	}
 }
 
 void FUnrealDiffAssetsSourceControlModule::ShutdownModule()
 {
-	ISourceControlModule::Get().GetProvider().UnregisterSourceControlStateChanged_Handle(SourceControlStateChanged_Handle);
 }
 
 void FUnrealDiffAssetsSourceControlModule::BuildSourceControlMenu()

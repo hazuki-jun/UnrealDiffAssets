@@ -7,8 +7,6 @@ class FUnrealDiffAssetsSourceControlModule : public IModuleInterface
 {
 public:
     virtual void StartupModule() override;
-
-	void OnSourceControlStateChanged();
 	
     virtual void ShutdownModule() override;
 
