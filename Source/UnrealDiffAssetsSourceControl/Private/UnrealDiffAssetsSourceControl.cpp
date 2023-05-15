@@ -14,7 +14,6 @@
 #include "PackageTools.h"
 #include "SourceControlHelpers.h"
 #include "SourceControlOperations.h"
-#include "SourceControlWindows.h"
 
 #if ENGINE_MAJOR_VERSION == 4
 	#include "StringTable.h"
